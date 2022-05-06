@@ -1,0 +1,23 @@
+name: LostSettlers
+version: '1.0'
+author: loferga
+main: fr.loferga.lost_settlers.Main
+api-version: '1.17'
+api: '1.17'
+depend: [ProtocolLib]
+
+commands:
+  lsteam:
+    description: LostSettlers command for players to change their team
+  start:
+    description: LostSettlers command to start a new game
+    permission: op
+  end:
+    description: LostSettlers command to stop an already running game
+    permission: op
+  reloadmap:
+    description: LostSettlers command to reload the map to its original state
+    permission: op
+  ellipses:
+    description: LostSettlers command for testing ellipses
+    permission: op
