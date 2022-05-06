@@ -14,3 +14,4 @@ All Ores give you XP and it gradualy increase with the ore type and it's doubled
 If you take damages you won't be able to regain health within a specific amount of seconds
 All Fireworks you craft take your teamcolor as their color
 Invisibility effect no longer have particles, but other effects have
+If you smith an item to netherite, all enchantments will increase by 1 even if it's not vanilla-friendly
