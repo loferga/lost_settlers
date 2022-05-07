@@ -62,10 +62,11 @@ public class Lode {
 				for (double z = bounds[4]; z < bounds[5]; z+=1.0)
 					if (isInLode(new double[] {x, y, z})) {
 						Block b = new Location(Main.map, x, y, z).getBlock();
-						if (Func.primeContain(valid_stone, b.getType()))
+						if (Func.primeContain(valid_stone, b.getType())) {
 							b.setType(ore);
-						else if (b.getType() == Material.DEEPSLATE)
+						} else if (b.getType() == Material.DEEPSLATE) {
 							b.setType(Material.valueOf("DEEPSLATE_".concat(ore.toString())));
+						}
 					}
 	}
 

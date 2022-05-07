@@ -1,8 +1,7 @@
 package fr.loferga.lost_settlers.map;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -19,24 +18,31 @@ import fr.loferga.lost_settlers.map.geometry.Vector;
 public class MapMngr {
 	
 	private static double range = Main.getPlugin(Main.class).getConfig().getDouble("tp_range");
-	protected static double ground_level;
-	// organized such as: [coal, iron, copper, gold, redstone, lapis, diamond, emerald, debris]
-	private static Map<Material, Integer> lodes_count = new HashMap<>();
-	
-	private static final Material[] lodes = new Material[] {Material.COAL_ORE, Material.IRON_ORE, Material.COPPER_ORE, Material.GOLD_ORE,
-			Material.REDSTONE_ORE, Material.LAPIS_ORE, Material.DIAMOND_ORE, Material.EMERALD_ORE, Material.ANCIENT_DEBRIS};
+	protected static double highest_ground;
+	protected static List<LodeGenerator> generators = new ArrayList<>();
 	
 	public static void buildMapVars(ConfigurationSection cfg) {
-		ground_level = cfg.getDouble("lodes.ground_level");
-		List<Integer> counts = cfg.getIntegerList("lodes.count");
-		for (int i = 0; i<counts.size(); i++)
-			lodes_count.put(lodes[i], counts.get(i));
+		highest_ground = cfg.getDouble("lodes.highest_ground");
+		buildGenerators(cfg.getConfigurationSection("lodes.ores"));
 		CampMngr.buildCamps(cfg.getConfigurationSection("camps"));
 	}
 	
 	public static void buildMap() {
 		CampMngr.initFlags();
-		spawnLodes();
+		generateLodes();
+	}
+	
+	private static void buildGenerators(ConfigurationSection cfg) {
+		for (String ore : cfg.getKeys(false)) {
+			List<?> data = cfg.getList(ore);
+			List<?> rv = (List<?>) data.get(3);
+			generators.add(new LodeGenerator(
+					Material.valueOf(ore.toUpperCase()),
+					(double) data.get(0), (int) data.get(1), (double) data.get(2),
+new double[] {(double) rv.get(1), (double) rv.get(1), (double) rv.get(2), (double) rv.get(3), (double) rv.get(4), (double) rv.get(5)},
+					(int) data.get(4)
+			));
+		}
 	}
 	
 	public static void teleportAround(Location loc, Player p) {
@@ -78,25 +84,25 @@ public class MapMngr {
 	 * ============================================================================
 	 */
 	
-	private static void spawnLodes() {
-		for (Material ore : lodes_count.keySet()) {
-			for (int n = 0; n<lodes_count.get(ore); n++) {
-				spawnLode(ore, lodes_count.get(ore));
-			}
+	private static void generateLodes() {
+		for (LodeGenerator generator : generators) {
+			createLode(generator, new double[2], new double[2]);
 		}
 	}
 	
-	public static void spawnLode(Material ore, int count) {
+	public static void createLode(LodeGenerator g, double[] mins, double[] maxs) {
+		/*
 		double d = Main.map.getWorldBorder().getSize();
 		double cx = Main.map.getWorldBorder().getCenter().getX();
 		double cz = Main.map.getWorldBorder().getCenter().getZ();
-		for (int n = 0; n<count; n++) {
-			double y = Func.onBounds(0, 1, Func.gauss(5)*1.3) * (ground_level-4) + 4;
+		*/
+		for (int n = 0; n<g.count; n++) {
+			double y = Func.onBounds(0, 1, Func.gauss(g.gaussFactor)*g.gaussOffset) * (highest_ground-4) + 4;
 			Vector[] ijk = randomVectors(2, 4.5, 1, 3.5, 1, 1.5);
-			new Lode(Material.COAL_ORE, new Point(
-					random(cx - d, cx + d),
+			new Lode(g.ore, new Point(
+					random(mins[0], maxs[0]),
 					y,
-					random(cz - d, cz + d)
+					random(mins[1], maxs[1])
 			), ijk[0], ijk[1], ijk[2]).setMaterial();
 		}
 	}
