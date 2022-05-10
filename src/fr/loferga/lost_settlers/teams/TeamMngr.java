@@ -170,7 +170,7 @@ public class TeamMngr {
 		if (kMem.containsKey(k))
 			for (Team v : kMem.get(k).keySet())
 				for (Player p : kMem.get(k).get(v)) {
-					MapMngr.teleportAround(getOlderCamp(v).getLoc(), p);
+					MapMngr.campTeleport(p, getOlderCamp(v));
 					p.setGameMode(GameMode.SURVIVAL);
 					removeKilled(k, v, p);
 				}
@@ -178,14 +178,14 @@ public class TeamMngr {
 	
 	public static void respawnKilled(Team k, Team v) {
 		for (Player p : kMem.get(k).get(v)) {
-			MapMngr.teleportAround(getOlderCamp(v).getLoc(), p);
+			MapMngr.campTeleport(p, getOlderCamp(v));
 			p.setGameMode(GameMode.SURVIVAL);
 			removeKilled(k, v, p);
 		}
 	}
 	
 	public static void respawn(Player p) {
-		MapMngr.teleportAround(CampMngr.getTeamCamps(teamOf(p)).get(0).getLoc(), p);
+		MapMngr.campTeleport(p, getOlderCamp(teamOf(p)));
 		p.setGameMode(GameMode.SURVIVAL);
 	}
 	

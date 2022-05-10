@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -16,7 +15,6 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Arrow;
@@ -68,6 +66,7 @@ import org.bukkit.util.Vector;
 import fr.loferga.lost_settlers.dogs.DogsMngr;
 import fr.loferga.lost_settlers.game.EndGameMngr;
 import fr.loferga.lost_settlers.gui.GUIMngr;
+import fr.loferga.lost_settlers.map.MapMngr;
 import fr.loferga.lost_settlers.map.camps.Camp;
 import fr.loferga.lost_settlers.map.camps.CampMngr;
 import fr.loferga.lost_settlers.tasks.ComeBack;
@@ -87,7 +86,7 @@ public class Listeners implements Listener {
 				DogsMngr.refundDogs(p);
 				NaturalRegen.addPlayer(p);
 			} else {
-				p.teleport(new Location(Bukkit.getWorld("hub"), 0.5, 10.0, 0.5));
+				MapMngr.spawnTeleport(p);
 			}
 		}
 	}
@@ -95,7 +94,7 @@ public class Listeners implements Listener {
 	// events with multiples effects
 	@EventHandler
 	public void onPlayerMove(PlayerMoveEvent e) {
-		// linked to CAMPS
+		// linked to CAMPS & JUMP
 		Player p = e.getPlayer();
 		Location from = e.getFrom();
 		Location to = e.getTo();
@@ -105,21 +104,7 @@ public class Listeners implements Listener {
 					campArea(p);
 		} else if (p.getGameMode() == GameMode.ADVENTURE) {
 			if ((int)from.getX() != (int)to.getX() || (int)from.getY() != (int)to.getY() || (int)from.getZ() != (int)to.getZ())
-				if ((int)from.getY() != (int)to.getY()) {
-					if (to.getY() < 10) {
-						p.setHealth(0);
-					}
-				} else if (to.getBlock().getRelative(BlockFace.DOWN).getType() == Material.GOLD_BLOCK) {
-					if (p.getBedSpawnLocation() == null || p.getBedSpawnLocation().getY() < to.getY()) {
-						Location abs = to.getBlock().getLocation().add(0.5, 0, 0.5);
-						abs.setPitch(to.getPitch());
-						abs.setYaw(to.getYaw());
-						p.setBedSpawnLocation(abs, true);
-						Func.sendActionbar(p, Func.format("&eCheckpoint"));
-					}
-				} else if (to.getBlock().getRelative(BlockFace.DOWN).getType() == Material.CYAN_WOOL) {
-					p.setBedSpawnLocation(null);
-				}
+				MapMngr.checkJump(p, from, to);
 		}
 	}
 	
@@ -527,7 +512,7 @@ public class Listeners implements Listener {
 				if (e.getCause() != DamageCause.FIRE_TICK)
 					NaturalRegen.addPlayer((Player) e.getEntity());
 			} else if (e.getCause() == DamageCause.VOID)
-				e.getEntity().remove();
+				((Player) e.getEntity()).setHealth(0);
 		}
 	}
 	

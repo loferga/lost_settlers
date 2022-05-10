@@ -1,13 +1,22 @@
 # ~ = arbitrary values
 # \ = optional
 
+# spawn: spawn coordinates in your default server world
 # ores: <material_name>: [yratio (% of lower y took), gauss factor, gauss offset, [bounds of i, j, k (lode size)], lodes per 100^3 cubes]
-# <~campName>: [<x>, <y>, <z>, <isFacingNorth?>]
-# real camp size = 2*camp_size
+# <~campStringID>: [<x>, <y>, <z>, <isFacingNorth?>]
+# camps are squared, a face of this square is 2 times camp_size, same for vital_zone
 current_map: "generic"
 
 maps:
+  spawn:
+    location: [0.0, 10.0, 0.0]
+    jump_active: true
+    jump:
+      minimum_height: 10.0
+      checkpoint_block: "gold_block"
+      reset_block: "iron_block"
   generic:
+    lodes_active: true
     lodes:
       highest_ground: 72
       ores:
@@ -18,7 +27,6 @@ maps:
         diamond_ore:    [0.3, 6, 0.6, [1.0, 2.0, 0.5, 1.5, 0.5, 1.0], 60]
         emerald_ore:    [0.2, 7, 1.0, [1.0, 1.5, 0.5, 1.0, 0.5, 1.0], 45]
         ancient_debris: [0.1, 1, 1.0, [0.5, 1.0, 0.5, 1.0, 0.5, 1.0], 50]
-          
     camps:
       positions:
         hill: [-879.5, 70.0, 435.5, true]
@@ -26,7 +34,7 @@ maps:
         foreset: [-1027.5, 64.0, 415.5, true]
       settings:
         camp_size: 16.5
-        ratio: 0.51
+        vital_size: 8.5
         
 
 # <teamConcreteColor>: "<\chatColor char><displayName>"

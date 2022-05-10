@@ -17,6 +17,7 @@ import org.bukkit.scoreboard.Team.OptionStatus;
 import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.map.MapMngr;
+import fr.loferga.lost_settlers.map.camps.Camp;
 import fr.loferga.lost_settlers.map.camps.CampMngr;
 import fr.loferga.lost_settlers.particles.ParticleMngr;
 import fr.loferga.lost_settlers.tasks.GameLaunch;
@@ -51,22 +52,20 @@ public class StartMngr {
 		// MAP
 		FileConfiguration cfg = Main.getPlugin(Main.class).getConfig();
 		String cMap = cfg.getString("current_map");
-		if (Main.map == null || Main.map.getName() != cMap) {
-			if (Main.map == null) {
-				Bukkit.unloadWorld(Main.map, false);
-			}
-			Bukkit.broadcastMessage(Func.format("&cChargement de la carte ...&r, \'" + cMap + '\''));
-			Main.map = new WorldCreator("-LS-" + cMap).createWorld();
-			MapMngr.buildMapVars(cfg.getConfigurationSection("maps.".concat(cMap)));
+		if (Main.map != null && Main.map.getName() != cMap) {
+			Bukkit.unloadWorld(Main.map, false);
 		}
-		System.out.println(Main.map);
-		CampMngr.initFlags();
+		Bukkit.broadcastMessage(Func.format("&cChargement de la carte ...&r, \'" + cMap + '\''));
+		Main.map = new WorldCreator("-LS-" + cMap).createWorld();
+		MapMngr.buildMapVars(cfg.getConfigurationSection("maps.".concat(cMap)));
+		Bukkit.broadcastMessage(Func.format("&cConstruction de la carte ...&r, \'" + cMap + '\''));
+		MapMngr.buildMap();
 		// PLAYERS
 		for (Team team : TeamMngr.get()) {
 			team.setOption(Option.COLLISION_RULE, OptionStatus.ALWAYS);
-			Location tpLoc = CampMngr.getTeamCamps(team).get(0).getLoc();
+			Camp tCamp = CampMngr.getTeamCamps(team).get(0);
 			for (Player p : TeamMngr.getPlayers(team)) {
-				MapMngr.teleportAround(tpLoc, p);
+				MapMngr.campTeleport(p, tCamp);
 				p.setGameMode(GameMode.ADVENTURE);
 				p.setFoodLevel(30);
 				p.setHealth(20.0);

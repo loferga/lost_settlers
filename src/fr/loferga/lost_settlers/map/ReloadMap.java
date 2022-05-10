@@ -69,11 +69,13 @@ public class ReloadMap implements TabExecutor {
 		server.getWorlds().add(0, new WorldCreator(mapName).createWorld()); // so the call should load the world as the folder exist
 		Main.map = Bukkit.getWorlds().get(0);
 		// tp after
+		/*
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			Location ploc = MapMngr.getMapCenter();
 			MapMngr.teleportAround(ploc, p);
 			p.sendMessage(p.getLocation().getWorld().getName());
 		}
+		*/
 	}
 	
 }

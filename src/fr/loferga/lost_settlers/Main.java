@@ -19,6 +19,7 @@ import com.comphenix.protocol.wrappers.WrappedWatchableObject;
 import fr.loferga.lost_settlers.game.Start;
 import fr.loferga.lost_settlers.game.EndGame;
 import fr.loferga.lost_settlers.map.Ellipses;
+import fr.loferga.lost_settlers.map.MapMngr;
 import fr.loferga.lost_settlers.map.ReloadMap;
 import fr.loferga.lost_settlers.teams.LSTeam;
 
@@ -36,6 +37,7 @@ public class Main extends JavaPlugin{
 		
 		saveDefaultConfig();
 		
+		new MapMngr();
 		Recipes.createRecipes(this);
 		getCommand("lsteam").setExecutor(new LSTeam());
 		getCommand("start").setExecutor(new Start());

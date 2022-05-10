@@ -56,7 +56,7 @@ public class Func {
 		long m = t/60000; t%=60000;
 		long s = t/1000;
 		if (h!=0) rt[0] = h + "h ";
-		if (m!=0) rt[1] = m + "m et ";
+		if (m!=0) rt[1] = m + "m ";
 		if (s!=0) rt[2] = s + "s";
 		return rt;
 	}

@@ -3,8 +3,10 @@ package fr.loferga.lost_settlers.map;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
@@ -17,19 +19,31 @@ import fr.loferga.lost_settlers.map.geometry.Vector;
 
 public class MapMngr {
 	
-	private static double range = Main.getPlugin(Main.class).getConfig().getDouble("tp_range");
+	private static final List<Double> SPAWN = Main.getPlugin(Main.class).getConfig().getDoubleList("maps.spawn.location");
+	private static final boolean JUMP = Main.getPlugin(Main.class).getConfig().getBoolean("maps.spawn.jump_active");
+	private static final double MIN_HEIGHT = Main.getPlugin(Main.class).getConfig().getDouble("maps.spawn.jump.minimum_height");
+	private static final Material CHECKPOINT = Material.valueOf(Main.getPlugin(Main.class).getConfig().getString("maps.spawn.jump.checkpoint_block").toUpperCase());
+	private static final Material RESET = Material.valueOf(Main.getPlugin(Main.class).getConfig().getString("maps.spawn.jump.reset_block").toUpperCase());
+	protected static boolean lodes;
 	protected static double highest_ground;
 	protected static List<LodeGenerator> generators = new ArrayList<>();
+	private static final double RANGE = Main.getPlugin(Main.class).getConfig().getDouble("tp_range");
 	
 	public static void buildMapVars(ConfigurationSection cfg) {
-		highest_ground = cfg.getDouble("lodes.highest_ground");
-		buildGenerators(cfg.getConfigurationSection("lodes.ores"));
+		lodes = cfg.getBoolean("lodes_active");
 		CampMngr.buildCamps(cfg.getConfigurationSection("camps"));
+		//if (lodes) {
+			highest_ground = cfg.getDouble("lodes.highest_ground");
+			buildGenerators(cfg.getConfigurationSection("lodes.ores"));
+		//}
 	}
 	
 	public static void buildMap() {
 		CampMngr.initFlags();
-		generateLodes();
+		if (lodes) {
+			Bukkit.broadcastMessage(Func.format("&cGénération des minerais ..."));
+			generateLodes();
+		}
 	}
 	
 	private static void buildGenerators(ConfigurationSection cfg) {
@@ -45,12 +59,74 @@ new double[] {(double) rv.get(1), (double) rv.get(1), (double) rv.get(2), (doubl
 		}
 	}
 	
-	public static void teleportAround(Location loc, Player p) {
-		p.teleport(loc.add(
-				(Math.random()*range)-range/2,
+	/*
+	 * ============================================================================
+	 *                                   LODES
+	 * ============================================================================
+	 */
+	
+	private static void generateLodes() {
+		double d = Main.map.getWorldBorder().getSize();
+		double cx = Main.map.getWorldBorder().getCenter().getX();
+		double cz = Main.map.getWorldBorder().getCenter().getZ();
+		for (LodeGenerator generator : generators) {
+			createLode(generator, new double[] {cx-d, 2, cz-d}, new double[] {cx+d, highest_ground,  cz+d});
+		}
+	}
+	
+	public static void createLode(LodeGenerator g, double[] mins, double[] maxs) {
+		/*
+		double d = Main.map.getWorldBorder().getSize();
+		double cx = Main.map.getWorldBorder().getCenter().getX();
+		double cz = Main.map.getWorldBorder().getCenter().getZ();
+		*/
+		int count = (int) (g.count * (((maxs[0]-mins[0])*(maxs[1]-mins[1])*(maxs[2]-mins[2]))/1000000));
+		System.out.println("ore: " + g.ore + "count: " + count);
+		double[] rv = g.sizeBounds;
+		for (int n = 0; n<count; n++) {
+			double y = Func.onBounds(0, 1, Func.gauss(g.gaussFactor)*g.gaussOffset) * (maxs[1]*g.yratio) + mins[1];
+			Vector[] ijk = randomVectors(rv[0], rv[1], rv[2], rv[3], rv[4], rv[5]);
+			new Lode(g.ore, new Point(
+					random(mins[0], maxs[0]),
+					y,
+					random(mins[2], maxs[2])
+			), ijk[0], ijk[1], ijk[2]).setMaterial();
+		}
+	}
+	
+	private static Vector[] randomVectors(double imin, double imax, double jmin, double jmax, double kmin, double kmax) {
+		Vector[] ijk = new Vector[3];
+		double ilen = random(imin, imax);
+		double jlen = random(jmin, jmax);
+		double klen = random(kmin, kmax);
+		Vector i = new Vector(Math.random()*2-1, Math.random()*2-1, Math.random()*2-1).normalize().multiply(ilen);
+		ijk[0] = i;
+		Vector j = new Vector(ijk[0].y(), -ijk[0].x(), 0).normalize().multiply(jlen);
+		ijk[1] = j;
+		ijk[2] = new Vector(i.y()*j.z() - i.z()*j.y(), i.z()*j.x() - i.x()*j.z(), i.x()*j.y() - i.y()*j.x()).normalize().multiply(klen);
+		return ijk;
+	}
+	
+	private static double random(double min, double max) {
+		return Math.random() * (max-min) + min;
+	}
+	
+	/*
+	 * ============================================================================
+	 *                                   MISC
+	 * ============================================================================
+	 */
+	
+	public static void campTeleport(Player p, Camp c) {
+		p.teleport(c.getLoc().add(
+				(Math.random()*2*RANGE)-RANGE,
 				0,
-				(Math.random()*range)-range/2
+				(Math.random()*2*RANGE)-RANGE
 				));
+	}
+	
+	public static void spawnTeleport(Player p) {
+		p.teleport(new Location(Bukkit.getWorlds().get(0), SPAWN.get(0), SPAWN.get(1), SPAWN.get(2)));
 	}
 
 	public static Location getMapCenter() {
@@ -78,50 +154,19 @@ new double[] {(double) rv.get(1), (double) rv.get(1), (double) rv.get(2), (doubl
 		return max;
 	}
 	
-	/*
-	 * ============================================================================
-	 *                                   LODES
-	 * ============================================================================
-	 */
-	
-	private static void generateLodes() {
-		for (LodeGenerator generator : generators) {
-			createLode(generator, new double[2], new double[2]);
+	public static void checkJump(Player p, Location from, Location to) {
+		if (JUMP) {
+			if (to.getY() < MIN_HEIGHT) {
+				p.setHealth(0);
+			} else if (to.getBlock().getRelative(BlockFace.DOWN).getType() == CHECKPOINT) {
+				Location abs = to.getBlock().getLocation().add(0.5, 0, 0.5);
+				abs.setYaw(to.getYaw());
+				p.setBedSpawnLocation(abs, true);
+				Func.sendActionbar(p, Func.format("&eCheckpoint"));
+			} else if (to.getBlock().getRelative(BlockFace.DOWN).getType() == RESET) {
+				p.setBedSpawnLocation(null);
+			}
 		}
-	}
-	
-	public static void createLode(LodeGenerator g, double[] mins, double[] maxs) {
-		/*
-		double d = Main.map.getWorldBorder().getSize();
-		double cx = Main.map.getWorldBorder().getCenter().getX();
-		double cz = Main.map.getWorldBorder().getCenter().getZ();
-		*/
-		for (int n = 0; n<g.count; n++) {
-			double y = Func.onBounds(0, 1, Func.gauss(g.gaussFactor)*g.gaussOffset) * (highest_ground-4) + 4;
-			Vector[] ijk = randomVectors(2, 4.5, 1, 3.5, 1, 1.5);
-			new Lode(g.ore, new Point(
-					random(mins[0], maxs[0]),
-					y,
-					random(mins[1], maxs[1])
-			), ijk[0], ijk[1], ijk[2]).setMaterial();
-		}
-	}
-	
-	private static Vector[] randomVectors(double imin, double imax, double jmin, double jmax, double kmin, double kmax) {
-		Vector[] ijk = new Vector[3];
-		double ilen = random(imin, imax);
-		double jlen = random(jmin, jmax);
-		double klen = random(kmin, kmax);
-		Vector i = new Vector(Math.random()*2-1, Math.random()*2-1, Math.random()*2-1).normalize().multiply(ilen);
-		ijk[0] = i;
-		Vector j = new Vector(ijk[0].y(), -ijk[0].x(), 0).normalize().multiply(jlen);
-		ijk[1] = j;
-		ijk[2] = new Vector(i.y()*j.z() - i.z()*j.y(), i.z()*j.x() - i.x()*j.z(), i.x()*j.y() - i.y()*j.x()).normalize().multiply(klen);
-		return ijk;
-	}
-	
-	private static double random(double min, double max) {
-		return Math.random() * (max-min) + min;
 	}
 	
 }
