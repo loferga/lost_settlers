@@ -1,7 +1,7 @@
 # ~ = arbitrary values
 # \ = optional
 
-# count: [<coal>, <iron>, <copper>, <gold>, <redstone>, <lapis>, <diamond>, <emerald>, <debris>]
+# ores: <material_name>: [yratio (% of lower y took), gauss factor, gauss offset, [bounds of i, j, k (lode size)], lodes per 100^3 cubes]
 # <~campName>: [<x>, <y>, <z>, <isFacingNorth?>]
 # real camp size = 2*camp_size
 current_map: "generic"
