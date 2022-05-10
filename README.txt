@@ -19,3 +19,4 @@ If you smith an item to netherite, all enchantments will increase by 1 even if i
 for now:
 you need a world named "-LS-<mapname>" and modify the config.yml accordingly like:
 setting the value of current_map to the string of mapname and configure your map with the indication in config.yml (camps positions, highest_ground etc...)
+/reloadmap is currently not working
