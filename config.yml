@@ -5,7 +5,7 @@
 # ores: <material_name>: [yratio (% of lower y took), gauss factor, gauss offset, [bounds of i, j, k (lode size)], lodes per 100^3 cubes]
 # <~campStringID>: [<x>, <y>, <z>, <isFacingNorth?>]
 # camps are squared, a face of this square is 2 times camp_size, same for vital_zone
-current_map: "generic"
+current_map: "forest"
 
 maps:
   spawn:
@@ -15,18 +15,20 @@ maps:
       minimum_height: 10.0
       checkpoint_block: "gold_block"
       reset_block: "iron_block"
-  generic:
+  forest:
     lodes_active: true
     lodes:
       highest_ground: 72
       ores:
         coal_ore:       [1.0, 5, 1.2, [2.0, 4.5, 1.0, 3.5, 1.0, 1.5], 115]
-        iron_ore:       [1.0, 2, 1.1, [1.5, 3.5, 1.0, 2.5, 1.0, 1.5], 140]
+        iron_ore:       [1.0, 2, 1.1, [1.5, 3.5, 1.0, 2.5, 1.0, 1.5], 160]
         copper_ore:     [0.8, 3, 1.0, [1.0, 2.0, 0.5, 1.5, 0.5, 1.0], 60]
-        gold_ore:       [0.6, 2, 0.8, [1.5, 2.5, 1.0, 2.0, 1.0, 1.5], 60]
-        diamond_ore:    [0.3, 6, 0.6, [1.0, 2.0, 0.5, 1.5, 0.5, 1.0], 60]
-        emerald_ore:    [0.2, 7, 1.0, [1.0, 1.5, 0.5, 1.0, 0.5, 1.0], 45]
-        ancient_debris: [0.1, 1, 1.0, [0.5, 1.0, 0.5, 1.0, 0.5, 1.0], 50]
+        gold_ore:       [0.6, 2, 0.8, [1.5, 2.5, 1.0, 2.0, 0.5, 1.0], 60]
+        redstone_ore:   [0.3, 3, 1.2, [1.0, 2.0, 1.0, 1.5, 0.5, 1.0], 50]
+        lapis_ore:      [0.3, 3, 1.2, [1.5, 3.0, 1.0, 2.0, 1.0, 1.5], 50]
+        diamond_ore:    [0.3, 6, 0.6, [1.0, 2.0, 0.5, 1.5, 0.5, 1.0], 100]
+        emerald_ore:    [0.2, 7, 1.0, [1.0, 1.5, 0.5, 1.0, 0.5, 1.0], 50]
+        ancient_debris: [0.1, 1, 1.8, [0.5, 1.0, 0.5, 1.0, 0.5, 1.0], 60]
     camps:
       positions:
         hill: [-879.5, 70.0, 435.5, true]
@@ -44,7 +46,7 @@ teams:
   purple: "dViolets"
 
 # time in seconds
-pvp_time: 900
+pvp_time: 10
 # delay in seconds
 regeneration_delay: 15
 # range of teleportation around flags
