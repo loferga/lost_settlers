@@ -10,7 +10,7 @@ current_map: "generic"
 maps:
   spawn:
     location: [0.0, 10.0, 0.0]
-    jump_active: true
+    jump_active: false
     jump:
       minimum_height: 10.0
       checkpoint_block: "gold_block"
@@ -20,10 +20,10 @@ maps:
     lodes:
       highest_ground: 72
       ores:
-        coal_ore:       [1.0, 5, 1.4, [2.0, 4.5, 1.0, 3.5, 1.0, 1.5], 115]
+        coal_ore:       [1.0, 5, 1.2, [2.0, 4.5, 1.0, 3.5, 1.0, 1.5], 115]
         iron_ore:       [1.0, 2, 1.1, [1.5, 3.5, 1.0, 2.5, 1.0, 1.5], 140]
         copper_ore:     [0.8, 3, 1.0, [1.0, 2.0, 0.5, 1.5, 0.5, 1.0], 60]
-        gold_ore:       [0.5, 2, 0.8, [1.5, 2.5, 1.0, 2.0, 1.0, 1.5], 60]
+        gold_ore:       [0.6, 2, 0.8, [1.5, 2.5, 1.0, 2.0, 1.0, 1.5], 60]
         diamond_ore:    [0.3, 6, 0.6, [1.0, 2.0, 0.5, 1.5, 0.5, 1.0], 60]
         emerald_ore:    [0.2, 7, 1.0, [1.0, 1.5, 0.5, 1.0, 0.5, 1.0], 45]
         ancient_debris: [0.1, 1, 1.0, [0.5, 1.0, 0.5, 1.0, 0.5, 1.0], 50]

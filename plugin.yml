@@ -15,8 +15,8 @@ commands:
   end:
     description: LostSettlers command to stop an already running game
     permission: op
-  reloadmap:
-    description: LostSettlers command to reload the map to its original state
+  restoremap:
+    description: LostSettlers command to restore the map to its original state
     permission: op
   ellipses:
     description: LostSettlers command for testing ellipses
