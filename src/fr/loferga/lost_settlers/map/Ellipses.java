@@ -29,12 +29,12 @@ public class Ellipses implements TabExecutor {
 			Player p = (Player) sender;
 			if (args.length == 0) {
 				final Location ploc = p.getLocation();
-				final int lowx = (int) ploc.getX() - 40;
-				final int dx = 80;
+				final int lowx = (int) ploc.getX() - 30;
+				final int dx = 60;
 				final int lowy = (int) ploc.getY();
 				final int dy = 70;
-				final int lowz = (int) ploc.getZ() - 40;
-				final int dz = 80;
+				final int lowz = (int) ploc.getZ() - 30;
+				final int dz = 60;
 				if (stage == 0) {
 					for (int x = lowx; x<lowx+dx; x++)
 						for (int y = lowy; y<lowy+dy; y++)

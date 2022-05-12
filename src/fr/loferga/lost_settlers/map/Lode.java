@@ -13,7 +13,7 @@ import fr.loferga.lost_settlers.map.geometry.Vector;
 public class Lode {
 	
 	private static Material[] valid_stone = {Material.STONE, Material.ANDESITE, Material.DIORITE, Material.GRANITE, Material.DIRT,
-				Material.TUFF};
+				Material.GRAVEL};
 	
 	public Lode(Material ore, Point O, Vector i,Vector j, Vector k) {
 		this.ore = ore;
@@ -59,15 +59,19 @@ public class Lode {
 		
 		for (double x = bounds[0]; x < bounds[1]; x+=1.0)
 			for (double y = bounds[2]; y < bounds[3]; y+=1.0)
-				for (double z = bounds[4]; z < bounds[5]; z+=1.0)
+				for (double z = bounds[4]; z < bounds[5]; z+=1.0) {
 					if (isInLode(new double[] {x, y, z})) {
 						Block b = new Location(Main.map, x, y, z).getBlock();
 						if (Func.primeContain(valid_stone, b.getType())) {
 							b.setType(ore);
-						} else if (b.getType() == Material.DEEPSLATE) {
-							b.setType(Material.valueOf("DEEPSLATE_".concat(ore.toString())));
+						} else if (b.getType() == Material.DEEPSLATE || b.getType() == Material.TUFF) {
+							if (ore.toString().endsWith("_ORE"))
+								b.setType(Material.valueOf("DEEPSLATE_".concat(ore.toString())));
+							else
+								b.setType(ore);
 						}
 					}
+				}
 	}
 
 }

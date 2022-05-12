@@ -28,13 +28,17 @@ public class Vector {
 		return new double[] {x, y, z};
 	}
 	
+	public double length() {
+		return Math.sqrt(x*x + y*y + z*z);
+	}
+	
 	public Vector multiply(double f) {
 		x*=f; y*=f; z*=f;
 		return this;
 	}
 	
 	public Vector normalize() {
-		double len = Math.sqrt(x*x + y*y + z*z);
+		double len = length();
 		x/=len; y/=len; z/=len;
 		return this;
 	}

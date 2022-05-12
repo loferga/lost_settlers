@@ -21,8 +21,8 @@ import fr.loferga.lost_settlers.teams.TeamMngr;
 public class CampMngr {
 	
 	private static List<Camp> camps = new ArrayList<>();
-	private static double size;
-	private static double ratio;
+	private static double cSize;
+	private static double vSize;
 	
 	public static List<Camp> get() {
 		return new ArrayList<>(camps);
@@ -48,10 +48,8 @@ public class CampMngr {
 						(boolean) data.get(3)
 						));
 			}
-		
-		size = cfg.getDouble("settings.camp_size");
-		
-		ratio = cfg.getDouble("settings.ratio");
+		cSize = cfg.getDouble("settings.camp_size");
+		vSize = cfg.getDouble("settings.vital_size");
 	}
 	
 	public static void assignRandomTeam() {
@@ -183,13 +181,12 @@ public class CampMngr {
 	
 	public static boolean isInCamp(Location loc, Camp camp) {
 		double[] pos = camp.getPos();
-		return isNearBy(loc.getX(), pos[0], size) && isNearBy(loc.getZ(), pos[2], size);
+		return isNearBy(loc.getX(), pos[0], cSize) && isNearBy(loc.getZ(), pos[2], cSize);
 	}
 	
 	public static boolean isInVitalSpace(Location loc, Camp camp) {
 		double[] pos = camp.getPos();
-		double vsSize = ratio * size;
-		return isNearBy(loc.getX(), pos[0], vsSize) && isNearBy(loc.getZ(), pos[2], vsSize);
+		return isNearBy(loc.getX(), pos[0], vSize) && isNearBy(loc.getZ(), pos[2], vSize);
 	}
 	
 	public static boolean isFlag(Location loc) {

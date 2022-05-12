@@ -3,8 +3,6 @@ package fr.loferga.lost_settlers.game;
 import org.bukkit.Bukkit;
 import org.bukkit.Difficulty;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.WorldBorder;
 import org.bukkit.WorldCreator;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
@@ -50,15 +48,15 @@ public class StartMngr {
 	
 	public static void start() {
 		// MAP
+		Main.getPlugin(Main.class).reloadConfig();
 		FileConfiguration cfg = Main.getPlugin(Main.class).getConfig();
 		String cMap = cfg.getString("current_map");
-		if (Main.map != null && Main.map.getName() != cMap) {
+		if (Main.map != null)
 			Bukkit.unloadWorld(Main.map, false);
-		}
 		Bukkit.broadcastMessage(Func.format("&cChargement de la carte ...&r, \'" + cMap + '\''));
 		Main.map = new WorldCreator("-LS-" + cMap).createWorld();
 		MapMngr.buildMapVars(cfg.getConfigurationSection("maps.".concat(cMap)));
-		Bukkit.broadcastMessage(Func.format("&cConstruction de la carte ...&r, \'" + cMap + '\''));
+		Bukkit.broadcastMessage(Func.format("&cInitialisation des drapeaux ..."));
 		MapMngr.buildMap();
 		// PLAYERS
 		for (Team team : TeamMngr.get()) {
@@ -78,18 +76,9 @@ public class StartMngr {
 		for (Entity i : Main.map.getEntitiesByClasses(Item.class))
 			i.remove();
 		Main.map.setDifficulty(Difficulty.EASY);
-		setWorldBorder();
 		Main.map.setTime(0);
 		ParticleMngr.disableTrails();
 		GameLaunch.start(Main.getPlugin(Main.class));
-	}
-	
-	private static void setWorldBorder() {
-		Location loc = MapMngr.getMapCenter();
-		double maxDist = MapMngr.getMaxDist(loc);
-		WorldBorder wb = Main.map.getWorldBorder();
-		wb.setCenter(loc);
-		wb.setSize((int) (maxDist + 150));
 	}
 
 }

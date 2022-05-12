@@ -3,6 +3,7 @@ package fr.loferga.lost_settlers;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.ConsoleCommandSender;
@@ -20,7 +21,7 @@ import fr.loferga.lost_settlers.game.Start;
 import fr.loferga.lost_settlers.game.EndGame;
 import fr.loferga.lost_settlers.map.Ellipses;
 import fr.loferga.lost_settlers.map.MapMngr;
-import fr.loferga.lost_settlers.map.ReloadMap;
+import fr.loferga.lost_settlers.map.RestoreMap;
 import fr.loferga.lost_settlers.teams.LSTeam;
 
 public class Main extends JavaPlugin{
@@ -32,8 +33,6 @@ public class Main extends JavaPlugin{
 	public static World map = null;
 	
 	public void onEnable() {
-		ConsoleCommandSender console = getServer().getConsoleSender();
-		console.sendMessage("[LostSettlers] " + ChatColor.DARK_AQUA + "INIT");
 		
 		saveDefaultConfig();
 		
@@ -42,7 +41,7 @@ public class Main extends JavaPlugin{
 		getCommand("lsteam").setExecutor(new LSTeam());
 		getCommand("start").setExecutor(new Start());
 		getCommand("end").setExecutor(new EndGame());
-		getCommand("reloadmap").setExecutor(new ReloadMap());
+		getCommand("restoremap").setExecutor(new RestoreMap());
 		getCommand("ellipses").setExecutor(new Ellipses());
 		getServer().getPluginManager().registerEvents(new Listeners(), this);
 		
@@ -63,12 +62,15 @@ public class Main extends JavaPlugin{
 					}
 				 });
 		
+		ConsoleCommandSender console = getServer().getConsoleSender();
 		console.sendMessage("[LostSettlers] ===============================");
 		console.sendMessage("[LostSettlers]   " + ChatColor.AQUA + "Plugin " + ChatColor.GOLD + "Lost Settlers" + ChatColor.DARK_AQUA + " active");
 		console.sendMessage("[LostSettlers] ===============================");
 	}
 	
 	public void onDisable() {
+		if (map != null)
+			Bukkit.unloadWorld(map, false);
 		ConsoleCommandSender console = getServer().getConsoleSender();
 		console.sendMessage("[LostSettlers] " + ChatColor.DARK_RED + "Plugin Disabled");
     }

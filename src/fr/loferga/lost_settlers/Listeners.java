@@ -81,14 +81,11 @@ public class Listeners implements Listener {
 	@EventHandler
 	public void onJoin(final PlayerJoinEvent e) {
 		Player p = e.getPlayer();
-		if (p.getGameMode() == GameMode.ADVENTURE) {
-			if (Game.active()) {
-				DogsMngr.refundDogs(p);
-				NaturalRegen.addPlayer(p);
-			} else {
-				MapMngr.spawnTeleport(p);
-			}
-		}
+		if (Game.active()) {
+			DogsMngr.refundDogs(p);
+			NaturalRegen.addPlayer(p);
+		} else
+			MapMngr.spawnTeleport(p);
 	}
 	
 	// events with multiples effects

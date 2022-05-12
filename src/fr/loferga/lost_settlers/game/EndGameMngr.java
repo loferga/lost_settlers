@@ -28,7 +28,7 @@ public class EndGameMngr {
 		Game.stop();
 		if (team != null) Bukkit.broadcastMessage(Func.format("&eL'équipe des " + team.getDisplayName() + "&e a remporté la victoire!"));
 		String[] rt = Func.toReadableTime(gameTime);
-		Bukkit.broadcastMessage(Func.format("&eLa partie s'est terminé en &3" + rt[0] + rt[1] + rt[2] + "&e."));
+		Bukkit.broadcastMessage(Func.format("&eLa partie s'est terminée en &3" + rt[0] + rt[1] + rt[2] + "&e."));
 		ComeBack.stop();
 		DogAnger.stop();
 		NaturalRegen.stop();

@@ -6,6 +6,7 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.WorldBorder;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -32,14 +33,15 @@ public class MapMngr {
 	public static void buildMapVars(ConfigurationSection cfg) {
 		lodes = cfg.getBoolean("lodes_active");
 		CampMngr.buildCamps(cfg.getConfigurationSection("camps"));
-		//if (lodes) {
+		if (lodes) {
 			highest_ground = cfg.getDouble("lodes.highest_ground");
 			buildGenerators(cfg.getConfigurationSection("lodes.ores"));
-		//}
+		}
 	}
 	
 	public static void buildMap() {
 		CampMngr.initFlags();
+		setWorldBorder();
 		if (lodes) {
 			Bukkit.broadcastMessage(Func.format("&cGénération des minerais ..."));
 			generateLodes();
@@ -71,25 +73,22 @@ new double[] {(double) rv.get(1), (double) rv.get(1), (double) rv.get(2), (doubl
 		double cz = Main.map.getWorldBorder().getCenter().getZ();
 		for (LodeGenerator generator : generators) {
 			createLode(generator, new double[] {cx-d, 2, cz-d}, new double[] {cx+d, highest_ground,  cz+d});
+			System.out.println(generator.ore.toString() + " generated");
 		}
 	}
 	
 	public static void createLode(LodeGenerator g, double[] mins, double[] maxs) {
-		/*
-		double d = Main.map.getWorldBorder().getSize();
-		double cx = Main.map.getWorldBorder().getCenter().getX();
-		double cz = Main.map.getWorldBorder().getCenter().getZ();
-		*/
 		int count = (int) (g.count * (((maxs[0]-mins[0])*(maxs[1]-mins[1])*(maxs[2]-mins[2]))/1000000));
-		System.out.println("ore: " + g.ore + "count: " + count);
 		double[] rv = g.sizeBounds;
 		for (int n = 0; n<count; n++) {
-			double y = Func.onBounds(0, 1, Func.gauss(g.gaussFactor)*g.gaussOffset) * (maxs[1]*g.yratio) + mins[1];
+			double x = random(mins[0], maxs[0]);
+			double y = Func.onBounds(0, 1, Func.gauss(g.gaussFactor)*g.gaussOffset) * (maxs[1]-mins[1]) *g.yratio + mins[1];
+			double z = random(mins[2], maxs[2]);
 			Vector[] ijk = randomVectors(rv[0], rv[1], rv[2], rv[3], rv[4], rv[5]);
 			new Lode(g.ore, new Point(
-					random(mins[0], maxs[0]),
+					x,
 					y,
-					random(mins[2], maxs[2])
+					z
 			), ijk[0], ijk[1], ijk[2]).setMaterial();
 		}
 	}
@@ -116,6 +115,14 @@ new double[] {(double) rv.get(1), (double) rv.get(1), (double) rv.get(2), (doubl
 	 *                                   MISC
 	 * ============================================================================
 	 */
+	
+	private static void setWorldBorder() {
+		Location loc = MapMngr.getMapCenter();
+		double maxDist = MapMngr.getMaxDist(loc);
+		WorldBorder wb = Main.map.getWorldBorder();
+		wb.setCenter(loc);
+		wb.setSize((int) (maxDist + 150));
+	}
 	
 	public static void campTeleport(Player p, Camp c) {
 		p.teleport(c.getLoc().add(
