@@ -15,8 +15,8 @@ If you take damages you won't be able to regain health within a specific amount 
 All Fireworks you craft take your teamcolor as their color
 Invisibility effect no longer have particles, but other effects have
 If you smith an item to netherite, all enchantments will increase by 1 even if it's not vanilla-friendly
+Deads can be respawned if a member of their team kill a member of the team who killed the dead
 
 for now:
 you need a world named "-LS-<mapname>" and modify the config.yml accordingly like:
 setting the value of current_map to the string of mapname and configure your map with the indication in config.yml (camps positions, highest_ground etc...)
-/reloadmap is currently not working
