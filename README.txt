@@ -20,3 +20,7 @@ Deads can be respawned if a member of their team kill a member of the team who k
 for now:
 you need a world named "-LS-<mapname>" and modify the config.yml accordingly like:
 setting the value of current_map to the string of mapname and configure your map with the indication in config.yml (camps positions, highest_ground etc...)
+each world file should contain a backup file where a copy of alle the original state data are contained (like region if you want to restore only the map, tou can add entities if you also want to restore entities etc...)
+backup file will be called when executing the command /restoremap.
+
+This plugins messages are in French but errors are in english
