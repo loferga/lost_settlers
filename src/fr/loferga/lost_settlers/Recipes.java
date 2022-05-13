@@ -56,9 +56,6 @@ public class Recipes {
 		}
 		Bukkit.removeRecipe(NamespacedKey.minecraft("ender_chest"));
 		Bukkit.removeRecipe(NamespacedKey.minecraft("shield"));
-		Bukkit.removeRecipe(NamespacedKey.minecraft("raw_iron_block"));
-		Bukkit.removeRecipe(NamespacedKey.minecraft("raw_copper_block"));
-		Bukkit.removeRecipe(NamespacedKey.minecraft("raw_gold_block"));
 		// Trident
 		NamespacedKey tkey = new NamespacedKey(main, "trident");
 		ShapedRecipe rt = new ShapedRecipe(tkey, new ItemStack(Material.TRIDENT));

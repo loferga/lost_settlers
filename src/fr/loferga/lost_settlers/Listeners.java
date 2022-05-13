@@ -405,7 +405,7 @@ public class Listeners implements Listener {
 	}
 	
 	private static boolean isOre(String bTypeN) {
-		return bTypeN.length() > 7 && (bTypeN.endsWith("ORE") || bTypeN.startsWith("RAW") || bTypeN.equals("ANCIENT_DEBRIS"));
+		return bTypeN.length() > 7 && (bTypeN.endsWith("ORE") || bTypeN.equals("ANCIENT_DEBRIS"));
 	}
 	
 	private static void spawnExp(Block b) {
@@ -418,10 +418,7 @@ public class Listeners implements Listener {
 
 	private static int oreToExp(String name) {
 		int fact = 1;
-		if (name.startsWith("RAW")) {
-			name = name.substring(4, name.length() - 6);
-			fact = 9;
-		} else if (name.startsWith("DEEPSLATE")) {
+		if (name.startsWith("DEEPSLATE")) {
 			name = name.substring(10, name.length() - 4);
 			fact = 2;
 		} else

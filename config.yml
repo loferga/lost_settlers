@@ -9,7 +9,7 @@ current_map: "generic"
 
 maps:
   spawn:
-    location: [0.0, 10.0, 0.0]
+    location: [0.5, 10.0, 0.5]
     jump_active: false
     jump:
       minimum_height: 10.0
