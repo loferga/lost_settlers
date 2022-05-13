@@ -5,7 +5,7 @@
 # ores: <material_name>: [yratio (% of lower y took), gauss factor, gauss offset, [bounds of i, j, k (lode size)], lodes per 100^3 cubes]
 # <~campStringID>: [<x>, <y>, <z>, <isFacingNorth?>]
 # camps are squared, a face of this square is 2 times camp_size, same for vital_zone
-current_map: "forest"
+current_map: "generic"
 
 maps:
   spawn:
@@ -15,7 +15,7 @@ maps:
       minimum_height: 10.0
       checkpoint_block: "gold_block"
       reset_block: "iron_block"
-  forest:
+  generic:
     lodes_active: true
     lodes:
       highest_ground: 72
