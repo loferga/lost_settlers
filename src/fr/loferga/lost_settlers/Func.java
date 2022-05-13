@@ -39,16 +39,6 @@ public class Func {
 		return contain;
 	}
 	
-	public static int getIndex(List<?> list, Object e) {
-		boolean stop = false;
-		int i = list.size()-1;
-		while (i >= 0 && !stop)
-			if (list.get(i) == e)
-				stop = true;
-			else i--;
-		return i;
-	}
-	
 	public static String[] toReadableTime(long time) {
 		String[] rt = new String[] {"", "", ""};
 		long t = time;
@@ -82,7 +72,7 @@ public class Func {
 		p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(msg));
 	}
 	
-	public static void glowFor(LivingEntity ent, Player p, Integer duration) {
+	public static void glowFor(LivingEntity ent, List<Player> p, Integer duration) {
 		Main.glow.put(ent.getEntityId(), p);
 		ent.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, duration, 0, false, false));
 	}

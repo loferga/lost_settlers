@@ -12,7 +12,6 @@ import org.bukkit.scoreboard.Team;
 import org.bukkit.scoreboard.Team.Option;
 import org.bukkit.scoreboard.Team.OptionStatus;
 
-import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.map.MapMngr;
 import fr.loferga.lost_settlers.map.camps.Camp;
@@ -27,11 +26,6 @@ public class StartMngr {
 	/* start:
 	 * worldBorders to maxDist + 150
 	 * time set to 0
-	 * 
-	 * initiate scoreboard for everyone wich include:
-	 * 		timer (with time until combat)
-	 * 		current team state
-	 * 		other team members
 	 * 
 	 * for each team:
 	 * 		initiate flags
@@ -53,10 +47,9 @@ public class StartMngr {
 		String cMap = cfg.getString("current_map");
 		if (Main.map != null)
 			Bukkit.unloadWorld(Main.map, false);
-		Bukkit.broadcastMessage(Func.format("&cChargement de la carte ...&r, \'" + cMap + '\''));
+		Bukkit.broadcastMessage("Chargement de " + cMap + " ...");
 		Main.map = new WorldCreator("-LS-" + cMap).createWorld();
 		MapMngr.buildMapVars(cfg.getConfigurationSection("maps.".concat(cMap)));
-		Bukkit.broadcastMessage(Func.format("&cInitialisation des drapeaux ..."));
 		MapMngr.buildMap();
 		// PLAYERS
 		for (Team team : TeamMngr.get()) {

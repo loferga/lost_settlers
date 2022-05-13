@@ -19,6 +19,10 @@ public class GameLaunch extends BukkitRunnable {
 		new GameLaunch().runTaskTimer(plugin, 0L, 20L);
 	}
 	
+	public static boolean active() {
+		return active;
+	}
+	
 	private static int chrono = 3;
 	private static String codes = "ae64";
 

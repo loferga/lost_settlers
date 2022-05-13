@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -26,6 +27,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MagmaCube;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.SpectralArrow;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -119,6 +121,11 @@ public class Listeners implements Listener {
 				
 			} else if (e.getDamager() instanceof Arrow) {
 				if (isBonusArrow((Arrow) e.getDamager())) e.setDamage(0);
+			} else if (e.getDamager() instanceof SpectralArrow) {
+				SpectralArrow sa = (SpectralArrow) e.getDamager();
+				if (sa.getShooter() instanceof Player) {
+					Func.glowFor(dmged, TeamMngr.getAliveTeamMembers(TeamMngr.teamOf((Player) sa.getShooter())), 600);
+				}
 			}
 		}
 	}
@@ -135,9 +142,10 @@ public class Listeners implements Listener {
 	public void onBlockBreak(BlockBreakEvent e) {
 		// linked to CAMPS & ORE EXP
 		if (Game.active()) {
-			e.setCancelled(
-					campBlockBreak(e.getBlock(), e.getPlayer())
-					);
+			if (campBlockBreak(e.getBlock(), e.getPlayer())) {
+				e.setCancelled(true);
+				return;
+			}
 			oreExp(e.getBlock());
 		}
 	}
@@ -267,13 +275,13 @@ public class Listeners implements Listener {
 						comeBack(dogs, p);
 						p.getWorld().playSound(p.getLocation(), "custom.whistle_back", SoundCategory.PLAYERS, 2.0f, 1.0f);
 						for (Wolf dog : dogs)
-							Func.glowFor((LivingEntity)dog, p, 10);
+							Func.glowFor((LivingEntity)dog, Arrays.asList(p), 10);
 					}
 					prevTarget.remove(p);
 				} else {
 					setAnger(dogs, target);
 					p.getWorld().playSound(p.getLocation(), "custom.whistle", SoundCategory.PLAYERS, 2.0f, 1.0f);
-					Func.glowFor(target, p, 10);
+					Func.glowFor(target, Arrays.asList(p), 10);
 					prevTarget.put(p, target);
 				}
 			}
@@ -358,8 +366,7 @@ public class Listeners implements Listener {
 	
 	@EventHandler
 	public void onPlayerToggleSneak(PlayerToggleSneakEvent e) {
-		// /!\ optimize area of activation /!\
-		if (!Game.active() && e.getPlayer().getLocation().getX() <= 8 && e.getPlayer().getGameMode() == GameMode.ADVENTURE)
+		if (!Game.active() && e.getPlayer().getLocation().getWorld() == Bukkit.getWorlds().get(0) && e.getPlayer().getGameMode() == GameMode.ADVENTURE)
 			e.getPlayer().openInventory(GUIMngr.getTM());
 	}
 	

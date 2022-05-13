@@ -40,10 +40,12 @@ public class MapMngr {
 	}
 	
 	public static void buildMap() {
+
+		Bukkit.broadcastMessage("Initialisation des drapeaux ...");
 		CampMngr.initFlags();
 		setWorldBorder();
 		if (lodes) {
-			Bukkit.broadcastMessage(Func.format("&cGénération des minerais ..."));
+			Bukkit.broadcastMessage("Generation des minerais ...");
 			generateLodes();
 		}
 	}

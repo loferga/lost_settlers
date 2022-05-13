@@ -83,8 +83,7 @@ public class DogsMngr {
 			}
 			tamers.remove(from);
 			to.sendMessage(Func.format("&eVous êtes désormais le maître des chiens de " +
-			TeamMngr.teamOf(from).getColor() +
-			from.getDisplayName()));
+			TeamMngr.teamOf(from).getColor() + from.getDisplayName()));
 		}
 	}
 	

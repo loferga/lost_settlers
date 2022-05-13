@@ -42,7 +42,7 @@ public class Game extends BukkitRunnable {
 	}
 	
 	public static boolean active() {
-		return active;
+		return active || GameLaunch.active();
 	}
 	
 	public static boolean pvp() {
@@ -60,18 +60,18 @@ public class Game extends BukkitRunnable {
 		if (active) {
 			if (chrono == half) {
 				String[] rt = Func.toReadableTime((long) (Math.abs(half - pvp_time)) * 1000);
-				Bukkit.broadcastMessage(Func.format("&aIl reste &3" + rt[0] + rt[1] + rt[2] + "&a avant le début des captures"));
+				Bukkit.broadcastMessage(Func.format("&aIl reste &3" + rt[0] + rt[1] + rt[2] + "&a avant le debut des captures"));
 			}
 			if (chrono == fifth) {
 				String[] rt = Func.toReadableTime((long) (Math.abs(fifth - pvp_time)) * 1000);
-				Bukkit.broadcastMessage(Func.format("&eIl reste &3" + rt[0] + rt[1] + rt[2] + "&e avant le début des captures"));
+				Bukkit.broadcastMessage(Func.format("&eIl reste &3" + rt[0] + rt[1] + rt[2] + "&e avant le debut des captures"));
 			}
 			if (chrono == fifteenth) {
 				String[] rt = Func.toReadableTime((long) (Math.abs(fifteenth - pvp_time)) * 1000);
-				Bukkit.broadcastMessage(Func.format("&6Il reste &3" + rt[0] + rt[1] + rt[2] + "&6 avant le début des captures"));
+				Bukkit.broadcastMessage(Func.format("&6Il reste &3" + rt[0] + rt[1] + rt[2] + "&6 avant le debut des captures"));
 			}
 			if (chrono == pvp_time) {
-				Bukkit.broadcastMessage(Func.format("&4Captures et Combats Activés"));
+				Bukkit.broadcastMessage(Func.format("&4Captures et Combat Actives"));
 				for (Player p : TeamMngr.getTeamedPlayers())
 					p.playSound(Main.map.getSpawnLocation(), Sound.ENTITY_ELDER_GUARDIAN_AMBIENT, SoundCategory.MASTER, 400.0f, 1.0f);
 				pvp = true;

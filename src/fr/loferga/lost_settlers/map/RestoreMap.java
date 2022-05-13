@@ -78,7 +78,7 @@ public class RestoreMap implements TabExecutor {
 			e.printStackTrace();
 		}
 		
-		Bukkit.broadcastMessage(Func.format("&aLa carte est restaurée"));
+		Bukkit.broadcastMessage(Func.format("&aLa carte est restauree"));
 	}
 	
 }

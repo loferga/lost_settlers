@@ -119,11 +119,11 @@ public class TeamMngr {
 	 */
 	
 	public static List<Player> getAliveTeamMembers(Team team) {
-		List<Player> pset= new ArrayList<>();
+		List<Player> pl= new ArrayList<>();
 		for (Player p : getPlayers(team))
 			if (!p.isDead() && p.getGameMode() != GameMode.SPECTATOR)
-				pset.add(p);
-		return pset;
+				pl.add(p);
+		return pl;
 	}
 	
 	public static List<Player> getTeamedPlayers() {
