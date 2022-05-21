@@ -24,3 +24,5 @@ each world file should contain a backup file where a copy of alle the original s
 backup file will be called when executing the command /restoremap.
 
 This plugins messages are in French but errors are in english
+
+HUGE UPDATE COMING SOON
