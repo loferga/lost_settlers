@@ -1,6 +1,7 @@
 package fr.loferga.lost_settlers;
 
-import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -26,6 +27,10 @@ public class Func {
 	public static String toReadable(String msg, int i) {
 		String msgu = msg.toUpperCase();
 		return msgu.substring(0, i).concat(msgu.substring(i).toLowerCase());
+	}
+	
+	public static double random(double min, double max) {
+		return ThreadLocalRandom.current().nextDouble(min, max);
 	}
 	
 	public static <T> boolean primeContain(T[] array, T e) {
@@ -72,7 +77,7 @@ public class Func {
 		p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(msg));
 	}
 	
-	public static void glowFor(LivingEntity ent, List<Player> p, Integer duration) {
+	public static void glowFor(LivingEntity ent, Set<Player> p, Integer duration) {
 		Main.glow.put(ent.getEntityId(), p);
 		ent.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, duration, 0, false, false));
 	}

@@ -1,84 +1,78 @@
 package fr.loferga.lost_settlers.teams;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabExecutor;
+import org.bukkit.ChatColor;
+import org.bukkit.Color;
+import org.bukkit.DyeColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Team;
 
-import fr.loferga.lost_settlers.Func;
-import fr.loferga.lost_settlers.tasks.Game;
-
-public class LSTeam implements TabExecutor {
+public class LSTeam {
 	
-	public static final List<String> TEAM_NAMES = teamsNames();
-	private static List<String> teamsNames() {
-		List<String> res = new ArrayList<>(Arrays.asList("#null"));
-		for (Team team : TeamMngr.get()) {
-			res.add(team.getName());
-		}
-		return res;
-	}
-
-	@Override
-	public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
-		if (!Game.active()) {
-			if (args.length == 1)
-				return TEAM_NAMES;
-			if (sender.isOp() && args.length == 2) {
-				return null;
-			}
-		}
-		return new ArrayList<>();
+	public LSTeam(Team team, Material flag, DyeColor dyeColor, Color color) {
+		this.team = team;
+		this.flag = flag;
+		this.dyeColor = dyeColor;
+		this.color = color;
 	}
 	
-	@Override
-	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (sender instanceof Player) {
-			Player p = (Player) sender;
-			if (args.length == 2) {
-				if (p.isOp())
-					p = Bukkit.getPlayer(args[1]);
-				else {
-					p.sendMessage(Func.format("\"" + args[1] + "\"&c is not a valid player"));
-					return false;
-				}
-			}
-			if (args.length == 1 || args.length == 2) {
-				if (Game.active()) return false;
-				if (args[0].equals("#null")) {
-					TeamMngr.remove(p);
-					p.sendMessage(Func.format("&eVous ne faites plus parti d'une équipe"));
-					return true;
-				}
-				Team team = null;
-				for (Team t : TeamMngr.get()) {
-					if (t.getName().equals(args[0])) {
-						team = t;
-						break;
-					}
-				}
-				if (team != null) {
-					TeamMngr.join(p, team);
-					p.sendMessage(Func.format("&eVous faites désormais parti de l'équipe " + team.getColor() + team.getDisplayName()));
-					return true;
-				} else {
-					p.sendMessage(Func.format("\"" + args[0] + "\"&c is not a valid team"));
-					return false;
-				}
-			}
-			sendInvalid(p);
-		}
-		return false;
+	private Team team;
+	private Material flag;
+	private DyeColor dyeColor;
+	private Color color;
+	
+	public Team getTeam() {
+		return team;
 	}
 	
-	private void sendInvalid(Player p) {
-		p.sendMessage(Func.format("&cInvalid usage, please use:\n/lsteam <team>"));
+	public Material getFlag() {
+		return flag;
 	}
-
+	
+	public ChatColor getChatColor() {
+		return team.getColor();
+	}
+	
+	public DyeColor getDyeColor() {
+		return dyeColor;
+	}
+	
+	public Color getColor() {
+		return color;
+	}
+	
+	public String getRawName() {
+		return team.getName();
+	}
+	
+	public String getName() {
+		return team.getDisplayName();
+	}
+	
+	public void join(Player p) {
+		team.addEntry(p.getName());
+	}
+	
+	public void leave(Player p) {
+		team.removeEntry(p.getName());
+	}
+	
+	public Set<Player> getPlayers() {
+		Set<Player> pset = new HashSet<>();
+		for (String pname : team.getEntries()) {
+			Player p = Bukkit.getPlayer(pname);
+			if (p != null) pset.add(p);
+		}
+		return pset;
+			
+	}
+	
+	public boolean isMember(Player p) {
+		return team.hasEntry(p.getName());
+	}
+	
 }

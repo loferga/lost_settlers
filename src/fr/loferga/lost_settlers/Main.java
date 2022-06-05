@@ -1,12 +1,13 @@
 package fr.loferga.lost_settlers;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
+import org.bukkit.WorldCreator;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -19,29 +20,41 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
 
 import fr.loferga.lost_settlers.game.Start;
-import fr.loferga.lost_settlers.game.EndGame;
+import fr.loferga.lost_settlers.gui.GUIMngr;
+import fr.loferga.lost_settlers.game.End;
 import fr.loferga.lost_settlers.map.MapMngr;
-import fr.loferga.lost_settlers.map.RestoreMap;
-import fr.loferga.lost_settlers.teams.LSTeam;
+import fr.loferga.lost_settlers.map.ClearOres;
+import fr.loferga.lost_settlers.map.CloseWorld;
+import fr.loferga.lost_settlers.map.Lobby;
+import fr.loferga.lost_settlers.map.Warp;
+import fr.loferga.lost_settlers.teams.SelectTeam;
+import fr.loferga.lost_settlers.teams.TeamMngr;
 
 public class Main extends JavaPlugin{
 	
-	private ProtocolManager protocolManager;
+	private static ProtocolManager protocolManager;
 	
-	// Dynamic
-	public static Map<Integer, List<Player>> glow = new HashMap<>();
-	public static World map = null;
+	public static Map<Integer, Set<Player>> glow = new HashMap<>();
+	public static World hub;
 	
 	public void onEnable() {
 		
 		saveDefaultConfig();
 		
+		hub = new WorldCreator(Main.getPlugin(Main.class).getConfig().getString("maps.spawn.worldname")).createWorld();
+		hub.setPVP(false);
+		
 		new MapMngr();
+		new GUIMngr();
 		Recipes.createRecipes(this);
-		getCommand("lsteam").setExecutor(new LSTeam());
+		getCommand("lobby").setExecutor(new Lobby());
+		getCommand("lsteam").setExecutor(new SelectTeam());
 		getCommand("start").setExecutor(new Start());
-		getCommand("end").setExecutor(new EndGame());
-		getCommand("restoremap").setExecutor(new RestoreMap());
+		getCommand("end").setExecutor(new End());
+		getCommand("warp").setExecutor(new Warp());
+		getCommand("close").setExecutor(new CloseWorld());
+		getCommand("clearores").setExecutor(new ClearOres());
+		getCommand("lstest").setExecutor(new LSTest());
 		getServer().getPluginManager().registerEvents(new Listeners(), this);
 		
 		protocolManager = ProtocolLibrary.getProtocolManager();
@@ -53,12 +66,11 @@ public class Main extends JavaPlugin{
 				    	if (wwo.getIndex() == 0 && (byte) wwo.getRawValue() == 0b01000000) {
 				    		Integer eID = e.getPacket().getIntegers().read(0);
 				    		if (glow.keySet().contains(eID)) {
-				    			int i = glow.get(eID).indexOf(e.getPlayer());
-				    			if (i == -1 )
+				    			if (!glow.get(eID).contains(e.getPlayer()))
 				    				e.setCancelled(true);
 				    			else
 				    				if (glow.get(eID).size() > 1)
-				    					glow.get(eID).remove(i);
+				    					glow.get(eID).remove(e.getPlayer());
 				    				else
 				    					glow.remove(eID);
 				    		}
@@ -73,8 +85,9 @@ public class Main extends JavaPlugin{
 	}
 	
 	public void onDisable() {
-		if (map != null)
-			Bukkit.unloadWorld(map, false);
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			TeamMngr.remove(p);
+		}
 		ConsoleCommandSender console = getServer().getConsoleSender();
 		console.sendMessage("[LostSettlers] " + ChatColor.DARK_RED + "Plugin Disabled");
     }

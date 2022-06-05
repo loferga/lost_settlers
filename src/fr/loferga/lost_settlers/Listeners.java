@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -62,32 +64,25 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
 
+import fr.loferga.lost_settlers.dogs.ComeBack;
+import fr.loferga.lost_settlers.dogs.Anger;
 import fr.loferga.lost_settlers.dogs.DogsMngr;
-import fr.loferga.lost_settlers.game.EndGameMngr;
+import fr.loferga.lost_settlers.game.GameMngr;
 import fr.loferga.lost_settlers.gui.GUIMngr;
+import fr.loferga.lost_settlers.map.CloseWorld;
 import fr.loferga.lost_settlers.map.MapMngr;
 import fr.loferga.lost_settlers.map.camps.Camp;
-import fr.loferga.lost_settlers.map.camps.CampMngr;
-import fr.loferga.lost_settlers.tasks.ComeBack;
-import fr.loferga.lost_settlers.tasks.DogAnger;
-import fr.loferga.lost_settlers.tasks.Game;
-import fr.loferga.lost_settlers.tasks.NaturalRegen;
-import fr.loferga.lost_settlers.tasks.RespawnCooldown;
+import fr.loferga.lost_settlers.rules.Wounded;
+import fr.loferga.lost_settlers.teams.LSTeam;
 import fr.loferga.lost_settlers.teams.TeamMngr;
 
 public class Listeners implements Listener {
 	
 	@EventHandler
 	public void onJoin(final PlayerJoinEvent e) {
-		Player p = e.getPlayer();
-		if (Game.active()) {
-			DogsMngr.refundDogs(p);
-			NaturalRegen.addPlayer(p);
-		} else
-			MapMngr.spawnTeleport(p);
+		CloseWorld.reconnect(e.getPlayer());
 	}
 	
 	// events with multiples effects
@@ -97,13 +92,11 @@ public class Listeners implements Listener {
 		Player p = e.getPlayer();
 		Location from = e.getFrom();
 		Location to = e.getTo();
-		if (Game.active()) {
-			if (Game.pvp() && p.getGameMode() == GameMode.SURVIVAL)
+		Game g = GameMngr.gameIn(p);
+		if (g != null) {
+			if (g.pvp() && p.getGameMode() == GameMode.SURVIVAL)
 				if ((int)from.getX() != (int)to.getX() || (int)from.getZ() != (int)to.getZ())
 					campArea(p);
-		} else if (p.getGameMode() == GameMode.ADVENTURE) {
-			if ((int)from.getX() != (int)to.getX() || (int)from.getY() != (int)to.getY() || (int)from.getZ() != (int)to.getZ())
-				MapMngr.checkJump(p, from, to);
 		}
 	}
 	
@@ -114,7 +107,8 @@ public class Listeners implements Listener {
 			Player dmged = (Player) e.getEntity();
 			if (e.getDamager() instanceof Player) {
 				Player dmger = (Player) e.getDamager();
-				if (Game.active() && (Game.pvp() || TeamMngr.teamOf(dmged) == TeamMngr.teamOf(dmger))) {
+				Game game = GameMngr.gameIn(dmger);
+				if (game != null && (game.pvp() || TeamMngr.teamOf(dmged) == TeamMngr.teamOf(dmger))) {
 					putInCombat(dmged, dmger);
 				} else
 					e.setCancelled(true);
@@ -124,7 +118,7 @@ public class Listeners implements Listener {
 			} else if (e.getDamager() instanceof SpectralArrow) {
 				SpectralArrow sa = (SpectralArrow) e.getDamager();
 				if (sa.getShooter() instanceof Player) {
-					Func.glowFor(dmged, TeamMngr.getAliveTeamMembers(TeamMngr.teamOf((Player) sa.getShooter())), 600);
+					Func.glowFor(dmged, TeamMngr.teamOf((Player) sa.getShooter()).getPlayers(), 600);
 				}
 			}
 		}
@@ -132,7 +126,7 @@ public class Listeners implements Listener {
 	
 	@EventHandler
 	public void onBlockPlace(BlockPlaceEvent e) {
-		if (Game.active())
+		if (GameMngr.getGame(e.getBlock().getWorld()) != null)
 			e.setCancelled(
 					campBlockInteract(e.getBlock(), e.getPlayer())
 					);
@@ -141,7 +135,7 @@ public class Listeners implements Listener {
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent e) {
 		// linked to CAMPS & ORE EXP
-		if (Game.active()) {
+		if (GameMngr.gameIn(e.getPlayer()) != null) {
 			if (campBlockBreak(e.getBlock(), e.getPlayer())) {
 				e.setCancelled(true);
 				return;
@@ -152,7 +146,7 @@ public class Listeners implements Listener {
 	
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent e) {
-		if (Game.active()) {
+		if (GameMngr.gameIn(e.getPlayer()) != null) {
 			if (e.getAction() == Action.LEFT_CLICK_AIR) {
 				onOrder(e);
 			} else if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
@@ -170,8 +164,6 @@ public class Listeners implements Listener {
 		else if (ent instanceof Monster)
 			if (ent.getLocation().getY() < 16)
 				spawnMagmaCubeInstead(ent);
-			else if (!Game.pvp() && Math.random() < 0.8)
-				e.setCancelled(true);
 	}
 	
 	/*
@@ -181,21 +173,23 @@ public class Listeners implements Listener {
 	 */
 	
 	private static boolean campBlockBreak(Block b, Player p) {
-		if (CampMngr.isFlag(b.getLocation().add(0.5, 0.5, 0.5)))
+		Game game = GameMngr.gameIn(p);
+		if (game.isFlag(b.getLocation().add(0.5, 0.5, 0.5)))
 			return true;
 		return campBlockInteract(b, p);
 	}
 	
 	private static boolean campBlockInteract(Block b, Player p) {
 		if (b.getType() != Material.TNT) {
-			Team pteam = TeamMngr.teamOf(p);
-			if (pteam != null)
-				for (Camp camp : CampMngr.get())
-					if (CampMngr.isInCamp(b.getLocation(), camp))
-						if (!camp.getRivals().contains(pteam)) {
-							Func.sendActionbar(p, Func.format("&cCe camp n'est pas à vous"));
-							return true;
-						}
+			Game game = GameMngr.gameIn(p);
+			LSTeam pteam = TeamMngr.teamOf(p);
+			if (game != null && pteam != null) {
+				Camp camp = game.campIn(b.getLocation());
+				if (camp != null && !camp.getRivals().contains(pteam)) {
+					Func.sendActionbar(p, Func.format("&cCe camp n'est pas à vous"));
+					return true;
+				}
+			}
 		}
 		return false;
 	}
@@ -203,17 +197,17 @@ public class Listeners implements Listener {
 	private static void campArea(Player p) {
 		// triggered whenever a player move to a new block in x.z plane
 		if (!p.isInvisible()) {
-			Team pteam = TeamMngr.teamOf(p);
-			if (pteam != null)
-				for (Camp camp : CampMngr.get())
-					if (CampMngr.isInVitalSpace(p.getLocation(), camp))
-						if (!camp.getRivals().contains(pteam)) {
-							if (CampMngr.teamProtect(camp.getOwner(), camp))
-								CampMngr.conquest(camp, pteam);
-							else
-								CampMngr.capture(camp, pteam);
-							break;
-						}
+			Game game = GameMngr.gameIn(p);
+			LSTeam pteam = TeamMngr.teamOf(p);
+			if (game != null && pteam != null) {
+				Camp camp = game.vitalIn(p.getLocation());
+				if (camp != null && !camp.getRivals().contains(pteam)) {
+					if (game.teamProtect(camp.getOwner(), camp))
+						game.conquest(camp, pteam);
+					else
+						game.capture(camp, pteam);
+				}
+			}
 		}
 	}
 	
@@ -231,7 +225,7 @@ public class Listeners implements Listener {
 			AnimalTamer p = e.getOwner();
 			Wolf wolf = (Wolf) e.getEntity();
 			DogsMngr.addWolf(p, wolf);
-			wolf.setCollarColor(TeamMngr.getDyeColor((Player) p));
+			wolf.setCollarColor(TeamMngr.teamOf((Player) p).getDyeColor());
 			wolf.setCustomName(pickRandomName());
 		}
 	}
@@ -242,7 +236,7 @@ public class Listeners implements Listener {
 			));
 	
 	private static String pickRandomName() {
-		int rng = (int) (Math.random() * names.size());
+		int rng = (int) ThreadLocalRandom.current().nextInt(names.size());
 		String picked = names.get(rng);
 		names.remove(rng);
 		return picked;
@@ -253,7 +247,7 @@ public class Listeners implements Listener {
 	public void onEntityTeleport(EntityTeleportEvent e) {
 		if (e.getEntity() instanceof Wolf) {
 			Wolf wolf = (Wolf)e.getEntity();
-			if (DogAnger.contain(wolf) || ComeBack.contain(wolf))
+			if (Anger.contain(wolf) || ComeBack.contain(wolf))
 				e.setCancelled(true);
 		}
 	}
@@ -275,13 +269,13 @@ public class Listeners implements Listener {
 						comeBack(dogs, p);
 						p.getWorld().playSound(p.getLocation(), "custom.whistle_back", SoundCategory.PLAYERS, 2.0f, 1.0f);
 						for (Wolf dog : dogs)
-							Func.glowFor((LivingEntity)dog, Arrays.asList(p), 10);
+							Func.glowFor((LivingEntity)dog, new HashSet<>(Set.of(p)), 10);
 					}
 					prevTarget.remove(p);
 				} else {
 					setAnger(dogs, target);
 					p.getWorld().playSound(p.getLocation(), "custom.whistle", SoundCategory.PLAYERS, 2.0f, 1.0f);
-					Func.glowFor(target, Arrays.asList(p), 10);
+					Func.glowFor(target, new HashSet<>(Set.of(p)), 10);
 					prevTarget.put(p, target);
 				}
 			}
@@ -296,7 +290,7 @@ public class Listeners implements Listener {
 		int i = 0;
 		Collection<Entity> ents = p.getWorld().getEntitiesByClasses(LivingEntity.class);
     	ents.remove(prevTarget.get(p));
-    	ents.removeAll(TeamMngr.getAliveTeamMembers(TeamMngr.teamOf(p)));
+    	ents.removeAll(TeamMngr.teamOf(p).getPlayers());
     	while (i < 60 && !stop) {
     		rayloc = rayloc.add(eyedir);
     		if (!rayloc.getBlock().getType().isOccluding()) {
@@ -315,7 +309,7 @@ public class Listeners implements Listener {
 	private static void setAnger(List<Wolf> wolfs, LivingEntity target) {
 		for (Wolf wolf : wolfs) {
 			ComeBack.removeDog(wolf);
-			DogAnger.addAnger(wolf, target);
+			Anger.addAnger(wolf, target);
 		}
 	}
 	
@@ -327,7 +321,7 @@ public class Listeners implements Listener {
 		dummy.setAI(false);
 		dummy.setSilent(true);
 		for (Wolf wolf : wolfs) {
-			DogAnger.removeAnger(wolf);
+			Anger.removeAnger(wolf);
 			ComeBack.addDog(wolf, dummy, p);
 		}
 	}
@@ -338,10 +332,10 @@ public class Listeners implements Listener {
 		if (e.getEntity() instanceof Wolf) {
 			Wolf wolf = (Wolf) e.getEntity();
 			if (wolf.isTamed()) DogsMngr.removeWolf((Player) wolf.getOwner(), wolf);
-			DogAnger.removeAnger(wolf);
+			Anger.removeAnger(wolf);
 			ComeBack.removeDog(wolf);
 		}
-		Wolf angry = DogAnger.getDogAngry(e.getEntity());
+		Wolf angry = Anger.getDogAngry(e.getEntity());
 		if (angry != null) {
 			Player p2 = (Player) angry.getOwner();
 			comeBack(DogsMngr.get().get(p2), p2);
@@ -357,31 +351,29 @@ public class Listeners implements Listener {
 	@EventHandler
 	public void onPlayerInteractWithDog(PlayerInteractAtEntityEvent e) {
 		Player p = e.getPlayer();
-		if (Game.active() && p.isSneaking())
+		Game game = GameMngr.gameIn(p);
+		if (game != null && p.isSneaking())
 			if (e.getRightClicked() instanceof Wolf)
 				if (DogsMngr.ownership((Wolf) e.getRightClicked(), p))
-					if (TeamMngr.getAliveTeamMembers(TeamMngr.teamOf(p)).size() > 1)
+					if (game.getMembers(TeamMngr.teamOf(p)).size() > 1)
 						p.openInventory(GUIMngr.getDTM(p, e.getRightClicked().getCustomName()));
 	}
 	
 	@EventHandler
 	public void onPlayerToggleSneak(PlayerToggleSneakEvent e) {
-		if (!Game.active() && e.getPlayer().getLocation().getWorld() == Bukkit.getWorlds().get(0) && e.getPlayer().getGameMode() == GameMode.ADVENTURE)
+		if (e.getPlayer().getWorld() == Main.hub &&
+				e.getPlayer().getGameMode() == GameMode.ADVENTURE &&
+				!e.getPlayer().getScoreboardTags().contains("noSelection")
+				)
 			e.getPlayer().openInventory(GUIMngr.getTM());
 	}
 	
-	Map<Material, Particle> particle = new HashMap<>();
-	
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent e) {
-		if (!Game.active()) {
+		if (GameMngr.gameIn((Player) e.getView().getPlayer()) == null) {
 			if (e.getView().getTitle() == "Selection") {
 				if (e.getCurrentItem() != null)
 					GUIMngr.clickTM((Player) e.getWhoClicked(), e.getCurrentItem());
-				e.setCancelled(true);
-			} else if (e.getView().getTitle().equals("Trainées")) {
-				if (e.getCurrentItem() != null)
-					// addPlayer to particles
 				e.setCancelled(true);
 			}
 		} else if (e.getView().getTitle().startsWith("Confier")) {
@@ -412,8 +404,13 @@ public class Listeners implements Listener {
 		ExperienceOrb exp = (ExperienceOrb) b.getWorld().spawnEntity(b.getLocation(), EntityType.EXPERIENCE_ORB);
 		if (b.getType() != Material.ANCIENT_DEBRIS)
 			exp.setExperience(oreToExp(b.getType().toString()));
-		else
-			exp.setExperience(70);
+		else {
+			exp.setExperience(10);
+			for (int i = 0; i<6; i++) {
+				ExperienceOrb netheriteXPOrb = (ExperienceOrb) b.getWorld().spawnEntity(b.getLocation(), EntityType.EXPERIENCE_ORB);
+				netheriteXPOrb.setExperience(10);
+			}
+		}
 	}
 
 	private static int oreToExp(String name) {
@@ -442,8 +439,8 @@ public class Listeners implements Listener {
 	public void onObsidianForm(BlockFormEvent e) {
 		if (e.getNewState().getType() == Material.OBSIDIAN) {
 			Location bloc = e.getBlock().getLocation().add(0.5, 0.5, 0.5);
-			Main.map.playSound(bloc, Sound.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.0f);
-			Main.map.spawnParticle(Particle.SMOKE_LARGE, bloc, 8, 0.4, 0.4, 0.4, 0.01);
+			bloc.getWorld().playSound(bloc, Sound.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.0f);
+			bloc.getWorld().spawnParticle(Particle.SMOKE_LARGE, bloc, 8, 0.4, 0.4, 0.4, 0.01);
 			e.getBlock().setType(Material.STONE);
 			e.setCancelled(true);
 		}
@@ -469,7 +466,7 @@ public class Listeners implements Listener {
 	public void vaporizeWater(BlockPhysicsEvent e) {
 		Block b = e.getBlock();
 		if (b.getType() == Material.WATER)
-			if (b.getWorld() == Main.map && b.getLocation().getY() < 16)
+			if (MapMngr.worlds.contains(b.getWorld()) && b.getLocation().getY() < 16)
 				b.setType(Material.AIR);
 	}
 	
@@ -502,60 +499,54 @@ public class Listeners implements Listener {
 	// ##### NATURAL REGEN #####
 	
 	private static void putInCombat(Player dmged, Player dmger) {
-		NaturalRegen.addPlayer(dmged);
-		NaturalRegen.addPlayer(dmger);
+		Wounded.addPlayer(dmged);
+		Wounded.addPlayer(dmger);
 	}
 	
 	@EventHandler
 	public void onEntityDamage(EntityDamageEvent e) {
 		if (e.getEntity() instanceof Player) {
-			if (Game.active()) {
+			if (GameMngr.gameIn((Player) e.getEntity()) != null)
 				if (e.getCause() != DamageCause.FIRE_TICK)
-					NaturalRegen.addPlayer((Player) e.getEntity());
-			} else if (e.getCause() == DamageCause.VOID)
-				((Player) e.getEntity()).setHealth(0);
+					Wounded.addPlayer((Player) e.getEntity());
 		}
 	}
 	
 	@EventHandler
 	public void onEntityRegainHealth(EntityRegainHealthEvent e) {
-		if (Game.active()) {
-			if (e.getEntity() instanceof Player)
-				if (NaturalRegen.isInCombat((Player) e.getEntity()))
-					e.setCancelled(true);
-		}
+		if (e.getEntity() instanceof Player)
+			if (Wounded.isInCombat((Player) e.getEntity()))
+				e.setCancelled(true);
 	}
 	
 	// ##### DEATH #####
 	
 	@EventHandler
 	public void onPlayerRespawn(PlayerRespawnEvent e) {
-		if (Game.active()) {
+		if (GameMngr.gameIn(e.getPlayer()) != null) {
 			Player p = e.getPlayer();
 			p.setGameMode(GameMode.SPECTATOR);
-			p.teleport(Main.map.getSpawnLocation());
 		}
 	}
 	
 	@EventHandler
 	public void onPlayerDeath(PlayerDeathEvent e) {
-		if (Game.active()) {
+		Game game = GameMngr.gameIn(e.getEntity());
+		if (game != null) {
 			Player dead = e.getEntity();
 			dead.setBedSpawnLocation(dead.getLocation());
-			if (Game.pvp()) {
+			if (game.pvp()) {
 				Player killer = dead.getKiller();
 				if (killer != null) {
 					if (killer instanceof Player) {
-						TeamMngr.teamKills(dead, killer);
+						game.kill(dead, killer);
 						DogsMngr.transferDogsTo(dead, killer);
 					}
-				} else if (TeamMngr.getAliveTeamMembers(TeamMngr.teamOf(dead)).size() == 0) {
-					TeamMngr.respawnAllKilled(TeamMngr.teamOf(dead));
 				}
-				EndGameMngr.winCondition(null);
+				game.winCondition(null);
 				e.setDroppedExp(dead.getTotalExperience());
 			} else
-				RespawnCooldown.add(dead);
+				game.addRespawn(dead);
 			GUIMngr.refreshDTM();
 		}
 	}
@@ -569,7 +560,7 @@ public class Listeners implements Listener {
 		if (result != null) {
 			if (result.getType() == Material.FIREWORK_ROCKET) {
 				Player p = (Player) e.getView().getPlayer();
-				Color color = TeamMngr.getColor(p);
+				Color color = TeamMngr.teamOf(p).getColor();
 				result.setItemMeta((ItemMeta) Recipes.setColor(result.getItemMeta(), color));
 				e.getInventory().setResult(result);
 			}
@@ -596,9 +587,9 @@ public class Listeners implements Listener {
 	
 	@EventHandler
 	public void onPlayerTeleport(PlayerTeleportEvent e) {
-		if (Game.active() && e.getCause() == TeleportCause.ENDER_PEARL) {
+		if (GameMngr.gameIn(e.getPlayer()) != null && e.getCause() == TeleportCause.ENDER_PEARL) {
 			Player p = (Player) e.getPlayer();
-			p.setHealth(Math.round((p.getHealth()-0.1)/1.5));
+			p.setHealth(2*p.getHealth()/3);
 		}
 	}
 	
@@ -627,9 +618,8 @@ public class Listeners implements Listener {
 	
 	@EventHandler
 	public void onQuit(PlayerQuitEvent e) {
-		Player p = (Player) e.getPlayer();
-		TeamMngr.remove(p);
-		Wolf angry = DogAnger.getDogAngry((LivingEntity) e.getPlayer());
+		CloseWorld.disconect(e.getPlayer());
+		Wolf angry = Anger.getDogAngry((LivingEntity) e.getPlayer());
 		if (angry != null) {
 			Player owner = (Player) angry.getOwner();
 			comeBack(DogsMngr.get().get(owner), owner);

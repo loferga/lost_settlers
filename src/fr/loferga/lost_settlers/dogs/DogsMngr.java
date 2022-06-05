@@ -14,7 +14,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 
 import fr.loferga.lost_settlers.Func;
-import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.teams.TeamMngr;
 
 public class DogsMngr {
@@ -68,18 +67,12 @@ public class DogsMngr {
 				wolf.setCollarColor(color);
 	}
 	
-	public static void refundDogs(Player p) {
-		for (Wolf wolf : Main.map.getEntitiesByClass(Wolf.class))
-			if (wolf.getOwner() == p)
-				addWolf(p, wolf);
-	}
-	
 	public static void transferDogsTo(Player from, Player to) {
 		if (tamers.containsKey(from)) {
 			for (Wolf wolf : tamers.get(from)) {
 				dogGive(to, wolf);
 				wolf.setAngry(false);
-				Main.map.playSound(wolf.getLocation(), Sound.ENTITY_WOLF_WHINE, 1.0f, 1.0f);
+				wolf.getWorld().playSound(wolf.getLocation(), Sound.ENTITY_WOLF_WHINE, 1.0f, 1.0f);
 			}
 			tamers.remove(from);
 			to.sendMessage(Func.format("&eVous êtes désormais le maître des chiens de " +
@@ -93,15 +86,15 @@ public class DogsMngr {
 			tamers.get(from).remove(wolf);
 		else
 			tamers.remove(from);
-		ChatColor color = TeamMngr.teamOf(from).getColor();
+		ChatColor color = TeamMngr.teamOf(from).getChatColor();
 		from.sendMessage(Func.format("&eVous venez de confier " + color + wolf.getCustomName() +
-				"&e à " + color + to.getDisplayName()));
-		to.sendMessage(Func.format(color + from.getDisplayName() + "&e viens de vous confier " + color + wolf.getCustomName()));
+				"&e à " + color + to.getName()));
+		to.sendMessage(Func.format(color + from.getName() + "&e viens de vous confier " + color + wolf.getCustomName()));
 	}
 	
 	private static void dogGive(Player p, Wolf w) {
 		addWolf(p, w);
-		w.setCollarColor(TeamMngr.getDyeColor(p));
+		w.setCollarColor(TeamMngr.teamOf(p).getDyeColor());
 		w.setSitting(false);
 	}
 

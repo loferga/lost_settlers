@@ -5,20 +5,24 @@
 # ores: <material_name>: [yratio (% of lower y took), gauss factor, gauss offset, [bounds of i, j, k (lode size)], lodes per 100^3 cubes]
 # <~campStringID>: [<x>, <y>, <z>, <isFacingNorth?>]
 # camps are squared, a face of this square is 2 times camp_size, same for vital_zone
-current_map: "generic"
 
 maps:
   spawn:
+    worldname: "hub"
     location: [0.5, 10.0, 0.5]
-    jump_active: false
-    jump:
-      minimum_height: 10.0
-      checkpoint_block: "gold_block"
-      reset_block: "iron_block"
   generic:
+    playable_area: 200
+    camps:
+      positions:
+        hill: [-879.5, 70.0, 435.5, true]
+        river: [-935.5, 64.0, 312.5, false]
+        foreset: [-1027.5, 64.0, 415.5, true]
+      settings:
+        camp_size: 19.5
+        vital_size: 8.5
+    highest_ground: 72
     lodes_active: true
     lodes:
-      highest_ground: 72
       ores:
         coal_ore:       [1.0, 5, 1.2, [2.0, 4.5, 1.0, 3.5, 1.0, 1.5], 115]
         iron_ore:       [1.0, 2, 1.1, [1.5, 3.5, 1.0, 2.5, 1.0, 1.5], 160]
@@ -29,21 +33,13 @@ maps:
         diamond_ore:    [0.3, 6, 0.6, [1.0, 2.0, 0.5, 1.5, 0.5, 1.0], 100]
         emerald_ore:    [0.2, 7, 1.0, [1.0, 1.5, 0.5, 1.0, 0.5, 1.0], 50]
         ancient_debris: [0.1, 1, 1.8, [0.5, 1.0, 0.5, 1.0, 0.5, 1.0], 60]
-    camps:
-      positions:
-        hill: [-879.5, 70.0, 435.5, true]
-        river: [-935.5, 64.0, 312.5, false]
-        foreset: [-1027.5, 64.0, 415.5, true]
-      settings:
-        camp_size: 16.5
-        vital_size: 8.5
         
 
-# <teamConcreteColor>: "<\chatColor char><displayName>"
+# <displayName>: "[flagMaterial, DyeColor, Color, ChatColor]"
 teams:
-  orange: "6Oranges"
-  red: "cRouges"
-  purple: "dViolets"
+  Oranges: ["gold", "orange_concrete", "orange", "orange"]
+  Rouges: ["red", "red_concrete", "red", "red"]
+  Violets: ["light_purple", "purple_concrete", "purple", "purple"]
 
 # time in seconds
 pvp_time: 10

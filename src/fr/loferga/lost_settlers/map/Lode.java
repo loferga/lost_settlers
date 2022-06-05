@@ -2,10 +2,10 @@ package fr.loferga.lost_settlers.map;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 
 import fr.loferga.lost_settlers.Func;
-import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.map.geometry.Matrix;
 import fr.loferga.lost_settlers.map.geometry.Point;
 import fr.loferga.lost_settlers.map.geometry.Vector;
@@ -15,7 +15,8 @@ public class Lode {
 	private static Material[] valid_stone = {Material.STONE, Material.ANDESITE, Material.DIORITE, Material.GRANITE, Material.DIRT,
 				Material.GRAVEL};
 	
-	public Lode(Material ore, Point O, Vector i,Vector j, Vector k) {
+	public Lode(World world, Material ore, Point O, Vector i,Vector j, Vector k) {
+		this.world = world;
 		this.ore = ore;
 		this.O = O;
 		this.i = i;
@@ -23,6 +24,7 @@ public class Lode {
 		this.k = k;
 	}
 	
+	private World world;
 	private Material ore;
 	private Point O;
 	private Vector i;
@@ -61,7 +63,7 @@ public class Lode {
 			for (double y = bounds[2]; y < bounds[3]; y+=1.0)
 				for (double z = bounds[4]; z < bounds[5]; z+=1.0) {
 					if (isInLode(new double[] {x, y, z})) {
-						Block b = new Location(Main.map, x, y, z).getBlock();
+						Block b = new Location(world, x, y, z).getBlock();
 						if (Func.primeContain(valid_stone, b.getType())) {
 							b.setType(ore);
 						} else if (b.getType() == Material.DEEPSLATE || b.getType() == Material.TUFF) {

@@ -1,5 +1,5 @@
 name: LostSettlers
-version: '1.0'
+version: '3.0'
 author: loferga
 main: fr.loferga.lost_settlers.Main
 api-version: '1.17'
@@ -7,14 +7,24 @@ api: '1.17'
 depend: [ProtocolLib]
 
 commands:
+  lobby:
+    description: LostSettlers command to tp the sender to the lobby world
   lsteam:
-    description: LostSettlers command for players to change their team
+    description: LostSettlers command to change a player\'s team, non-operators can only change their team
   start:
-    description: LostSettlers command to start a new game
+    description: LostSettlers command to start a new game in a specified world (set the worldspawn to the center of the camps)
     permission: op
   end:
-    description: LostSettlers command to stop an already running game
+    description: LostSettlers command to stop a running game in the player\'s world
     permission: op
-  restoremap:
-    description: LostSettlers command to restore the map to its original state
+  warp:
+    description: LostSettlers command to load a world and tp to it\'s WorldSpawn
+    permission: op
+  close:
+    description: LostSettlers command to tp everyone in a specified world to the lobby world and either store or restore the world
+    permission: op
+  clearores:
+    description: LostSettlers command to clear all ores in the player\'s world playable area
+    permission: op
+  lstest:
     permission: op

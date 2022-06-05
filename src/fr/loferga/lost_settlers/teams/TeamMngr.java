@@ -1,10 +1,8 @@
 package fr.loferga.lost_settlers.teams;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -12,7 +10,7 @@ import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
@@ -20,67 +18,48 @@ import org.bukkit.scoreboard.Team;
 import org.bukkit.scoreboard.Team.Option;
 import org.bukkit.scoreboard.Team.OptionStatus;
 
-import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.dogs.DogsMngr;
-import fr.loferga.lost_settlers.map.MapMngr;
-import fr.loferga.lost_settlers.map.camps.Camp;
-import fr.loferga.lost_settlers.map.camps.CampMngr;
 
 public class TeamMngr {
 	
 	private static ConfigurationSection section = Main.getPlugin(Main.class).getConfig().getConfigurationSection("teams");
 	private static Scoreboard sb = Bukkit.getScoreboardManager().getMainScoreboard();
 	
-	private static final List<Team> TEAMS = buildTeams(section, sb);
-	private static Map<Team, Map<Team, List<Player>>> kMem = new HashMap<>();
+	private static final LSTeam[] TEAMS = buildTeams(section, sb);
 	
-	public static List<Team> get() {
-		return new ArrayList<>(TEAMS);
+	public static LSTeam[] get() {
+		return TEAMS;
 	}
 	
-	@SuppressWarnings("deprecation")
-	public static void join(Player p, Team team) {
-		team.addPlayer(p);
-		DogsMngr.setDogsColor(p, getDyeColor(p));
+	public static void join(Player p, LSTeam team) {
+		team.join(p);
+		DogsMngr.setDogsColor(p, team.getDyeColor());
 	}
 	
-	@SuppressWarnings("deprecation")
 	public static void remove(Player p) {
-		Team team = teamOf(p);
-		if (team != null) team.removePlayer(p);
+		LSTeam team = teamOf(p);
+		if (team != null) team.leave(p);
 		DogsMngr.setDogsColor(p, DyeColor.WHITE);
 	}
 	
-	@SuppressWarnings("deprecation")
-	public static Team teamOf(Player p) {
-		for (Team team : TEAMS)
-			if (team.hasPlayer(p))
+	public static LSTeam teamOf(Player p) {
+		for (LSTeam team : TEAMS)
+			if (team.isMember(p))
 				return team;
 		return null;
 	}
 	
-	@SuppressWarnings("deprecation")
-	public static List<Player> getPlayers(Team team) {
-		List<Player> pset = new ArrayList<>();
-		for (OfflinePlayer offp : team.getPlayers())
-			if (offp.isOnline())
-				pset.add((Player) offp);
-		return pset;
-	}
-	
-	private static void removeKilled(Team k, Team v, Player p) {
-		if (kMem.get(k).get(v).size() == 1)
-			if (kMem.get(k).size() == 1)
-				kMem.remove(k);
+	public static int indexOf(LSTeam t) {
+		boolean found = false;
+		int i = TEAMS.length-1;
+		while(i>=0 && !found) {
+			if (TEAMS[i] == t)
+				found = true;
 			else
-				kMem.get(k).remove(v);
-		else
-			kMem.get(k).get(v).remove(p);
-	}
-	
-	private static boolean isKillerOf(Team k, Team v) {
-		return kMem.containsKey(k) && kMem.get(k).containsKey(v);
+				i--;
+		}
+		return i;
 	}
 	
 	/*
@@ -89,16 +68,25 @@ public class TeamMngr {
 	 * ============================================================================
 	 */
 	
-	public static List<Team> buildTeams(ConfigurationSection section, Scoreboard sb) {
-		List<Team> teams = new ArrayList<>();
+	public static LSTeam[] buildTeams(ConfigurationSection section, Scoreboard sb) {
+		colors = new Color[] {
+				Color.AQUA, Color.BLACK, Color.BLUE, Color.FUCHSIA, Color.GRAY,
+				Color.GREEN, Color.LIME, Color.MAROON,Color.NAVY, Color.OLIVE,
+				Color.ORANGE, Color.PURPLE, Color.RED, Color.SILVER, Color.TEAL,
+				Color.WHITE, Color.YELLOW
+		};
+		LSTeam[] teams = new LSTeam[section.getKeys(false).size()];
+		int i = 0;
 		for (String key : section.getKeys(false)) {
-			String keyinfo = section.getString(key);
+			List<String> data = section.getStringList(key);
+			Team team = null;
 			try {
-				teams.add(createTeam(sb, Func.unformat(keyinfo.charAt(0)), keyinfo.substring(1)));
+				team = createTeam(sb, ChatColor.valueOf(data.get(0).toUpperCase()), key);
 			} catch (Exception e) {
-				teams.add(sb.getTeam(keyinfo.substring(1)));
+				team = sb.getTeam(key);
 			}
-			
+			teams[i] = new LSTeam(team, Material.valueOf(data.get(1).toUpperCase()), DyeColor.valueOf(data.get(2).toUpperCase()), colorValueOf(data.get(3).toUpperCase()));
+			i++;
 		}
 		return teams;
 	}
@@ -108,131 +96,51 @@ public class TeamMngr {
 		team.setColor(color);
 		team.setDisplayName(color + name);
 		team.setCanSeeFriendlyInvisibles(false);
-		team.setOption(Option.COLLISION_RULE, OptionStatus.NEVER);
+		team.setOption(Option.COLLISION_RULE, OptionStatus.ALWAYS);
 		return team;
+	}
+	
+	private static Color[] colors;
+	
+	private static Color colorValueOf(String str) {
+		for (Color clr : colors)
+			if (clr.toString().equals(str))
+				return clr;
+		return null;
 	}
 	
 	/*
 	 * ============================================================================
-	 *                           TEAM UTIL FUNCTIONS
+	 *                                    UTIL
 	 * ============================================================================
 	 */
 	
-	public static List<Player> getAliveTeamMembers(Team team) {
-		List<Player> pl= new ArrayList<>();
-		for (Player p : getPlayers(team))
-			if (!p.isDead() && p.getGameMode() != GameMode.SPECTATOR)
-				pl.add(p);
-		return pl;
+	public static Set<Player> alivePlayers(Set<Player> pset) {
+		Set<Player> res = new HashSet<>();
+		for (Player p : pset)
+			if (p.isOnline() && p.getGameMode() != GameMode.SPECTATOR)
+				res.add(p);
+		return res;
 	}
 	
-	public static List<Player> getTeamedPlayers() {
-		List<Player> pset = new ArrayList<>();
-		for (Team team : TEAMS)
-			pset.addAll(getPlayers(team));
+	public static Set<Player> teamedPlayers(World world) {
+		Set<Player> pset = new HashSet<>();
+		for (LSTeam team : TEAMS)
+			for (Player p : team.getPlayers())
+				if (p.getWorld() == world)
+					pset.add(p);
 		return pset;
 	}
 	
 	// IMPROVE
-	public static int[] getTeamsSize() {
-		int i = 0;
-		int[] teamSize = new int[3];
-		String[] names = new String[] {"Oranges", "Rouges", "Violets"};
-		while (i < names.length) {
-			for (Team team : TEAMS)
-				if (team.getName().equals(names[i]))
-					teamSize[i] = getAliveTeamMembers(team).size();
-			i++;
+	public static int[] teamsSizes(World world) {
+		int[] teamSize = new int[] {0, 0, 0};
+		for (int i = 0; i<TEAMS.length; i++) {
+			for (Player p : TEAMS[i].getPlayers())
+				if (p.getWorld() == world)
+					teamSize[i]++;
 		}
 		return teamSize;
-	}
-	
-	public static void teamKills(Player dead, Player killer) {
-		Team k = teamOf(killer);
-		Team v = teamOf(dead);
-		if (k != v) {
-			// revive
-			if (isKillerOf(v, k)) {
-				if (CampMngr.getTeamCamps(v).size() > 0)
-					respawnKilled(v, k);
-			}
-			// add to kMem
-			if (!kMem.containsKey(k))
-				kMem.put(k, new HashMap<>(Map.of(v, new ArrayList<>(Arrays.asList(dead)))));
-			else if (!kMem.get(k).containsKey(v))
-				kMem.get(k).put(v, new ArrayList<>(Arrays.asList(dead)));
-			else
-				kMem.get(k).get(v).add(dead);
-		}
-	}
-	
-	public static void respawnAllKilled(Team k) {
-		if (kMem.containsKey(k))
-			for (Team v : kMem.get(k).keySet())
-				for (Player p : kMem.get(k).get(v)) {
-					MapMngr.campTeleport(p, getOlderCamp(v));
-					p.setGameMode(GameMode.SURVIVAL);
-					removeKilled(k, v, p);
-				}
-	}
-	
-	public static void respawnKilled(Team k, Team v) {
-		for (Player p : kMem.get(k).get(v)) {
-			MapMngr.campTeleport(p, getOlderCamp(v));
-			p.setGameMode(GameMode.SURVIVAL);
-			removeKilled(k, v, p);
-		}
-	}
-	
-	public static void respawn(Player p) {
-		MapMngr.campTeleport(p, getOlderCamp(teamOf(p)));
-		p.setGameMode(GameMode.SURVIVAL);
-	}
-	
-	public static Camp getOlderCamp(Team t) {
-		Camp older = null;
-		long time = Long.MAX_VALUE;
-		for (Camp c : CampMngr.getTeamCamps(t)) {
-			long ctime = c.getOwnerTime();
-			if (ctime < time) {
-				older = c;
-				time = ctime;
-			}
-		}
-		return older;
-	}
-	
-	public static void resetKillerMemory() {
-		kMem.clear();
-	}
-	
-	public static DyeColor getDyeColor(Player p) {
-		Team team = teamOf(p);
-		if (team==null) return DyeColor.WHITE;
-		switch(team.getColor()) {
-		case GOLD: return DyeColor.ORANGE;
-		case RED: return DyeColor.RED;
-		default: return DyeColor.PURPLE;
-		}
-	}
-	
-	public static Color getColor(Player p) {
-		Team team = teamOf(p);
-		if (team==null) return Color.WHITE;
-		switch(team.getColor()) {
-		case GOLD: return Color.ORANGE;
-		case RED: return Color.RED;
-		default: return Color.PURPLE;
-		}
-	}
-	
-	public static Material getTeamMaterial(Team team) {
-		switch(team.getColor()) {
-		case GOLD: return Material.ORANGE_CONCRETE;
-		case RED: return Material.RED_CONCRETE;
-		case LIGHT_PURPLE: return Material.PURPLE_CONCRETE;
-		default: return Material.WHITE_CONCRETE;
-		}
 	}
 	
 }

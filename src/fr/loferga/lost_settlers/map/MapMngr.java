@@ -1,66 +1,62 @@
 package fr.loferga.lost_settlers.map;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.WorldBorder;
-import org.bukkit.block.BlockFace;
-import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
 
 import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.map.camps.Camp;
-import fr.loferga.lost_settlers.map.camps.CampMngr;
 import fr.loferga.lost_settlers.map.geometry.Point;
 import fr.loferga.lost_settlers.map.geometry.Vector;
 
 public class MapMngr {
 	
+	public static List<World> worlds = new ArrayList<>();
+	private static List<MapSettings> mapsSettings = new ArrayList<>();
+	
 	private static final List<Double> SPAWN = Main.getPlugin(Main.class).getConfig().getDoubleList("maps.spawn.location");
-	private static final boolean JUMP = Main.getPlugin(Main.class).getConfig().getBoolean("maps.spawn.jump_active");
-	private static final double MIN_HEIGHT = Main.getPlugin(Main.class).getConfig().getDouble("maps.spawn.jump.minimum_height");
-	private static final Material CHECKPOINT = Material.valueOf(Main.getPlugin(Main.class).getConfig().getString("maps.spawn.jump.checkpoint_block").toUpperCase());
-	private static final Material RESET = Material.valueOf(Main.getPlugin(Main.class).getConfig().getString("maps.spawn.jump.reset_block").toUpperCase());
-	protected static boolean lodes;
-	protected static double highest_ground;
-	protected static List<LodeGenerator> generators = new ArrayList<>();
 	private static final double RANGE = Main.getPlugin(Main.class).getConfig().getDouble("tp_range");
 	
-	public static void buildMapVars(ConfigurationSection cfg) {
-		lodes = cfg.getBoolean("lodes_active");
-		CampMngr.buildCamps(cfg.getConfigurationSection("camps"));
-		if (lodes) {
-			highest_ground = cfg.getDouble("lodes.highest_ground");
-			buildGenerators(cfg.getConfigurationSection("lodes.ores"));
-		}
+	public static World newWorld(String wn) {
+		World w = new WorldCreator("-LS-" + wn).createWorld();
+		worlds.add(w);
+		CloseWorld.addWorld(w);
+		w.setAutoSave(false);
+		return w;
 	}
 	
-	public static void buildMap() {
-
-		Bukkit.broadcastMessage("Initialisation des drapeaux ...");
-		CampMngr.initFlags();
-		setWorldBorder();
-		if (lodes) {
-			Bukkit.broadcastMessage("Generation des minerais ...");
-			generateLodes();
-		}
+	public static void forget(World world, boolean save) {
+		Bukkit.unloadWorld(world, save);
+		Bukkit.getWorlds().remove(world);
+		worlds.remove(world);
 	}
 	
-	private static void buildGenerators(ConfigurationSection cfg) {
-		for (String ore : cfg.getKeys(false)) {
-			List<?> data = cfg.getList(ore);
-			List<?> rv = (List<?>) data.get(3);
-			generators.add(new LodeGenerator(
-					Material.valueOf(ore.toUpperCase()),
-					(double) data.get(0), (int) data.get(1), (double) data.get(2),
-new double[] {(double) rv.get(1), (double) rv.get(1), (double) rv.get(2), (double) rv.get(3), (double) rv.get(4), (double) rv.get(5)},
-					(int) data.get(4)
-			));
-		}
+	public static World getWorldFromName(String wn) {
+		for (World w : worlds)
+			if (w.getName().endsWith(wn))
+				return w;
+		return null;
+	}
+	
+	public static void add(MapSettings ms) {
+		mapsSettings.add(ms);
+	}
+	
+	public static MapSettings getMapSettings(World world) {
+		for (MapSettings ms : mapsSettings)
+			if (ms.world == world)
+				return ms;
+		return null;
 	}
 	
 	/*
@@ -69,25 +65,25 @@ new double[] {(double) rv.get(1), (double) rv.get(1), (double) rv.get(2), (doubl
 	 * ============================================================================
 	 */
 	
-	private static void generateLodes() {
-		double d = Main.map.getWorldBorder().getSize();
-		double cx = Main.map.getWorldBorder().getCenter().getX();
-		double cz = Main.map.getWorldBorder().getCenter().getZ();
-		for (LodeGenerator generator : generators) {
-			createLode(generator, new double[] {cx-d, 2, cz-d}, new double[] {cx+d, highest_ground,  cz+d});
-			System.out.println(generator.ore.toString() + " generated");
+	public static void generateLodes(World world, MapSettings ms) {
+		double d = world.getWorldBorder().getSize();
+		double cx = world.getWorldBorder().getCenter().getX();
+		double cz = world.getWorldBorder().getCenter().getZ();
+		for (LodeGenerator generator : ms.generators) {
+			createLodes(world, generator, new double[] {cx-d, 2, cz-d}, new double[] {cx+d, ms.highestGround,  cz+d});
+			System.out.println("[LodeGenerator] " + generator.ore.toString() + " generated");
 		}
 	}
 	
-	public static void createLode(LodeGenerator g, double[] mins, double[] maxs) {
+	public static void createLodes(World world, LodeGenerator g, double[] mins, double[] maxs) {
 		int count = (int) (g.count * (((maxs[0]-mins[0])*(maxs[1]-mins[1])*(maxs[2]-mins[2]))/1000000));
 		double[] rv = g.sizeBounds;
 		for (int n = 0; n<count; n++) {
-			double x = random(mins[0], maxs[0]);
+			double x = Func.random(mins[0], maxs[0]);
 			double y = Func.onBounds(0, 1, Func.gauss(g.gaussFactor)*g.gaussOffset) * (maxs[1]-mins[1]) *g.yratio + mins[1];
-			double z = random(mins[2], maxs[2]);
+			double z = Func.random(mins[2], maxs[2]);
 			Vector[] ijk = randomVectors(rv[0], rv[1], rv[2], rv[3], rv[4], rv[5]);
-			new Lode(g.ore, new Point(
+			new Lode(world, g.ore, new Point(
 					x,
 					y,
 					z
@@ -97,19 +93,15 @@ new double[] {(double) rv.get(1), (double) rv.get(1), (double) rv.get(2), (doubl
 	
 	private static Vector[] randomVectors(double imin, double imax, double jmin, double jmax, double kmin, double kmax) {
 		Vector[] ijk = new Vector[3];
-		double ilen = random(imin, imax);
-		double jlen = random(jmin, jmax);
-		double klen = random(kmin, kmax);
-		Vector i = new Vector(Math.random()*2-1, Math.random()*2-1, Math.random()*2-1).normalize().multiply(ilen);
+		double ilen = Func.random(imin, imax);
+		double jlen = Func.random(jmin, jmax);
+		double klen = Func.random(kmin, kmax);
+		Vector i = new Vector(Func.random(-1, 1), Func.random(-1, 1), Func.random(-1, 1)).normalize().multiply(ilen);
 		ijk[0] = i;
 		Vector j = new Vector(ijk[0].y(), -ijk[0].x(), 0).normalize().multiply(jlen);
 		ijk[1] = j;
 		ijk[2] = new Vector(i.y()*j.z() - i.z()*j.y(), i.z()*j.x() - i.x()*j.z(), i.x()*j.y() - i.y()*j.x()).normalize().multiply(klen);
 		return ijk;
-	}
-	
-	private static double random(double min, double max) {
-		return Math.random() * (max-min) + min;
 	}
 	
 	/*
@@ -118,64 +110,98 @@ new double[] {(double) rv.get(1), (double) rv.get(1), (double) rv.get(2), (doubl
 	 * ============================================================================
 	 */
 	
-	private static void setWorldBorder() {
-		Location loc = MapMngr.getMapCenter();
-		double maxDist = MapMngr.getMaxDist(loc);
-		WorldBorder wb = Main.map.getWorldBorder();
-		wb.setCenter(loc);
-		wb.setSize((int) (maxDist + 150));
+	public static void setWorldBorder(World world, MapSettings mapSettings) {
+		MapSettings ms = mapSettings;
+		if (ms == null) ms = getMapSettings(world);
+		if (ms != null) {
+			Location loc = MapMngr.getMapCenter(world, ms);
+			double maxDist = MapMngr.getMaxDist(world, loc, ms);
+			WorldBorder wb = world.getWorldBorder();
+			wb.setCenter(loc);
+			wb.setSize((int) (maxDist + ms.playableArea));
+		}
+	}
+	
+	// A TRAVAILLER essentiel: garder en mémoir les blocks qui était là avant la pose du beacon
+	
+	public static Map<Location, Material> setBeams(MapSettings ms) {
+		Map<Location, Material> mem = new HashMap<>();
+		for (Camp c : ms.camps) {
+			Location loc = c.getLocation().clone().add(0, -1, 0);
+			setBlockType(loc.clone(), Material.valueOf(c.getOwner().getDyeColor().toString() + "_STAINED_GLASS"), mem);
+			loc.add(0, -1, 0);
+			setBlockType(loc.clone(), Material.BEACON, mem);
+			loc.add(0, -1, 0);
+			setBlockType(loc.clone(), Material.IRON_BLOCK, mem);
+			double p = Math.PI;
+			for (int i = 0; i<4; i++) {
+				double[] t = new double[] {Math.cos(p), Math.sin(p)};
+				loc.add(t[0], 0, t[1]);
+				setBlockType(loc.clone(), Material.IRON_BLOCK, mem);
+				loc.add(-2*t[0], 0, -2*t[1]);
+				setBlockType(loc.clone(), Material.IRON_BLOCK, mem);
+				loc.add(t[0], 0, t[1]);
+				p += Math.PI/4;
+			}
+		}
+		return mem;
+	}
+	
+	private static void setBlockType(Location bloc, Material type, Map<Location, Material> map) {
+		map.put(bloc, bloc.getBlock().getType());
+		bloc.getBlock().setType(type);
+	}
+	
+	public static void clearBeacons(Map<Location, Material> map) {
+		for (Location loc : map.keySet())
+			loc.getBlock().setType(map.get(loc));
+	}
+
+	public static Location getMapCenter(World world, MapSettings mapSettings) {
+		Location mapCenter = null;
+		MapSettings ms = mapSettings;
+		if (ms == null) ms = getMapSettings(world);
+		if (ms != null) {
+			double[] point = new double[] {0.0, 0.0};
+			Camp[] camps = ms.camps;
+			for (Camp camp : camps) {
+				double[] cpos = camp.getPosition();
+				point[0] += cpos[0];
+				point[1] += cpos[2];
+			}
+			point[0] /= camps.length;
+			point[1] /= camps.length;
+			mapCenter = new Location(world, point[0], ms.world.getHighestBlockYAt((int) point[0], (int) point[1]) + 5, point[1]);
+		}
+		return mapCenter;
+	}
+	
+	public static double getMaxDist(World world, Location loc, MapSettings mapSettings) {
+		double max = -1.0;
+		MapSettings ms = mapSettings;
+		if (ms == null) ms = getMapSettings(world);
+		if (ms != null) {
+			for (Camp camp : ms.camps) {
+				double[] cpos = camp.getPosition();
+				double xdist = Math.abs(cpos[0] - loc.getX());
+				double zdist = Math.abs(cpos[2] - loc.getZ());
+				if (Math.max(xdist, zdist) > max)
+					max = Math.max(xdist, zdist);
+			}
+		}
+		return max;
 	}
 	
 	public static void campTeleport(Player p, Camp c) {
-		p.teleport(c.getLoc().add(
-				(Math.random()*2*RANGE)-RANGE,
+		p.teleport(c.getLocation().add(
+				Func.random(-RANGE, RANGE),
 				0,
-				(Math.random()*2*RANGE)-RANGE
+				Func.random(-RANGE, RANGE)
 				));
 	}
 	
 	public static void spawnTeleport(Player p) {
 		p.teleport(new Location(Bukkit.getWorlds().get(0), SPAWN.get(0), SPAWN.get(1), SPAWN.get(2)));
-	}
-
-	public static Location getMapCenter() {
-		double[] point = new double[] {0.0, 0.0};
-		List<Camp> camps = CampMngr.get();
-		for (Camp camp : camps) {
-			double[] cpos = camp.getPos();
-			point[0] += cpos[0];
-			point[1] += cpos[2];
-		}
-		point[0] /= camps.size();
-		point[1] /= camps.size();
-		return new Location(Main.map, (int) point[0], 0, (int) point[1]);
-	}
-	
-	public static double getMaxDist(Location loc) {
-		double max = 0.0;
-		for (Camp camp : CampMngr.get()) {
-			double[] cpos = camp.getPos();
-			double xdist = Math.abs(cpos[0] - loc.getX());
-			double zdist = Math.abs(cpos[2] - loc.getZ());
-			if (Math.max(xdist, zdist) > max)
-				max = Math.max(xdist, zdist);
-		}
-		return max;
-	}
-	
-	public static void checkJump(Player p, Location from, Location to) {
-		if (JUMP) {
-			if (to.getY() < MIN_HEIGHT) {
-				p.setHealth(0);
-			} else if (to.getBlock().getRelative(BlockFace.DOWN).getType() == CHECKPOINT) {
-				Location abs = to.getBlock().getLocation().add(0.5, 0, 0.5);
-				abs.setYaw(to.getYaw());
-				p.setBedSpawnLocation(abs, true);
-				Func.sendActionbar(p, Func.format("&eCheckpoint"));
-			} else if (to.getBlock().getRelative(BlockFace.DOWN).getType() == RESET) {
-				p.setBedSpawnLocation(null);
-			}
-		}
 	}
 	
 }
