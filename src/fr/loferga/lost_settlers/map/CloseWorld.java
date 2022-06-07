@@ -59,12 +59,9 @@ public class CloseWorld implements TabExecutor {
 				if (args[1].equals("save") || args[1].equals("restore"))
 					for (World w : MapMngr.worlds)
 						if (w.getName().endsWith(args[0])) {
-							for (Player wp : w.getPlayers()) {
-								System.out.println(wp.getName());
+							for (Player wp : w.getPlayers())
 								MapMngr.spawnTeleport(wp);
-							}
 							for (Player discP : discPlayers.get(w)) {
-								System.out.println(discP.getName());
 								MapMngr.spawnTeleport(discP);
 								discPlayers.get(w).remove(discP);
 							}
