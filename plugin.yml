@@ -26,5 +26,3 @@ commands:
   clearores:
     description: LostSettlers command to clear all ores in the player\'s world playable area
     permission: op
-  lstest:
-    permission: op
