@@ -54,7 +54,6 @@ public class Main extends JavaPlugin{
 		getCommand("warp").setExecutor(new Warp());
 		getCommand("close").setExecutor(new CloseWorld());
 		getCommand("clearores").setExecutor(new ClearOres());
-		getCommand("lstest").setExecutor(new LSTest());
 		getServer().getPluginManager().registerEvents(new Listeners(), this);
 		
 		protocolManager = ProtocolLibrary.getProtocolManager();
