@@ -11,12 +11,10 @@ public class RuleManager extends BukkitRunnable {
 	
 	public RuleManager() {
 		Plugin plugin = Main.getPlugin(Main.class);
-		wounded = new Wounded();
-		wounded.runTaskTimer(plugin, 0L, 20L);
+		Wounded.getInstance().start(plugin);
+		SkillRules.getInstance().start(plugin);
 		this.runTaskTimer(plugin, 0L, 1L);
 	}
-	
-	private Wounded wounded;
 	
 	@Override
 	public void run() {
@@ -25,7 +23,6 @@ public class RuleManager extends BukkitRunnable {
 	}
 
 	public void stop() {
-		wounded.stop();
 		cancel();
 	}
 	

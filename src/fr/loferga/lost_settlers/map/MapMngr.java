@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -30,7 +31,6 @@ public class MapMngr {
 	public static World newWorld(String wn) {
 		World w = new WorldCreator("-LS-" + wn).createWorld();
 		worlds.add(w);
-		CloseWorld.addWorld(w);
 		w.setAutoSave(false);
 		return w;
 	}
@@ -122,27 +122,42 @@ public class MapMngr {
 		}
 	}
 	
-	// A TRAVAILLER essentiel: garder en mémoir les blocks qui était là avant la pose du beacon
+	// BEACONS
 	
-	public static Map<Location, Material> setBeams(MapSettings ms) {
+	public static Map<Location, Material> setMap(MapSettings ms) {
 		Map<Location, Material> mem = new HashMap<>();
 		for (Camp c : ms.camps) {
-			Location loc = c.getLocation().clone().add(0, -1, 0);
-			setBlockType(loc.clone(), Material.valueOf(c.getOwner().getDyeColor().toString() + "_STAINED_GLASS"), mem);
-			loc.add(0, -1, 0);
-			setBlockType(loc.clone(), Material.BEACON, mem);
-			loc.add(0, -1, 0);
-			setBlockType(loc.clone(), Material.IRON_BLOCK, mem);
+			// BEAMS
+			Location beamLoc = c.getLocation().clone().add(0, -1, 0);
+			setBlockType(beamLoc.clone(), Material.valueOf(c.getOwner().getDyeColor().toString() + "_STAINED_GLASS"), mem);
+			beamLoc.add(0, -1, 0);
+			setBlockType(beamLoc.clone(), Material.BEACON, mem);
+			beamLoc.add(0, -1, 0);
+			setBlockType(beamLoc.clone(), Material.IRON_BLOCK, mem);
 			double p = Math.PI;
+			// PYRAMID
 			for (int i = 0; i<4; i++) {
 				double[] t = new double[] {Math.cos(p), Math.sin(p)};
-				loc.add(t[0], 0, t[1]);
-				setBlockType(loc.clone(), Material.IRON_BLOCK, mem);
-				loc.add(-2*t[0], 0, -2*t[1]);
-				setBlockType(loc.clone(), Material.IRON_BLOCK, mem);
-				loc.add(t[0], 0, t[1]);
+				beamLoc.add(t[0], 0, t[1]);
+				setBlockType(beamLoc.clone(), Material.IRON_BLOCK, mem);
+				beamLoc.add(-2*t[0], 0, -2*t[1]);
+				setBlockType(beamLoc.clone(), Material.IRON_BLOCK, mem);
+				beamLoc.add(t[0], 0, t[1]);
 				p += Math.PI/4;
 			}
+			// BARRIER
+			Location barrierLoc = c.getLocation().clone().add(RANGE, 1, RANGE+1);
+			org.bukkit.util.Vector move = new org.bukkit.util.Vector(-1, 0, 0);
+			int sideLen = ((int) (RANGE+1)*2);
+			for (int side = 0; side<4; side++) {
+				for (int i = 0; i<sideLen; i++) {
+					setBlockType(barrierLoc.clone(), Material.BARRIER, mem);
+					barrierLoc.add(move);
+				}
+				turnLeft(move);
+				barrierLoc.add(move);
+			}
+			
 		}
 		return mem;
 	}
@@ -152,7 +167,17 @@ public class MapMngr {
 		bloc.getBlock().setType(type);
 	}
 	
-	public static void clearBeacons(Map<Location, Material> map) {
+	private static void turnLeft(org.bukkit.util.Vector vec) {
+		if (vec.getX()!=0) {
+			vec.setZ(vec.getX());
+			vec.setX(0);
+		} else {
+			vec.setX(-vec.getZ());
+			vec.setZ(0);
+		}
+	}
+	
+	public static void clearMap(Map<Location, Material> map) {
 		for (Location loc : map.keySet())
 			loc.getBlock().setType(map.get(loc));
 	}
@@ -171,7 +196,7 @@ public class MapMngr {
 			}
 			point[0] /= camps.length;
 			point[1] /= camps.length;
-			mapCenter = new Location(world, point[0], ms.world.getHighestBlockYAt((int) point[0], (int) point[1]) + 5, point[1]);
+			mapCenter = new Location(world, point[0], world.getHighestBlockYAt((int) point[0], (int) point[1]) + 5, point[1]);
 		}
 		return mapCenter;
 	}
@@ -201,6 +226,7 @@ public class MapMngr {
 	}
 	
 	public static void spawnTeleport(Player p) {
+		p.setGameMode(GameMode.ADVENTURE);
 		p.teleport(new Location(Bukkit.getWorlds().get(0), SPAWN.get(0), SPAWN.get(1), SPAWN.get(2)));
 	}
 	

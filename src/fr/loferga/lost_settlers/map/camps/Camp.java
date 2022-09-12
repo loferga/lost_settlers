@@ -105,6 +105,9 @@ public class Camp {
 			}
 			i++;
 		}
+		loc.add(dir[0], 0, dir[1]).getBlock().setType(Material.ENCHANTING_TABLE);
+		loc.add(-2*dir[0], 0, -2*dir[1]).getBlock().setType(Material.CHISELED_STONE_BRICKS);
+		loc.add(0, 1, 0).getBlock().setType(Material.BREWING_STAND);
 	}
 	
 }

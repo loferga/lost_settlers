@@ -14,6 +14,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -108,6 +109,16 @@ public class Game extends BukkitRunnable {
 		return teamMates;
 	}
 	
+	public Set<Player> getAliveEnnemies(Player p) {
+		Set<Player> ennemies = new HashSet<>();
+		for (Set<Player> pset : teams)
+			if (!pset.contains(p))
+				for (Player ennemy : pset)
+					if (ennemy.isOnline() && ennemy.getGameMode() != GameMode.SPECTATOR)
+						ennemies.add(ennemy);
+		return ennemies;
+	}
+	
 	public LSTeam getTeam(Player p) {
 		for (int i = 0; i < teams.size(); i++)
 			if (teams.get(i).contains(p))
@@ -142,6 +153,124 @@ public class Game extends BukkitRunnable {
 				disputedCamps.remove(camp);
 			}
 		}
+	}
+	
+	// MAGMA CHAMBER
+	
+	private Set<Player> inChamber = new HashSet<>();
+	private boolean froze = false;
+	
+	public void addPlayerInChamber(Player p) {
+		inChamber.add(p);
+	}
+	
+	public boolean isInChamber(Location loc) {
+		return loc.getY() < ms.chamberHeight;
+	}
+	
+	public double undergroundLevel(Location loc) {
+		
+		return loc.getY() / ms.highestGround;
+	}
+	
+	final int FORTY_FIVE_SECS = 900;
+	final int ONE_MIN = 1200;
+	final int SEVEN_MINS = 8400;
+	final int EIGHT_MINS = 9600;
+	
+	private void chamber(int chrono) {
+		if (pvp) {
+			int conv = chrono % EIGHT_MINS;
+			if (conv == SEVEN_MINS) {
+				for (Player p : getPlayers())
+					p.sendMessage(Func.format("&6La chambre magmatique commence à se refroidir"));
+				if (lava.isEmpty())
+					getChamberLava();
+			}
+			else if (conv > SEVEN_MINS)
+				freezeRandomLava((int) (0.015*lava.size()));
+			if (conv == 0)
+				freezeChamber();
+			if (froze) {
+				if (conv == FORTY_FIVE_SECS)
+					for (Player p : getPlayers())
+						p.sendMessage(Func.format("&6La chambre magmatique commence à se rechauffer"));
+				else if (conv > FORTY_FIVE_SECS) {
+					unfreezeRandomLava((int) (0.07*lava.size()));
+				}
+				if (conv >= ONE_MIN)
+					unfreezeChamber();
+			}
+		}
+		if (froze) return;
+		for (Player p : inChamber) {
+			if (!isInChamber(p.getLocation()))
+				inChamber.remove(p);
+			if (p.getGameMode() == GameMode.SURVIVAL && p.getFireTicks() <= 0)
+				p.setFireTicks(40);
+		}
+	}
+	
+	private List<Location> lava = new ArrayList<>();
+	private List<Location> lava_cache = new ArrayList<>();
+	
+	private void getChamberLava() {
+		Location center = MapMngr.getMapCenter(world, ms);
+		double xm = center.getX() + ms.playableArea;
+		double ym = (int) ms.chamberHeight;
+		double zm = center.getZ() + ms.playableArea;
+		for (double x = center.getX() - ms.playableArea; x < xm; x+=1)
+			for (double y = 3; y < ym; y+=1)
+				for (double z = center.getZ() - ms.playableArea; z < zm; z+=1) {
+					Location bloc = new Location(world, x, y, z);
+					if (bloc.getBlock().getType() == Material.LAVA)
+						lava.add(bloc);
+				}
+		lava_cache = new ArrayList<Location>(lava);
+	}
+	
+	private void freezeChamber() {
+		if (froze) return;
+		for (Player p : getPlayers())
+			p.sendMessage(Func.format("&cLa chambre magmatique s'est refroidie!"));
+		for (Location loc : lava) {
+			Block b = loc.getBlock();
+			if (b.getType() == Material.LAVA)
+				b.setType(Material.OBSIDIAN);
+		}
+		lava_cache = new ArrayList<Location>(lava);
+		froze = true;
+	}
+	
+	public void unfreezeChamber() {
+		if (!froze) return;
+		for (Player p : getPlayers())
+			p.sendMessage(Func.format("&cLa chambre magmatique s'est réchauffee!"));
+		for (Location loc : lava) {
+			Block b = loc.getBlock();
+			if (b.getType() == Material.OBSIDIAN)
+				b.setType(Material.LAVA);
+		}
+		lava_cache = new ArrayList<Location>(lava);
+		froze = false;
+	}
+	
+	private void changeRandomLava(Material mat) {
+		int size = lava_cache.size();
+		if (size <= 0) return;
+		int ir = ThreadLocalRandom.current().nextInt(size);
+		lava_cache.get(ir).getBlock().setType(mat);
+		lava_cache.remove(ir);
+	}
+	
+	private void freezeRandomLava(int count) {
+		for (int i = 0; i < count; i++)
+			changeRandomLava(Material.OBSIDIAN);
+	}
+	
+	private void unfreezeRandomLava(int count) {
+		for (int i = 0; i < count; i++)
+			changeRandomLava(Material.LAVA);
 	}
 	
 	// RESPAWN
@@ -184,10 +313,9 @@ public class Game extends BukkitRunnable {
 	
 	@Override
 	public void run() {
-		if (pvp) {
+		if (pvp)
 			conquest();
-		}
-		if (chrono % 20 == 0) respawn();
+		if (chrono % 20 == 0) { respawn(); if (ms.chamber) chamber(chrono); }
 		//DISPLAY
 		if (chrono >= goals[c]) {
 			if (c<3) {
@@ -227,8 +355,8 @@ public class Game extends BukkitRunnable {
 		return res;
 	}
 	
-	public void kill(Player k, Player v) {
-		LSTeam kt = TeamMngr.teamOf(k);
+	public void kill(Player v, Player k) {
+		LSTeam kt = getTeam(k);
 		// add memory
 		kMem.get(TeamMngr.indexOf(kt)).add(v);
 		// revive
@@ -237,7 +365,7 @@ public class Game extends BukkitRunnable {
 		Set<Player> vm = kMem.get(vti);
 		if (vm != null) 
 			for (Player p : vm)
-				if (TeamMngr.teamOf(p) == kt) {
+				if (getTeam(p) == kt) {
 					respawn(p, kt);
 					world.playSound(p.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 10.0f, 0.2f);
 					p.sendMessage(Func.format(k.getDisplayName() + "&e vous a vengé!"));
@@ -248,7 +376,7 @@ public class Game extends BukkitRunnable {
 			for (Player p : world.getPlayers())
 				p.sendMessage(Func.format("&eLes " + vt.getName() + "&e ont été éliminés par les " + kt.getName()));
 		}
-		winCondition(kt);
+		winCondition(kt, v);
 	}
 
 	public void respawn(Player p, LSTeam pTeam) {
@@ -289,16 +417,22 @@ public class Game extends BukkitRunnable {
 			p.playSound(c.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.MASTER, 10.0f, 1.0f);
 		c.setOwner(t);
 		c.placeFlag(t.getFlag());
-		winCondition(t);
+		winCondition(t, null);
 	}
 	
-	public void winCondition(LSTeam t) {
-		if (t != null) {
-			if (allCampsBelongTo(t) || noOtherTeamAlive(t)) {
-				GameMngr.stop(this, t);
-				for (Player p : getPlayers())
-					p.playSound(p.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 10.0f, 1.0f);
-			}
+	public void winCondition(LSTeam t, Player killed) {
+		if (t != null)
+			winTest(t, killed);
+		else
+			for (int i = 0; i<teams.size(); i++)
+				winTest(TeamMngr.get()[i], killed);
+	}
+	
+	private void winTest(LSTeam t, Player killed) {
+		if (allCampsBelongTo(t) || noOtherTeamAlive(t, killed)) {
+			GameMngr.stop(this, t);
+			for (Player p : getPlayers())
+				p.playSound(p.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 10.0f, 1.0f);
 		}
 	}
 	
@@ -310,12 +444,15 @@ public class Game extends BukkitRunnable {
 		return true;
 	}
 	
-	private boolean noOtherTeamAlive(LSTeam t) {
+	private boolean noOtherTeamAlive(LSTeam t, Player killed) {
 		LSTeam[] teams = TeamMngr.get();
 		for (int i = 0; i<teams.length; i++)
-			if (teams[i] != t)
-				if (TeamMngr.alivePlayers(this.teams.get(i)).size() > 0)
+			if (teams[i] != t) {
+				Set<Player> pset = TeamMngr.alivePlayers(this.teams.get(i));
+				pset.remove(killed);
+				if (pset.size() > 0)
 					return false;
+			}
 		return true;
 	}
 	
@@ -390,14 +527,14 @@ public class Game extends BukkitRunnable {
 	}
 	
 	// is there a flag where the location point
-	public boolean isFlag(Location loc) {
+	public boolean isFlag(Block b) {
 		boolean isFlag = false;
+		Location loc = b.getLocation().add(0.5, 0.5, 0.5);
 		double x = loc.getX(), y = loc.getY(), z = loc.getZ();
 		for (Camp c : ms.camps) {
 			double[] cp = c.getPosition();
-			if (isNearBy(x, cp[0], 0.5) && isNearBy(y, cp[1] + 6, 5.5) && isNearBy(z, cp[2], 0.5)) {
+			if (isNearBy(x, cp[0], 0.5) && isNearBy(y, cp[1] + 6, 5.5) && isNearBy(z, cp[2], 0.5))
 				isFlag = true;
-			}
 			if (isNearBy(y, cp[1] + 9.5, 1.5)) {
 				if (c.getDirection()) {
 					if (isNearBy(x, cp[0], 0.5) && isNearBy(z, cp[2], 1.5))

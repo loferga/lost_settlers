@@ -5,11 +5,22 @@ import java.util.HashSet;
 import java.util.Map;
 
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import fr.loferga.lost_settlers.Main;
 
 public class Wounded extends BukkitRunnable {
+	
+	private static boolean running = false;
+	
+	private static Wounded wounded = null;
+	
+	public static Wounded getInstance() {
+		if (wounded == null)
+			wounded = new Wounded();
+		return wounded;
+	}
 	
 	private static final int DELAY = Main.getPlugin(Main.class).getConfig().getInt("regeneration_delay");
 	
@@ -23,7 +34,15 @@ public class Wounded extends BukkitRunnable {
 		return inCombat.containsKey(p);
 	}
 	
+	public void start(Plugin plugin) {
+		if (!running) {
+			this.runTaskTimer(plugin, 0L, 20L);
+			running = true;
+		}
+	}
+	
 	public void stop() {
+		running = false;
 		cancel();
 	}
 	

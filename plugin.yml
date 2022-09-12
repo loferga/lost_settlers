@@ -9,6 +9,8 @@ depend: [ProtocolLib]
 commands:
   lobby:
     description: LostSettlers command to tp the sender to the lobby world
+  all:
+    description: LostSettlers command to send a message with all the players in a world
   lsteam:
     description: LostSettlers command to change a player\'s team, non-operators can only change their team
   start:

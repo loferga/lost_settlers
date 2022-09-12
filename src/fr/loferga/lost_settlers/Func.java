@@ -44,6 +44,10 @@ public class Func {
 		return contain;
 	}
 	
+	public static <T> T pickRandom(T[] array) {
+		return array[ThreadLocalRandom.current().nextInt(array.length)];
+	}
+	
 	public static String[] toReadableTime(long time) {
 		String[] rt = new String[] {"", "", ""};
 		long t = time;
@@ -77,7 +81,7 @@ public class Func {
 		p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(msg));
 	}
 	
-	public static void glowFor(LivingEntity ent, Set<Player> p, Integer duration) {
+	public static void glowFor(LivingEntity ent, Set<Player> p, int duration) {
 		Main.glow.put(ent.getEntityId(), p);
 		ent.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, duration, 0, false, false));
 	}

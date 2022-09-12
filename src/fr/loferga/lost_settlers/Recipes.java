@@ -10,7 +10,6 @@ import org.bukkit.FireworkEffect.Type;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -56,33 +55,6 @@ public class Recipes {
 		}
 		Bukkit.removeRecipe(NamespacedKey.minecraft("ender_chest"));
 		Bukkit.removeRecipe(NamespacedKey.minecraft("shield"));
-		// Trident
-		NamespacedKey tkey = new NamespacedKey(main, "trident");
-		ShapedRecipe rt = new ShapedRecipe(tkey, new ItemStack(Material.TRIDENT));
-		rt.shape(" AA",
-				 " PA",
-				 "P  ");
-		rt.setIngredient('A', Material.AMETHYST_SHARD);
-		rt.setIngredient('P', Material.BLAZE_ROD);
-		Bukkit.addRecipe(rt);
-		// Nether Warts
-		NamespacedKey nwkey = new NamespacedKey(main, "nether_wart");
-		ShapelessRecipe nwr = new ShapelessRecipe(nwkey, new ItemStack(Material.NETHER_WART, 9));
-		nwr.addIngredient(Material.NETHER_WART_BLOCK);
-		Bukkit.addRecipe(nwr);
-		// Blaze Rods
-		NamespacedKey brkey = new NamespacedKey(main, "blaze_rod");
-		ShapelessRecipe brr = new ShapelessRecipe(brkey, new ItemStack(Material.BLAZE_ROD));
-		brr.addIngredient(Material.STICK);
-		brr.addIngredient(Material.MAGMA_CREAM);
-		Bukkit.addRecipe(brr);
-		// Dragon's Breath
-		NamespacedKey dbkey = new NamespacedKey(main, "dragon_breath");
-		ShapelessRecipe dbr = new ShapelessRecipe(dbkey, new ItemStack(Material.DRAGON_BREATH));
-		dbr.addIngredient(Material.POTION);
-		dbr.addIngredient(Material.GLOWSTONE_DUST);
-		dbr.addIngredient(Material.MAGMA_CREAM);
-		Bukkit.addRecipe(dbr);
 	}
 	
 	private static ShapelessRecipe getFireworkRecipe(String key, String name, int Gp, int P, Material[] recipe, boolean flicker, boolean trail) {

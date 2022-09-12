@@ -1,29 +1,33 @@
 # ~ = arbitrary values
 # \ = optional
 
-# spawn: spawn coordinates in your default server world
-# ores: <material_name>: [yratio (% of lower y took), gauss factor, gauss offset, [bounds of i, j, k (lode size)], lodes per 100^3 cubes]
-# <~campStringID>: [<x>, <y>, <z>, <isFacingNorth?>]
 # camps are squared, a face of this square is 2 times camp_size, same for vital_zone
 
 maps:
   spawn:
-    worldname: "hub"
+  # spawn coordinates in the lobby world
+    worldname: "lobby"
     location: [0.5, 10.0, 0.5]
   generic:
-    playable_area: 200
+    playable_area: 190
     camps:
       positions:
+      # <~campStringID>: [<x>, <y>, <z>, <isFacingNorth?>]
         hill: [-879.5, 70.0, 435.5, true]
         river: [-935.5, 64.0, 312.5, false]
         foreset: [-1027.5, 64.0, 415.5, true]
       settings:
         camp_size: 19.5
         vital_size: 8.5
-    highest_ground: 72
+    chamber_active: true
+    chamber:
+      max_height: 16
     lodes_active: true
     lodes:
+    # highest ground to generate ores (in the majority of cases take the highest stone block)
+      highest_ground: 72
       ores:
+      # <materialName>: [yratio (% of lower y took), gauss factor, gauss offset, [bounds of i, j, k (lode size)], lodes per 100^3 cubes]
         coal_ore:       [1.0, 5, 1.2, [2.0, 4.5, 1.0, 3.5, 1.0, 1.5], 115]
         iron_ore:       [1.0, 2, 1.1, [1.5, 3.5, 1.0, 2.5, 1.0, 1.5], 160]
         copper_ore:     [0.8, 3, 1.0, [1.0, 2.0, 0.5, 1.5, 0.5, 1.0], 60]
@@ -35,14 +39,82 @@ maps:
         ancient_debris: [0.1, 1, 1.8, [0.5, 1.0, 0.5, 1.0, 0.5, 1.0], 60]
         
 
-# <displayName>: "[flagMaterial, DyeColor, Color, ChatColor]"
 teams:
+# <displayName>: "[flagMaterial, DyeColor, Color, ChatColor]"
   Oranges: ["gold", "orange_concrete", "orange", "orange"]
   Rouges: ["red", "red_concrete", "red", "red"]
   Violets: ["light_purple", "purple_concrete", "purple", "purple"]
 
+# WIP
+mobs:
+  equipment:
+    armor:
+      chance: 0.5
+      drop_chance: 0.75
+    weapon:
+      chance: 0.7
+      drop_chance: 0.55
+    enchantment:
+      chance: 0.4
+      up_chance: 0.6
+      amount: 3
+      allowed:
+        armor:
+        axe:
+        sword:
+        bow:
+  effect:
+    allowed:
+      absorption: true
+      damage_resistence: true
+      fire_resistence: true
+      health_boost: true
+      increase_damage: true
+      invisibility: true
+      jump: true
+      regeneration: true
+      slow_falling: true
+      speed: true
+    chance: 0.4
+    up_chance: 0.4
+    amount: 3
+
+skills:
+  ############### RESSOURCES ###############
+  # you melt ores on destruction
+  forgeur: true
+  # you make trees fall when their base is broke
+  bucheron: true
+  # spawn with a dog
+  chasseur: true
+  # do something
+  fermier: true
+  # don't get hunger
+  glouton: true
+  # do something
+  enchanteur: true
+  # do something
+  alchimiste: true
+  ###############   CAMPS    ###############
+  # do something
+  protecteur: true
+  # do something
+  constructeur: true
+  # breaking a tnt make the explosion more ... explosive
+  demolisseur: true
+  # no falling damages except in ennemies camps
+  roublard: true
+  ###############   COMBAT   ###############
+  # visible ennemies within 10 blocks appears as glowing for you
+  lucide: true
+  # you can see the footprints of ennemies but everyone can see your footprints
+  pisteur: true
+  # remove bow and crossbow innaccuracy but arrows deal less damages
+  archer: true
+# WIP
+
 # time in seconds
-pvp_time: 10
+pvp_time: 12
 # delay in seconds
 regeneration_delay: 15
 # range of teleportation around flags

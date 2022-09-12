@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -19,12 +20,13 @@ import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Ageable;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Breedable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
-import org.bukkit.entity.GlowSquid;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MagmaCube;
 import org.bukkit.entity.Monster;
@@ -32,25 +34,32 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.SpectralArrow;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.EntityTameEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.BrewEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.inventory.PrepareSmithingEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -60,6 +69,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
@@ -70,8 +80,8 @@ import fr.loferga.lost_settlers.dogs.ComeBack;
 import fr.loferga.lost_settlers.dogs.Anger;
 import fr.loferga.lost_settlers.dogs.DogsMngr;
 import fr.loferga.lost_settlers.game.GameMngr;
+import fr.loferga.lost_settlers.game.MobMngr;
 import fr.loferga.lost_settlers.gui.GUIMngr;
-import fr.loferga.lost_settlers.map.CloseWorld;
 import fr.loferga.lost_settlers.map.MapMngr;
 import fr.loferga.lost_settlers.map.camps.Camp;
 import fr.loferga.lost_settlers.rules.Wounded;
@@ -82,13 +92,12 @@ public class Listeners implements Listener {
 	
 	@EventHandler
 	public void onJoin(final PlayerJoinEvent e) {
-		CloseWorld.reconnect(e.getPlayer());
 	}
 	
 	// events with multiples effects
 	@EventHandler
 	public void onPlayerMove(PlayerMoveEvent e) {
-		// linked to CAMPS & JUMP
+		// linked to CAMPS & MAGMA CHAMBER
 		Player p = e.getPlayer();
 		Location from = e.getFrom();
 		Location to = e.getTo();
@@ -97,6 +106,8 @@ public class Listeners implements Listener {
 			if (g.pvp() && p.getGameMode() == GameMode.SURVIVAL)
 				if ((int)from.getX() != (int)to.getX() || (int)from.getZ() != (int)to.getZ())
 					campArea(p);
+				else if (g.getMapSettings().chamber && (int)from.getY() != (int)to.getY() && g.isInChamber(to))
+					g.addPlayerInChamber(p);
 		}
 	}
 	
@@ -105,7 +116,8 @@ public class Listeners implements Listener {
 		// linked to NATURAL REGEN & NO DAMAGE BONUS ARROW
 		if (e.getEntity() instanceof Player) {
 			Player dmged = (Player) e.getEntity();
-			if (e.getDamager() instanceof Player) {
+			Entity src = e.getDamager();
+			if (src instanceof Player) {
 				Player dmger = (Player) e.getDamager();
 				Game game = GameMngr.gameIn(dmger);
 				if (game != null && (game.pvp() || TeamMngr.teamOf(dmged) == TeamMngr.teamOf(dmger))) {
@@ -113,28 +125,31 @@ public class Listeners implements Listener {
 				} else
 					e.setCancelled(true);
 				
-			} else if (e.getDamager() instanceof Arrow) {
+			} else if (src instanceof Arrow)
 				if (isBonusArrow((Arrow) e.getDamager())) e.setDamage(0);
-			} else if (e.getDamager() instanceof SpectralArrow) {
+			else if (src instanceof SpectralArrow) {
 				SpectralArrow sa = (SpectralArrow) e.getDamager();
-				if (sa.getShooter() instanceof Player) {
+				if (sa.getShooter() instanceof Player)
 					Func.glowFor(dmged, TeamMngr.teamOf((Player) sa.getShooter()).getPlayers(), 600);
-				}
-			}
+			} else if (src instanceof Monster)
+				e.setDamage(0.35 * e.getFinalDamage());
 		}
 	}
 	
 	@EventHandler
 	public void onBlockPlace(BlockPlaceEvent e) {
-		if (GameMngr.getGame(e.getBlock().getWorld()) != null)
-			e.setCancelled(
-					campBlockInteract(e.getBlock(), e.getPlayer())
-					);
+		if (e.getBlock().getType() == Material.TNT) return;
+		
+		e.setCancelled(
+				campBlockInteract(e.getBlock(), e.getPlayer())
+				);
 	}
 	
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent e) {
 		// linked to CAMPS & ORE EXP
+		if (e.getBlock().getType() == Material.TNT) return;
+			
 		if (GameMngr.gameIn(e.getPlayer()) != null) {
 			if (campBlockBreak(e.getBlock(), e.getPlayer())) {
 				e.setCancelled(true);
@@ -149,21 +164,22 @@ public class Listeners implements Listener {
 		if (GameMngr.gameIn(e.getPlayer()) != null) {
 			if (e.getAction() == Action.LEFT_CLICK_AIR) {
 				onOrder(e);
-			} else if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-				onWaterPlaced(e);
+			} else if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.hasItem() && e.getItem().getType() != Material.TNT)
 				e.setCancelled(campBlockBreak(e.getClickedBlock(), e.getPlayer()));
-			}
 		}
 	}
 	
 	@EventHandler
 	public void onEntitySpawn(EntitySpawnEvent e) {
-		Entity ent = e.getEntity();
-		if (ent instanceof GlowSquid)
-			e.setCancelled(true);
-		else if (ent instanceof Monster)
-			if (ent.getLocation().getY() < 16)
-				spawnMagmaCubeInstead(ent);
+		Location loc = e.getLocation();
+		Game game = GameMngr.getGame(loc.getWorld());
+		if (game != null && e.getEntity() instanceof Monster) {
+			if (game.isInChamber(loc))
+				spawnMagmaCube(loc);
+			double ratio = game.undergroundLevel(loc);
+			if (ratio<=1)
+				MobMngr.setProperties(e.getEntity(), Math.abs(1-ratio), game.isInChamber(loc));
+		}
 	}
 	
 	/*
@@ -174,21 +190,19 @@ public class Listeners implements Listener {
 	
 	private static boolean campBlockBreak(Block b, Player p) {
 		Game game = GameMngr.gameIn(p);
-		if (game.isFlag(b.getLocation().add(0.5, 0.5, 0.5)))
+		if (game.isFlag(b))
 			return true;
 		return campBlockInteract(b, p);
 	}
 	
 	private static boolean campBlockInteract(Block b, Player p) {
-		if (b.getType() != Material.TNT) {
-			Game game = GameMngr.gameIn(p);
-			LSTeam pteam = TeamMngr.teamOf(p);
-			if (game != null && pteam != null) {
-				Camp camp = game.campIn(b.getLocation());
-				if (camp != null && !camp.getRivals().contains(pteam)) {
-					Func.sendActionbar(p, Func.format("&cCe camp n'est pas à vous"));
-					return true;
-				}
+		Game game = GameMngr.gameIn(p);
+		LSTeam pteam = TeamMngr.teamOf(p);
+		if (game != null && pteam != null) {
+			Camp camp = game.campIn(b.getLocation());
+			if (camp != null && !camp.getRivals().contains(pteam)) {
+				Func.sendActionbar(p, Func.format("&cCe camp n'est pas à vous"));
+				return true;
 			}
 		}
 		return false;
@@ -361,20 +375,26 @@ public class Listeners implements Listener {
 	
 	@EventHandler
 	public void onPlayerToggleSneak(PlayerToggleSneakEvent e) {
-		if (e.getPlayer().getWorld() == Main.hub &&
-				e.getPlayer().getGameMode() == GameMode.ADVENTURE &&
-				!e.getPlayer().getScoreboardTags().contains("noSelection")
+		Player p = e.getPlayer();
+		if (p.getWorld() == Main.hub &&
+				p.getGameMode() == GameMode.ADVENTURE &&
+				!p.getScoreboardTags().contains("noSelection")
 				)
-			e.getPlayer().openInventory(GUIMngr.getTM());
+			p.openInventory(GUIMngr.getTM(p));
 	}
 	
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent e) {
 		if (GameMngr.gameIn((Player) e.getView().getPlayer()) == null) {
-			if (e.getView().getTitle() == "Selection") {
-				if (e.getCurrentItem() != null)
+			if (e.getCurrentItem() != null) {
+				if (e.getView().getTitle() == "Selection") {
 					GUIMngr.clickTM((Player) e.getWhoClicked(), e.getCurrentItem());
-				e.setCancelled(true);
+					e.setCancelled(true);
+				} else if (e.getView().getTitle() == "Talents") {
+					boolean res = GUIMngr.clickSM((Player) e.getWhoClicked(), e.getCurrentItem());
+					if (res) e.getWhoClicked().openInventory(GUIMngr.getTM((Player) e.getWhoClicked()));
+					e.setCancelled(true);
+				}
 			}
 		} else if (e.getView().getTitle().startsWith("Confier")) {
 			if (e.getCurrentItem() != null)
@@ -445,35 +465,20 @@ public class Listeners implements Listener {
 			e.setCancelled(true);
 		}
 	}
-	
-	private void onWaterPlaced(PlayerInteractEvent e) {
-		if (e.hasItem())
-			if (e.getItem().getType() == Material.WATER_BUCKET)
-				if (e.getClickedBlock() != null) {
-					Location wloc = e.getClickedBlock().getLocation().add(
-							e.getBlockFace().getDirection().add(new Vector(0.5, 0.5, 0.5))
-							);
-					if (wloc.getY() < 16) {
-						Player p = e.getPlayer();
-						p.playSound(wloc, Sound.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.0f);
-						p.spawnParticle(Particle.SMOKE_LARGE, wloc, 8, 0.4, 0.4, 0.4, 0.01);
-						e.setCancelled(true);
-					}
-				}
-	}
 
 	@EventHandler
 	public void vaporizeWater(BlockPhysicsEvent e) {
 		Block b = e.getBlock();
-		if (b.getType() == Material.WATER)
-			if (MapMngr.worlds.contains(b.getWorld()) && b.getLocation().getY() < 16)
+		if (b.getType() == Material.WATER) {
+			Game game = GameMngr.getGame(b.getWorld());
+			if (game != null && game.isInChamber(b.getLocation()))
 				b.setType(Material.AIR);
+		}
 	}
 	
-	private static void spawnMagmaCubeInstead(Entity ent) {
-		MagmaCube magma = (MagmaCube) ent.getWorld().spawnEntity(ent.getLocation(), EntityType.MAGMA_CUBE);
+	private static void spawnMagmaCube(Location loc) {
+		MagmaCube magma = (MagmaCube) loc.getWorld().spawnEntity(loc, EntityType.MAGMA_CUBE);
 		magma.setSize((int) (Math.random() * 4));
-		ent.remove();
 	}
 	
 	// ##### NO DAMAGE BONUS ARROW #####
@@ -534,7 +539,7 @@ public class Listeners implements Listener {
 		Game game = GameMngr.gameIn(e.getEntity());
 		if (game != null) {
 			Player dead = e.getEntity();
-			dead.setBedSpawnLocation(dead.getLocation());
+			dead.setBedSpawnLocation(dead.getLocation(), true);
 			if (game.pvp()) {
 				Player killer = dead.getKiller();
 				if (killer != null) {
@@ -543,11 +548,33 @@ public class Listeners implements Listener {
 						DogsMngr.transferDogsTo(dead, killer);
 					}
 				}
-				game.winCondition(null);
-				e.setDroppedExp(dead.getTotalExperience());
+				else
+					game.winCondition(null, null);
+				e.setDroppedExp(0);
+				dropExp(dead.getLocation(), dead.getTotalExperience());
 			} else
 				game.addRespawn(dead);
 			GUIMngr.refreshDTM();
+		}
+	}
+	
+	final static int X = 2;
+	
+	private static void dropExp(Location loc, int xpAmount) {
+		int r = xpAmount;
+		int x = X;
+		while (r > 0) {
+			int xp;
+			if (r >= x) {
+				xp = x;
+				r -= x;
+			} else {
+				xp = r;
+				r = 0;
+			}
+			ExperienceOrb orb = (ExperienceOrb) loc.getWorld().spawnEntity(loc, EntityType.EXPERIENCE_ORB);
+			orb.setExperience(xp);
+			x *= X;
 		}
 	}
 	
@@ -616,9 +643,69 @@ public class Listeners implements Listener {
 		}
 	}
 	
+	// ##### TEAM CHAT #####
+	
+	@EventHandler
+	public void onPlayerSendMessage(AsyncPlayerChatEvent e) {
+		Player p = e.getPlayer();
+		Game game = GameMngr.gameIn(p);
+		if (game == null) return;
+		
+		LSTeam pt = game.getTeam(p);
+		for (Player player : game.getWorld().getPlayers()) {
+			LSTeam playert = game.getTeam(player);
+			if (playert == null || playert == pt)
+				player.sendMessage(ChatColor.GRAY + "<" + p.getName() + "> " + e.getMessage());
+		}
+		e.setCancelled(true);
+	}
+	
+	// FLAGS
+	
+	@EventHandler (priority = EventPriority.HIGHEST)
+	public void onEntityExplode(EntityExplodeEvent e) {
+		Game game = GameMngr.getGame(e.getLocation().getWorld());
+		if (game == null) return;
+		
+		for (Block b : e.blockList())
+			if (game.isFlag(b))
+				e.setCancelled(true);
+	}
+	
+	// ENCHANTMENTS
+	
+	@EventHandler
+	public void onEntityBreed(EntityBreedEvent e) {
+		((Breedable) e.getFather()).setBreed(true);
+		((Breedable) e.getMother()).setBreed(true);
+		((Ageable) e.getEntity()).setAge(1200);
+	}
+	
+	// BREWING
+	
+	@EventHandler
+	public void onBrew(BrewEvent e) {
+		if (e.getFuelLevel()==0)
+			e.getContents().setFuel(new ItemStack(Material.BLAZE_POWDER, 1));
+	}
+	
+	@EventHandler
+	public void onInventoryOpen(InventoryOpenEvent e) {
+		if (e.getInventory().getType() == InventoryType.BREWING) {
+			if (e.getInventory() instanceof BrewerInventory) {
+				BrewerInventory binv = (BrewerInventory) e.getInventory();
+				if (binv.getHolder().getFuelLevel() == 0)
+					binv.setFuel(new ItemStack(Material.BLAZE_POWDER, 1));
+			}
+		}
+	}
+	
+	// EXIT CASE
+	
 	@EventHandler
 	public void onQuit(PlayerQuitEvent e) {
-		CloseWorld.disconect(e.getPlayer());
+		MapMngr.spawnTeleport(e.getPlayer());
+		TeamMngr.remove(e.getPlayer());
 		Wolf angry = Anger.getDogAngry((LivingEntity) e.getPlayer());
 		if (angry != null) {
 			Player owner = (Player) angry.getOwner();

@@ -18,6 +18,7 @@ import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.map.MapMngr;
 import fr.loferga.lost_settlers.map.MapSettings;
 import fr.loferga.lost_settlers.map.camps.Camp;
+import fr.loferga.lost_settlers.skills.SkillMngr;
 import fr.loferga.lost_settlers.teams.LSTeam;
 import fr.loferga.lost_settlers.teams.TeamMngr;
 
@@ -79,7 +80,7 @@ public class GameMngr {
 		world.setTime(0);
 		world.setSpawnFlags(true, true);
 		world.setWaterAnimalSpawnLimit(8);
-		world.setTicksPerMonsterSpawns(1);
+		world.setMonsterSpawnLimit(20);
 		Location center = MapMngr.getMapCenter(world, ms);
 		if (center != world.getSpawnLocation()) world.setSpawnLocation(center);
 		// GAME
@@ -91,6 +92,7 @@ public class GameMngr {
 			Camp tCamp = game.getTeamCamps(team).get(0);
 			for (Player p : team.getPlayers()) {
 				MapMngr.campTeleport(p, tCamp);
+				p.setBedSpawnLocation(p.getLocation());
 				p.setGameMode(GameMode.ADVENTURE);
 				p.setFoodLevel(30);
 				p.setHealth(20.0);
@@ -98,11 +100,11 @@ public class GameMngr {
 				p.setLevel(0);
 				p.getInventory().clear();
 			}
-			// TODO Beacon Beam Effect
 		}
+		SkillMngr.giveAxeB(game);
 		for (Entity i : world.getEntitiesByClasses(Item.class))
 			i.remove();
-		new GameLaunch(game, MapMngr.setBeams(ms) /*list des blocks à changer lors du lancement de la partie*/, Main.getPlugin(Main.class));
+		new GameLaunch(game, MapMngr.setMap(ms), Main.getPlugin(Main.class));
 	}
 	
 	public static void stop(Game game, LSTeam winner) {
@@ -111,13 +113,13 @@ public class GameMngr {
 		String[] rt = Func.toReadableTime(gameTime);
 		Bukkit.broadcastMessage(Func.format("&eLa partie s\'est terminee en &3" + rt[0] + rt[1] + rt[2] + "&e."));
 		game.clearFlags();
+		game.unfreezeChamber();
 		World gw = game.getWorld();
 		gw.getWorldBorder().setSize(Double.MAX_VALUE);
 		gw.setDifficulty(Difficulty.PEACEFUL);
 		gw.setSpawnFlags(false, false);
 		for (Player p : game.getPlayers())
-			if (p.getGameMode() == GameMode.SURVIVAL)
-				p.setGameMode(GameMode.ADVENTURE);
+			p.setGameMode(GameMode.ADVENTURE);
 		remove(game);
 		game.stop();
 	}

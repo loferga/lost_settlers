@@ -21,12 +21,14 @@ import com.comphenix.protocol.wrappers.WrappedWatchableObject;
 
 import fr.loferga.lost_settlers.game.Start;
 import fr.loferga.lost_settlers.gui.GUIMngr;
+import fr.loferga.lost_settlers.game.All;
 import fr.loferga.lost_settlers.game.End;
 import fr.loferga.lost_settlers.map.MapMngr;
 import fr.loferga.lost_settlers.map.ClearOres;
 import fr.loferga.lost_settlers.map.CloseWorld;
 import fr.loferga.lost_settlers.map.Lobby;
 import fr.loferga.lost_settlers.map.Warp;
+import fr.loferga.lost_settlers.skills.SkillMngr;
 import fr.loferga.lost_settlers.teams.SelectTeam;
 import fr.loferga.lost_settlers.teams.TeamMngr;
 
@@ -47,7 +49,9 @@ public class Main extends JavaPlugin{
 		new MapMngr();
 		new GUIMngr();
 		Recipes.createRecipes(this);
+		
 		getCommand("lobby").setExecutor(new Lobby());
+		getCommand("all").setExecutor(new All());
 		getCommand("lsteam").setExecutor(new SelectTeam());
 		getCommand("start").setExecutor(new Start());
 		getCommand("end").setExecutor(new End());
@@ -55,6 +59,7 @@ public class Main extends JavaPlugin{
 		getCommand("close").setExecutor(new CloseWorld());
 		getCommand("clearores").setExecutor(new ClearOres());
 		getServer().getPluginManager().registerEvents(new Listeners(), this);
+		getServer().getPluginManager().registerEvents(new SkillMngr(), this);
 		
 		protocolManager = ProtocolLibrary.getProtocolManager();
 		protocolManager.addPacketListener(
@@ -85,8 +90,10 @@ public class Main extends JavaPlugin{
 	
 	public void onDisable() {
 		for (Player p : Bukkit.getOnlinePlayers()) {
-			TeamMngr.remove(p);
-		}
+			if (p.getWorld() != hub)
+				TeamMngr.remove(p);
+				MapMngr.spawnTeleport(p);
+			}
 		ConsoleCommandSender console = getServer().getConsoleSender();
 		console.sendMessage("[LostSettlers] " + ChatColor.DARK_RED + "Plugin Disabled");
     }
