@@ -18,7 +18,7 @@ import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.map.MapMngr;
 import fr.loferga.lost_settlers.map.MapSettings;
 import fr.loferga.lost_settlers.map.camps.Camp;
-import fr.loferga.lost_settlers.skills.SkillMngr;
+import fr.loferga.lost_settlers.skills.SkillListeners;
 import fr.loferga.lost_settlers.teams.LSTeam;
 import fr.loferga.lost_settlers.teams.TeamMngr;
 
@@ -101,7 +101,7 @@ public class GameMngr {
 				p.getInventory().clear();
 			}
 		}
-		SkillMngr.giveAxeB(game);
+		SkillListeners.giveEquipment(game);
 		for (Entity i : world.getEntitiesByClasses(Item.class))
 			i.remove();
 		new GameLaunch(game, MapMngr.setMap(ms), Main.getPlugin(Main.class));

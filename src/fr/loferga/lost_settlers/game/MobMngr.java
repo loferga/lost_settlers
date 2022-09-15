@@ -1,5 +1,7 @@
 package fr.loferga.lost_settlers.game;
 
+import java.util.List;
+
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Creeper;
@@ -9,7 +11,6 @@ import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import fr.loferga.lost_settlers.Func;
@@ -27,8 +28,10 @@ public class MobMngr {
 	*/
 	private static final float ARMOR_DC = (float) cfg.getDouble("mobs.equipment.armor.drop_chance");
 	private static final double ARMOR_CHANCE = cfg.getDouble("mobs.equipment.armor.chance");
+	private static final double ARMOR_UP_CHANCE = cfg.getDouble("mobs.equipment.armor.up_chance");
 	private static final float WEAPON_DC = (float) cfg.getDouble("mobs.equipment.weapon.drop_chance");
 	private static final double WEAPON_CHANCE = cfg.getDouble("mobs.equipment.weapon.chance");
+	private static final double WEAPON_UP_CHANCE = cfg.getDouble("mobs.equipment.weapon.up_chance");
 	private static final double EFFECT_CHANCE = cfg.getDouble("mobs.effect.chance");
 	private static final double EFFECT_UP_CHANCE = cfg.getDouble("mobs.effect.up_chance");
 	private static final int EFFECT_AMOUNT = cfg.getInt("mobs.effect.amount");
@@ -37,6 +40,7 @@ public class MobMngr {
 			Material.CHAINMAIL_HELMET, Material.GOLDEN_HELMET,
 			Material.IRON_HELMET,Material.DIAMOND_HELMET, Material.NETHERITE_HELMET
 			};
+	
 	private static final Material[] CHESTPLATES = new Material[] {
 			Material.CHAINMAIL_CHESTPLATE, Material.GOLDEN_CHESTPLATE,
 			Material.IRON_CHESTPLATE, Material.DIAMOND_CHESTPLATE, Material.NETHERITE_CHESTPLATE
@@ -55,26 +59,26 @@ public class MobMngr {
 			Material.NETHERITE_SWORD, Material.NETHERITE_AXE
 			};
 	
-	private static final double[] ARMOR_CHANCES = new double[] {
-			ARMOR_CHANCE, Math.pow(ARMOR_CHANCE, 2), Math.pow(ARMOR_CHANCE, 3), Math.pow(ARMOR_CHANCE, 4), Math.pow(ARMOR_CHANCE, 5)
+	private static final double[] ARMOR_UP_CHANCES = new double[] {
+			ARMOR_UP_CHANCE, Math.pow(ARMOR_UP_CHANCE, 2), Math.pow(ARMOR_UP_CHANCE, 3), Math.pow(ARMOR_UP_CHANCE, 4), Math.pow(ARMOR_UP_CHANCE, 5)
 			};
-	private static final double[] WEAPON_CHANCES = new double[] {
-			WEAPON_CHANCE, Math.pow(WEAPON_CHANCE, 2), Math.pow(WEAPON_CHANCE, 3), Math.pow(WEAPON_CHANCE, 4), Math.pow(WEAPON_CHANCE, 5),
-			Math.pow(WEAPON_CHANCE, 6), Math.pow(WEAPON_CHANCE, 7), Math.pow(WEAPON_CHANCE, 8), Math.pow(WEAPON_CHANCE, 9), Math.pow(WEAPON_CHANCE, 10)
+	private static final double[] WEAPON_UP_CHANCES = new double[] {
+			WEAPON_UP_CHANCE, Math.pow(WEAPON_UP_CHANCE, 2), Math.pow(WEAPON_UP_CHANCE, 3), Math.pow(WEAPON_UP_CHANCE, 4), Math.pow(WEAPON_UP_CHANCE, 5),
+			Math.pow(WEAPON_UP_CHANCE, 6), Math.pow(WEAPON_UP_CHANCE, 7), Math.pow(WEAPON_UP_CHANCE, 8), Math.pow(WEAPON_UP_CHANCE, 9), Math.pow(WEAPON_UP_CHANCE, 10)
 			};
 	
 	private static final PotionEffectType[] ALLOWED_POTION_EFFECT_TYPE = getAllowedPotionEffectTypes();
 	private static PotionEffectType[] getAllowedPotionEffectTypes() {
 		// get all the allowed potion effect types in temp, an excessively large array
-		PotionEffectType[] temp = new PotionEffectType[PotionEffectType.values().length];
+		String path = "mobs.effect.allowed";
+		List<String> pet = cfg.getStringList(path);
+		PotionEffectType[] temp = new PotionEffectType[pet.size()];
 		int j = 0;
-		for (PotionEffectType pet : PotionEffectType.values()) {
-			String path = "mobs.effect.allowed." + pet.getName().toLowerCase();
-			// potion effect type is allowed only if it's written in config.yml and if it's boolean value is true
-			if (cfg.contains(path) && cfg.getBoolean(path)) {
-				temp[j] = pet;
-				j++;
-			}
+		for (String str : pet) {
+			// potion effect type is allowed only if it's written in config.ymlkk
+			for (PotionEffectType p : PotionEffectType.values())
+				if (p.toString().toLowerCase().equals(str))
+					temp[j++] = p;
 		}
 		// then clean the temp array to get res array
 		PotionEffectType[] res = new PotionEffectType[j];
@@ -86,7 +90,7 @@ public class MobMngr {
 	public static void setProperties(Entity ent, double ratio, boolean artifact) {
 		LivingEntity livEnt = (LivingEntity) ent;
 		
-		double rr = Math.pow(ratio, 4);
+		double rr = Math.pow(ratio, 2);
 		
 		if (ent instanceof Creeper) {
 			Creeper c = (Creeper) ent;
@@ -104,45 +108,55 @@ public class MobMngr {
 			eq.setItemInOffHandDropChance(WEAPON_DC);
 			
 			// helmet
-			int hlvl = 0;
 			double rngh = ThreadLocalRandom.current().nextDouble();
-			while (rngh < rr * ARMOR_CHANCES[hlvl] && hlvl<4)
-				hlvl++;
-			// helmet enchant
-			eq.setHelmet(new ItemStack(HELMETS[hlvl], 1));
+			if (rngh < rr * ARMOR_CHANCE) {
+				int hlvl = 0;
+				while (rngh < rr * ARMOR_UP_CHANCES[hlvl] && hlvl<4)
+					hlvl++;
+				// helmet enchant
+				eq.setHelmet(new ItemStack(HELMETS[hlvl], 1));
+			}
 			
 			// chestplate
-			int clvl = 0;
 			double rngc = ThreadLocalRandom.current().nextDouble();
-			while (rngc < rr * ARMOR_CHANCES[clvl] && clvl<4)
-				clvl++;
-			// chestplate enchant
-			eq.setChestplate(new ItemStack(CHESTPLATES[clvl], 1));
+			if (rngc < rr * ARMOR_CHANCE) {
+				int clvl = 0;
+				while (rngc < rr * ARMOR_UP_CHANCES[clvl] && clvl<4)
+					clvl++;
+				// chestplate enchant
+				eq.setChestplate(new ItemStack(CHESTPLATES[clvl], 1));
+			}
 			
 			// leggings
-			int llvl = 0;
 			double rngl = ThreadLocalRandom.current().nextDouble();
-			while (rngl < rr * ARMOR_CHANCES[llvl] && llvl<4)
-				llvl++;
-			// leggings enchant
-			eq.setLeggings(new ItemStack(LEGGINGS[llvl], 1));
+			if (rngl < rr * ARMOR_CHANCE) {
+				int llvl = 0;
+				while (rngl < rr * ARMOR_UP_CHANCES[llvl] && llvl<4)
+					llvl++;
+				// leggings enchant
+				eq.setLeggings(new ItemStack(LEGGINGS[llvl], 1));
+			}
 			
 			// boots
-			int blvl = 0;
 			double rngb = ThreadLocalRandom.current().nextDouble();
-			while (rngb < rr * ARMOR_CHANCES[blvl] && blvl<4)
-				blvl++;
-			// leggings enchant
-			eq.setBoots(new ItemStack(BOOTS[blvl], 1));
+			if (rngb < rr * ARMOR_CHANCE) {
+				int blvl = 0;
+				while (rngb < rr * ARMOR_UP_CHANCES[blvl] && blvl<4)
+					blvl++;
+				// leggings enchant
+				eq.setBoots(new ItemStack(BOOTS[blvl], 1));
+			}
 			
-			int wlvl = 0;
 			if (ent instanceof Zombie) {
 				// weapon
 				double rngw = ThreadLocalRandom.current().nextDouble();
-				while (rngw < rr * WEAPON_CHANCES[wlvl] && wlvl<9)
-					wlvl++;
-				// weapon enchant
-				eq.setItemInMainHand(new ItemStack(MELEE_WEAPONS[wlvl], 1));
+				if (rngc < rr * WEAPON_CHANCE) {
+					int wlvl = 0;
+					while (rngw < rr * WEAPON_UP_CHANCES[wlvl] && wlvl<9)
+						wlvl++;
+					// weapon enchant
+					eq.setItemInMainHand(new ItemStack(MELEE_WEAPONS[wlvl], 1));
+				}
 			}
 			
 		}
@@ -154,11 +168,7 @@ public class MobMngr {
 					int amplifier = 1;
 					while (ThreadLocalRandom.current().nextDouble() < rr * EFFECT_UP_CHANCE)
 						amplifier++;
-					livEnt.addPotionEffect(new PotionEffect(
-							Func.pickRandom(ALLOWED_POTION_EFFECT_TYPE),
-							Integer.MAX_VALUE,
-							amplifier
-							));
+					livEnt.addPotionEffect(Func.pickRandom(ALLOWED_POTION_EFFECT_TYPE).createEffect(Integer.MAX_VALUE, amplifier));
 				}
 		
 	}

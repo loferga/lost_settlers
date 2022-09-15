@@ -19,7 +19,7 @@ public class CloseWorld implements TabExecutor {
 		List<String> res = new ArrayList<>();
 		if (args.length == 1)
 			for (World w : MapMngr.worlds)
-				res.add(w.getName().substring(4));
+				res.add(w.getName().substring(3));
 		if (args.length == 2)
 			res.addAll(Arrays.asList("save", "restore"));
 		return res;

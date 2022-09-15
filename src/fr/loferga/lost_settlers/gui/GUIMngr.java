@@ -20,7 +20,7 @@ import org.bukkit.plugin.Plugin;
 import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.Game;
 import fr.loferga.lost_settlers.Main;
-import fr.loferga.lost_settlers.dogs.DogsMngr;
+import fr.loferga.lost_settlers.dogs.DogMngr;
 import fr.loferga.lost_settlers.game.GameMngr;
 import fr.loferga.lost_settlers.skills.Skill;
 import fr.loferga.lost_settlers.skills.SkillSelection;
@@ -172,7 +172,7 @@ public class GUIMngr {
 	public static Inventory getDTM(Player p, String wn) {
 		Game game = GameMngr.gameIn(p);
 		List<Player> pl = game.getAliveTeamMates(p);
-		List<Wolf> dogsl = DogsMngr.get().get(p);
+		List<Wolf> dogsl = DogMngr.get().get(p);
 		int i = 0, j = 0, dllen = dogsl.size(), pllen = pl.size();
 		Inventory inv = getBlankInventory(18 + (pllen/9), "Confier " + wn);
 		while (j<pllen || i<dllen) {
@@ -227,13 +227,13 @@ public class GUIMngr {
 		if (item.getItemMeta().getDisplayName() != " ") {
 			Material mat = item.getType();
 			if (mat == Material.PLAYER_HEAD) {
-				DogsMngr.transferDogTo(
-						DogsMngr.getDogByName(p, p.getOpenInventory().getTitle().substring(8)),
+				DogMngr.transferDogTo(
+						DogMngr.getDogByName(p, p.getOpenInventory().getTitle().substring(8)),
 						p,
 						((SkullMeta) item.getItemMeta()).getOwningPlayer().getPlayer()
 						);
-				if (DogsMngr.get().containsKey(p)) {
-					List<Wolf> dogs = DogsMngr.get().get(p);
+				if (DogMngr.get().containsKey(p)) {
+					List<Wolf> dogs = DogMngr.get().get(p);
 					p.openInventory(getDTM(p, dogs.get((int) (Math.random() * dogs.size())).getCustomName()));
 					p.updateInventory();
 				} else

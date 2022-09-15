@@ -16,19 +16,21 @@ import org.bukkit.SoundCategory;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import fr.loferga.lost_settlers.dogs.Anger;
+import fr.loferga.lost_settlers.dogs.ComeBack;
 import fr.loferga.lost_settlers.game.GameMngr;
 import fr.loferga.lost_settlers.map.MapMngr;
 import fr.loferga.lost_settlers.map.MapSettings;
 import fr.loferga.lost_settlers.map.camps.Camp;
-import fr.loferga.lost_settlers.rules.RuleManager;
+import fr.loferga.lost_settlers.rules.Wounded;
+import fr.loferga.lost_settlers.skills.SkillRules;
 import fr.loferga.lost_settlers.teams.LSTeam;
 import fr.loferga.lost_settlers.teams.TeamMngr;
 
 public class Game extends BukkitRunnable {
-	
-	private static RuleManager rules = null;
 	
 	private static int pvp_time = Main.getPlugin(Main.class).getConfig().getInt("pvp_time") * 20;
 	private static int half = pvp_time/2;
@@ -51,9 +53,13 @@ public class Game extends BukkitRunnable {
 		if (ms == null)
 			ms = new MapSettings(world, Main.getPlugin(Main.class).getConfig().getConfigurationSection("maps." + world.getName().substring(4)));
 		this.ms = ms;
-			
 		
-		if (GameMngr.noGames()) rules = new RuleManager();
+		Plugin plg = Main.getPlugin(Main.class);
+		Anger.getInstance().start(plg);
+		ComeBack.getInstance().start(plg);
+		Wounded.getInstance().start(plg);
+		SkillRules.getInstance().start(plg);
+		
 	}
 	
 	private boolean pvp;
@@ -335,8 +341,7 @@ public class Game extends BukkitRunnable {
 	}
 	
 	public void stop() {
-		pvp = false;
-		if (GameMngr.noGames()) rules.stop();
+		GameMngr.remove(this);
 		cancel();
 	}
 	

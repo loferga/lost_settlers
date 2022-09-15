@@ -29,7 +29,7 @@ public class MapMngr {
 	private static final double RANGE = Main.getPlugin(Main.class).getConfig().getDouble("tp_range");
 	
 	public static World newWorld(String wn) {
-		World w = new WorldCreator("-LS-" + wn).createWorld();
+		World w = new WorldCreator("ls_" + wn).createWorld();
 		worlds.add(w);
 		w.setAutoSave(false);
 		return w;

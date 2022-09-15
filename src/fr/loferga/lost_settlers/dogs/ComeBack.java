@@ -8,8 +8,29 @@ import java.util.Set;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
-public class ComeBack {
+public class ComeBack extends BukkitRunnable {
+	
+	private static boolean running = false;
+	
+	// Singleton methods
+	private static ComeBack comeBack = null;
+	
+	public static ComeBack getInstance() {
+		if (comeBack == null)
+			comeBack = new ComeBack();
+		return comeBack;
+	}
+	
+	//start the runnable if it's not already running
+	public void start(Plugin plugin) {
+		if (!running) {
+			runTaskTimer(plugin, 0L, 1L);
+			running = true;
+		}
+	}
 	
 	private static Map<LivingEntity, Set<Wolf>> targets = new HashMap<>();
 	private static Map<LivingEntity, Player> teleport = new HashMap<>();
@@ -53,7 +74,8 @@ public class ComeBack {
 		return false;
 	}
 	
-	public static void run() {
+	@Override
+	public void run() {
 		for (LivingEntity ent : targets.keySet()) {
 			Set<Wolf> wset = new HashSet<>();
 			wset.addAll(targets.get(ent));
