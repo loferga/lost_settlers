@@ -65,7 +65,6 @@ public class SkillListeners implements Listener {
 					res.add(frec);
 			}
 		}
-		res.forEach(e -> System.out.println(e.getInput().getType().toString()));
 		return res;
 	}
 	
