@@ -84,7 +84,7 @@ public class SkillListeners implements Listener {
 	}
 	
 	
-	// FORGEUR
+	// FORGE
 	private static boolean forge = Func.primeContain(SkillSelection.getSkills(), Skill.FORGE);
 	
 	@EventHandler
@@ -109,7 +109,7 @@ public class SkillListeners implements Listener {
 		return i;
 	}
 	
-	// BUCHERON
+	// ABATTAGE
 	private static final boolean abattage = Func.primeContain(SkillSelection.getSkills(), Skill.ABATTAGE);
 	
 	@EventHandler
@@ -130,7 +130,6 @@ public class SkillListeners implements Listener {
 	}
 	
 	// DRESSAGE
-	
 	private static final int DOG_N = 2;
 	
 	public static void giveDogs(Player p) {
@@ -219,7 +218,7 @@ public class SkillListeners implements Listener {
 		p.getInventory().addItem(new ItemStack(Material.GOLDEN_APPLE, 1));
 	}
 	
-	// DEMOLISSEUR
+	// DEMOLITION
 	private static final boolean demolition = Func.primeContain(SkillSelection.getSkills(), Skill.DEMOLITION);
 	
 	@EventHandler
