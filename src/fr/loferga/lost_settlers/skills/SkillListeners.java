@@ -2,8 +2,10 @@ package fr.loferga.lost_settlers.skills;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -11,6 +13,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -24,6 +27,7 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
@@ -44,7 +48,8 @@ public class SkillListeners implements Listener {
 			};
 	
 	private static final Material[] undesirable = new Material[] {
-			Material.SAND
+			Material.SAND, Material.RABBIT, Material.PORKCHOP, Material.CHORUS_FRUIT, Material.COD, Material.POTATO, Material.SALMON,
+			Material.CHICKEN, Material.MUTTON, Material.BEEF, Material.IRON_PICKAXE
 	};
 	
 	private static final List<FurnaceRecipe> FRECIPES = getAllFurnaceRecipes();
@@ -60,7 +65,7 @@ public class SkillListeners implements Listener {
 					res.add(frec);
 			}
 		}
-		res.forEach(e -> System.out.println(e));
+		res.forEach(e -> System.out.println(e.getInput().getType().toString()));
 		return res;
 	}
 	
@@ -87,7 +92,7 @@ public class SkillListeners implements Listener {
 	
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent e) {
-		if (!forge) return;
+		if (!forge || SkillSelection.empty(Skill.FORGE)) return;
 		if (SkillSelection.get(e.getPlayer()) != Skill.FORGE) return;
 		if (e.getPlayer().getGameMode() == GameMode.CREATIVE) return;
 		
@@ -121,7 +126,7 @@ public class SkillListeners implements Listener {
 	
 	@EventHandler
 	public void onBlockLogBreak(BlockBreakEvent e) {
-		if (!abattage) return;
+		if (!abattage || SkillSelection.empty(Skill.ABATTAGE)) return;
 		if (SkillSelection.get(e.getPlayer()) != Skill.ABATTAGE) return;
 		if (e.getPlayer().getGameMode() == GameMode.CREATIVE) return;
 		
@@ -207,7 +212,7 @@ public class SkillListeners implements Listener {
 	
 	@EventHandler
 	public void onFoodLevelChange(FoodLevelChangeEvent e) {
-		if (!glouton) return;
+		if (!glouton || SkillSelection.empty(Skill.GLOUTON)) return;
 		if (SkillSelection.get((Player) e.getEntity()) != Skill.GLOUTON) return;
 		
 		e.setCancelled(true);
@@ -222,7 +227,7 @@ public class SkillListeners implements Listener {
 	
 	@EventHandler
 	public void onTNTBreak(BlockBreakEvent e) {
-		if (!demolition) return;
+		if (!demolition || SkillSelection.empty(Skill.DEMOLITION)) return;
 		if (SkillSelection.get(e.getPlayer()) != Skill.DEMOLITION) return;
 		if (e.getPlayer().getGameMode() == GameMode.CREATIVE) return;
 		
@@ -251,7 +256,7 @@ public class SkillListeners implements Listener {
 	
 	@EventHandler
 	public void onFallingDamages(EntityDamageEvent e) {
-		if (!roublard) return;
+		if (!roublard || SkillSelection.empty(Skill.ROUBLARD)) return;
 		if (!(e.getEntity() instanceof Player)) return;
 		if (e.getCause() != DamageCause.FALL) return ;
 		Game game = GameMngr.gameIn((Player) e.getEntity());
@@ -263,12 +268,32 @@ public class SkillListeners implements Listener {
 		e.setCancelled(true);
 	}
 	
+	// PISTAGE
+	private static final boolean pistage = Func.primeContain(SkillSelection.getSkills(), Skill.PISTAGE);
+	
+	private static Set<Player> inAir = new HashSet<>();
+	
+	@EventHandler
+	public void onPlayerEnterNewBlock(PlayerMoveEvent e) {
+		if (!pistage || SkillSelection.empty(Skill.PISTAGE)) return;
+		Location from = e.getFrom();
+		Location to = e.getTo();
+		Player p = e.getPlayer();
+		
+		if (inAir.contains(p)) {inAir.remove(p); new Footprint(p); return;}
+		if ((int)from.getX() == (int)to.getX() && (int)from.getY() == (int)to.getY() && (int)from.getZ() == (int)to.getZ()) return;
+		
+		if (((Entity) p).isOnGround()) {
+			inAir.add(p);
+		} else new Footprint(p);
+	}
+	
 	// PRECISION
 	private static final boolean precision = Func.primeContain(SkillSelection.getSkills(), Skill.PRECISION);
 
 	@EventHandler
 	public void onPlayerShootWithBow(ProjectileLaunchEvent e) {
-		if (!precision) return;
+		if (!precision || SkillSelection.empty(Skill.PRECISION)) return;
 		
 		Projectile proj = e.getEntity();
 		

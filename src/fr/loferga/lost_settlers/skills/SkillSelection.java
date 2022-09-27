@@ -47,6 +47,10 @@ public class SkillSelection {
 		}
 	}
 	
+	public static boolean empty(Skill s) {
+		return getSet(s).isEmpty();
+	}
+	
 	public static Set<Player> getSet(Skill s) {
 		return selection.get(s);
 	}
