@@ -82,39 +82,39 @@ mobs:
 skills:
   ############### RESSOURCES ###############
   # you melt ores on destruction
-  forgeur: true
+  forge: true
   # you make trees fall when their base is broke
-  bucheron: true
+  abattage: true
   # spawn with a dog
-  chasseur: true
+  dresseur: true
   # do something
-  fermier: true
+  fermier: false
   # don't get hunger
   glouton: true
   # do something
-  enchanteur: true
+  enchantement: false
   # do something
-  alchimiste: true
+  alchimie: false
   ###############   CAMPS    ###############
   # do something
-  protecteur: true
+  protection: false
   # do something
-  constructeur: true
+  construction: false
   # breaking a tnt make the explosion more ... explosive
-  demolisseur: true
+  demolition: true
   # no falling damages except in ennemies camps
   roublard: true
   ###############   COMBAT   ###############
   # visible ennemies within 10 blocks appears as glowing for you
-  lucide: true
+  clairvoyance: true
   # you can see the footprints of ennemies but everyone can see your footprints
-  pisteur: true
+  pistage: true
   # remove bow and crossbow innaccuracy but arrows deal less damages
-  archer: true
+  precision: true
 # WIP
 
 # time in seconds
-pvp_time: 12
+pvp_time: 600
 # delay in seconds
 regeneration_delay: 15
 # range of teleportation around flags

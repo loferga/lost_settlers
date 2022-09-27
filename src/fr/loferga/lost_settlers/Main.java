@@ -28,7 +28,7 @@ import fr.loferga.lost_settlers.map.ClearOres;
 import fr.loferga.lost_settlers.map.CloseWorld;
 import fr.loferga.lost_settlers.map.Lobby;
 import fr.loferga.lost_settlers.map.Warp;
-import fr.loferga.lost_settlers.skills.SkillMngr;
+import fr.loferga.lost_settlers.skills.SkillListeners;
 import fr.loferga.lost_settlers.teams.SelectTeam;
 import fr.loferga.lost_settlers.teams.TeamMngr;
 
@@ -59,7 +59,7 @@ public class Main extends JavaPlugin{
 		getCommand("close").setExecutor(new CloseWorld());
 		getCommand("clearores").setExecutor(new ClearOres());
 		getServer().getPluginManager().registerEvents(new Listeners(), this);
-		getServer().getPluginManager().registerEvents(new SkillMngr(), this);
+		getServer().getPluginManager().registerEvents(new SkillListeners(), this);
 		
 		protocolManager = ProtocolLibrary.getProtocolManager();
 		protocolManager.addPacketListener(

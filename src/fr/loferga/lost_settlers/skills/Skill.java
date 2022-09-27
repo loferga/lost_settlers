@@ -16,23 +16,23 @@ import fr.loferga.lost_settlers.Main;
 public enum Skill {
 	
 	// RESSOURCES
-	FORGEUR(
+	FORGE(
 			Material.GOLDEN_PICKAXE,
 			List.of(
-					Func.format("&6Talent :"), Func.format("&5Cuit tout ce qu'il casse")
+					Func.format("&6Talent :"), Func.format("&5Cuire ce qui est détruit")
 					)
 			),
-	BUCHERON(
+	ABATTAGE(
 			Material.IRON_AXE,
 			List.of(
-					Func.format("&6Talent :"), Func.format("&5Fait tomber les arbres"),
+					Func.format("&6Talent :"), Func.format("&5Faire s'abattre les arbres"),
 					Func.format("&6Equipement :"), Func.format("&5Hache en fer amochée")
 					)
 			),
-	CHASSEUR(
+	DRESSAGE(
 			Material.BONE,
 			List.of(
-					Func.format("&6Talent :"), Func.format("&5Commence la partie avec un chien")
+					Func.format("&6Talent :"), Func.format("&5Commencer la parties avec deux chiens")
 					)
 			),
 	FERMIER(
@@ -45,34 +45,40 @@ public enum Skill {
 	GLOUTON(
 			Material.COOKED_CHICKEN,
 			List.of(
-					Func.format("&6Talent :"), Func.format("&5Ne subis pas la faim"),
+					Func.format("&6Talent :"), Func.format("&5Nourriture plus efficace"),
 					Func.format("&6Equipement :"), Func.format("&5Pomme en or")
 					)
 			),
 	// CAMPS
-	DEMOLISSEUR(
+	DEMOLITION(
 			Material.TNT,
 			List.of(
-					Func.format("&6Talent :"), Func.format("&5Augmente la puissance des explosifs")
+					Func.format("&6Talent :"), Func.format("&5Explosifs plus puissants")
 					)
 			),
 	ROUBLARD(
 			Material.FEATHER,
 			List.of(
-					Func.format("&6Talent :"), Func.format("&5Insensible aux dommages de chute"), Func.format("Sauf dans les campements ennemis")
+					Func.format("&6Talent :"), Func.format("&5Insensibilité aux dommages de chute"), Func.format("&5Sauf dans les campements ennemis")
 					)
 			),
 	// COMBAT
-	CLAIRVOYANT(
+	CLAIRVOYANCE(
 			Material.ENDER_EYE,
 			List.of(
-					Func.format("&6Talent :"), Func.format("&5Fait briller les ennemies visibles"), Func.format("&5autour du porteur")
+					Func.format("&6Talent :"), Func.format("&5Faire briller les ennemies visibles")
 					)
 			),
-	ARCHER(
+	PISTAGE(
+			Material.LEATHER_BOOTS,
+			List.of(
+					Func.format("&6Talent :"), Func.format("&5Voir les traces de pas")
+					)
+			),
+	PRECISION(
 			Material.BOW,
 			List.of(
-					Func.format("&6Talent :"), Func.format("&5Tire droit mais inflige moins")
+					Func.format("&6Talent :"), Func.format("&5Tirer droit et plus vite")
 					)
 			),
 	

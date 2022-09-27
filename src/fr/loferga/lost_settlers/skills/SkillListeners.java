@@ -9,8 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EntityType;
@@ -21,7 +19,6 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockFertilizeEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityExplodeEvent;
@@ -42,27 +39,13 @@ import fr.loferga.lost_settlers.teams.TeamMngr;
 
 public class SkillListeners implements Listener {
 	
-	public static void giveEquipment(Game g) {
-		for (Player p : g.getPlayers()) {
-			Skill s = SkillSelection.get(p);
-			if (s == null) return;
-			switch (s) {
-			case BUCHERON:
-				giveAxe(p); break;
-			case CHASSEUR:
-				giveDog(p); break;
-			case FERMIER:
-				giveHoe(p); break;
-			case GLOUTON:
-				giveGoldenApple(p); break;
-			default:
-				break;
-			}
-		}
-	}
+	private static final Material[] LOGS = new Material[] {
+			Material.ACACIA_LOG, Material.BIRCH_LOG, Material.DARK_OAK_LOG, Material.JUNGLE_LOG, Material.OAK_LOG, Material.SPRUCE_LOG
+			};
 	
-	// FORGEUR
-	private static boolean forgeur = Func.primeContain(SkillSelection.getSkills(), Skill.FORGEUR);
+	private static final Material[] undesirable = new Material[] {
+			Material.SAND
+	};
 	
 	private static final List<FurnaceRecipe> FRECIPES = getAllFurnaceRecipes();
 	private static List<FurnaceRecipe> getAllFurnaceRecipes() {
@@ -72,17 +55,40 @@ public class SkillListeners implements Listener {
 			Recipe next = it.next();
 			if (next instanceof FurnaceRecipe) {
 				FurnaceRecipe frec = (FurnaceRecipe) next;
-				if (frec.getInput().getType() != Material.SAND)
-					res.add((FurnaceRecipe) next);
+				Material imat = frec.getInput().getType();
+				if (!(Func.primeContain(undesirable, imat) || Func.primeContain(LOGS, imat)))
+					res.add(frec);
 			}
 		}
+		res.forEach(e -> System.out.println(e));
 		return res;
 	}
 	
+	public static void giveEquipment(Game g) {
+		for (Player p : g.getPlayers()) {
+			Skill s = SkillSelection.get(p);
+			if (s == null) return;
+			switch (s) {
+			case ABATTAGE:
+				giveAxe(p); break;
+			case DRESSAGE:
+				giveDogs(p); break;
+			case GLOUTON:
+				giveGoldenApple(p); break;
+			default:
+				break;
+			}
+		}
+	}
+	
+	
+	// FORGEUR
+	private static boolean forge = Func.primeContain(SkillSelection.getSkills(), Skill.FORGE);
+	
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent e) {
-		if (!forgeur) return;
-		if (SkillSelection.get(e.getPlayer()) != Skill.FORGEUR) return;
+		if (!forge) return;
+		if (SkillSelection.get(e.getPlayer()) != Skill.FORGE) return;
 		if (e.getPlayer().getGameMode() == GameMode.CREATIVE) return;
 		
 		Player p = e.getPlayer();
@@ -102,7 +108,7 @@ public class SkillListeners implements Listener {
 	}
 	
 	// BUCHERON
-	private static final boolean bucheron = Func.primeContain(SkillSelection.getSkills(), Skill.BUCHERON);
+	private static final boolean abattage = Func.primeContain(SkillSelection.getSkills(), Skill.ABATTAGE);
 	
 	private static final ItemStack B_AXE = buildBAxe();
 	private static ItemStack buildBAxe() {
@@ -113,14 +119,10 @@ public class SkillListeners implements Listener {
 		return axe;
 	}
 	
-	private static final Material[] LOGS = new Material[] {
-			Material.ACACIA_LOG, Material.BIRCH_LOG, Material.DARK_OAK_LOG, Material.JUNGLE_LOG, Material.OAK_LOG, Material.SPRUCE_LOG
-			};
-	
 	@EventHandler
 	public void onBlockLogBreak(BlockBreakEvent e) {
-		if (!bucheron) return;
-		if (SkillSelection.get(e.getPlayer()) != Skill.BUCHERON) return;
+		if (!abattage) return;
+		if (SkillSelection.get(e.getPlayer()) != Skill.ABATTAGE) return;
 		if (e.getPlayer().getGameMode() == GameMode.CREATIVE) return;
 		
 		if (!Func.primeContain(LOGS, e.getBlock().getType())) return;
@@ -138,15 +140,21 @@ public class SkillListeners implements Listener {
 		p.getInventory().addItem(B_AXE);
 	}
 	
-	// CHASSEUR
+	// DRESSAGE
 	
-	public static void giveDog(Player p) {
-		Wolf dog = (Wolf) p.getWorld().spawnEntity(p.getLocation(), EntityType.WOLF);
-		dog.setTamed(true);
-		DogMngr.addWolf(p, dog);
-		DogMngr.setDogsColor(p, TeamMngr.teamOf(p).getDyeColor());
+	private static final int DOG_N = 2;
+	
+	public static void giveDogs(Player p) {
+		for (int i = 0; i<DOG_N; i++) {
+			Wolf dog = (Wolf) p.getWorld().spawnEntity(p.getLocation(), EntityType.WOLF);
+			dog.setTamed(true);
+			DogMngr.addWolf(p, dog);
+			DogMngr.setDogsColor(p, TeamMngr.teamOf(p).getDyeColor());
+			// set dog name
+		}
 	}
 	
+	/*
 	// FERMIER
 	private static final boolean fermier = Func.primeContain(SkillSelection.getSkills(), Skill.FERMIER);
 	
@@ -187,13 +195,12 @@ public class SkillListeners implements Listener {
 		
 		Block b = e.getBlock();
 		if (!(b.getBlockData() instanceof Ageable)) return;
-		/*
 		Ageable crop = (Ageable) b.getBlockData();
 		crop.setAge(crop.getMaximumAge());
 		b.setBlockData(crop);
-		*/
 		
 	}
+	*/
 	
 	// GLOUTON
 	private static final boolean glouton = Func.primeContain(SkillSelection.getSkills(), Skill.GLOUTON);
@@ -210,40 +217,13 @@ public class SkillListeners implements Listener {
 		p.getInventory().addItem(new ItemStack(Material.GOLDEN_APPLE, 1));
 	}
 	
-	// ARCHER
-	private static final boolean archer = Func.primeContain(SkillSelection.getSkills(), Skill.ARCHER);
-
-	@EventHandler
-	public void onPlayerShootWithBow(ProjectileLaunchEvent e) {
-		if (!archer) return;
-		
-		Projectile proj = e.getEntity();
-		
-		if (!(proj.getShooter() instanceof Player)) return;
-		Player p = (Player) proj.getShooter();
-		if (SkillSelection.get(p) != Skill.ARCHER) return;
-		if (p.getGameMode() == GameMode.CREATIVE) return;
-		
-		if (!(proj instanceof Arrow)) return;
-		
-		double pow = proj.getVelocity().length();
-		proj.setVelocity(p.getEyeLocation().getDirection().normalize().multiply(1.5 * pow));
-		
-		Arrow arr = (Arrow) proj;
-		arr.setDamage(0.75* arr.getDamage());
-		AbstractArrow abarr = (AbstractArrow) arr;
-		System.out.println("kbStrength of arrow = " + abarr.getKnockbackStrength());
-		abarr.setKnockbackStrength((int) (1.5 * abarr.getKnockbackStrength()));
-		System.out.println("kbStrength of arrow after archer augment = " + abarr.getKnockbackStrength());
-	}
-	
 	// DEMOLISSEUR
-	private static final boolean demolisseur = Func.primeContain(SkillSelection.getSkills(), Skill.DEMOLISSEUR);
+	private static final boolean demolition = Func.primeContain(SkillSelection.getSkills(), Skill.DEMOLITION);
 	
 	@EventHandler
 	public void onTNTBreak(BlockBreakEvent e) {
-		if (!demolisseur) return;
-		if (SkillSelection.get(e.getPlayer()) != Skill.DEMOLISSEUR) return;
+		if (!demolition) return;
+		if (SkillSelection.get(e.getPlayer()) != Skill.DEMOLITION) return;
 		if (e.getPlayer().getGameMode() == GameMode.CREATIVE) return;
 		
 		if (e.getBlock().getType() != Material.TNT) return;
@@ -281,6 +261,30 @@ public class SkillListeners implements Listener {
 		if (c == null || c.getOwner() != TeamMngr.teamOf((Player) e.getEntity())) return;
 		
 		e.setCancelled(true);
+	}
+	
+	// PRECISION
+	private static final boolean precision = Func.primeContain(SkillSelection.getSkills(), Skill.PRECISION);
+
+	@EventHandler
+	public void onPlayerShootWithBow(ProjectileLaunchEvent e) {
+		if (!precision) return;
+		
+		Projectile proj = e.getEntity();
+		
+		if (!(proj.getShooter() instanceof Player)) return;
+		Player p = (Player) proj.getShooter();
+		if (SkillSelection.get(p) != Skill.PRECISION) return;
+		if (p.getGameMode() == GameMode.CREATIVE) return;
+		
+		if (!(proj instanceof Arrow)) return;
+		
+		double pow = proj.getVelocity().length();
+		proj.setVelocity(p.getEyeLocation().getDirection().normalize().multiply(1.5 * pow));
+		
+		Arrow arr = (Arrow) proj;
+		AbstractArrow abarr = (AbstractArrow) arr;
+		abarr.setKnockbackStrength((int) (1.5 * abarr.getKnockbackStrength()));
 	}
 	
 }

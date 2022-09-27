@@ -36,13 +36,13 @@ public class SkillRules extends BukkitRunnable {
 		cancel();
 	}
 	
-	private static final boolean clairvoyant = Func.primeContain(SkillSelection.getSkills(), Skill.CLAIRVOYANT);
+	private static final boolean clairvoyance = Func.primeContain(SkillSelection.getSkills(), Skill.CLAIRVOYANCE);
 	
 	@Override
 	public void run() {
 		// Lucide
-		if (clairvoyant)
-			for (Player c : SkillSelection.getSet(Skill.CLAIRVOYANT))
+		if (clairvoyance)
+			for (Player c : SkillSelection.getSet(Skill.CLAIRVOYANCE))
 				if (GameMngr.gameIn(c)!=null)
 					for (Player other : GameMngr.gameIn(c).getAliveEnnemies(c))
 						if (!other.isInvisible())
