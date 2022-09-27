@@ -25,14 +25,14 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
-import org.bukkit.inventory.meta.Damageable;
-import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
 
 import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.Game;
@@ -74,8 +74,6 @@ public class SkillListeners implements Listener {
 			Skill s = SkillSelection.get(p);
 			if (s == null) return;
 			switch (s) {
-			case ABATTAGE:
-				giveAxe(p); break;
 			case DRESSAGE:
 				giveDogs(p); break;
 			case GLOUTON:
@@ -101,7 +99,7 @@ public class SkillListeners implements Listener {
 		if (drops.size()>0) {
 			e.setDropItems(false);
 			for (ItemStack i : drops)
-				p.getWorld().dropItemNaturally(e.getBlock().getLocation().add(0.5, 0.5, 0.5), getFurnaceResult(i));
+				p.getWorld().dropItemNaturally(e.getBlock().getLocation(), getFurnaceResult(i));
 		}
 	}
 	
@@ -114,15 +112,6 @@ public class SkillListeners implements Listener {
 	
 	// BUCHERON
 	private static final boolean abattage = Func.primeContain(SkillSelection.getSkills(), Skill.ABATTAGE);
-	
-	private static final ItemStack B_AXE = buildBAxe();
-	private static ItemStack buildBAxe() {
-		ItemStack axe = new ItemStack(Material.IRON_AXE, 1);
-		Damageable axedmg = (Damageable) axe.getItemMeta();
-		axedmg.setDamage(220);
-		axe.setItemMeta((ItemMeta) axedmg);
-		return axe;
-	}
 	
 	@EventHandler
 	public void onBlockLogBreak(BlockBreakEvent e) {
@@ -139,10 +128,6 @@ public class SkillListeners implements Listener {
 			e.getPlayer().breakBlock(loc.getBlock());
 			loc.add(0, 1, 0);
 		}
-	}
-	
-	private static void giveAxe(Player p) {
-		p.getInventory().addItem(B_AXE);
 	}
 	
 	// DRESSAGE
@@ -215,6 +200,19 @@ public class SkillListeners implements Listener {
 		if (!glouton || SkillSelection.empty(Skill.GLOUTON)) return;
 		if (SkillSelection.get((Player) e.getEntity()) != Skill.GLOUTON) return;
 		
+		e.setFoodLevel(2 * e.getEntity().getFoodLevel());
+	}
+	
+	@EventHandler
+	public void onPotionEffect(EntityPotionEffectEvent e) {
+		if (!glouton || SkillSelection.empty(Skill.GLOUTON)) return;
+		if (!(e.getEntity() instanceof Player)) return;
+		Player p = (Player) e.getEntity();
+		if (SkillSelection.get(p) != Skill.GLOUTON) return;
+		
+		PotionEffect eff = e.getNewEffect();
+		int duration = eff.getDuration();
+		p.addPotionEffect(new PotionEffect(eff.getType(), duration + (int)((1/5)*duration), eff.getAmplifier(), true, true));
 		e.setCancelled(true);
 	}
 	
