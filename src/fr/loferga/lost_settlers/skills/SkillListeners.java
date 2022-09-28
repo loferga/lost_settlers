@@ -259,7 +259,7 @@ public class SkillListeners implements Listener {
 		Firework fw = e.getEntity();
 		ProjectileSource shooter = fw.getShooter();
 		if (!(shooter instanceof Player)) return;
-		System.out.println(((Player) shooter).getName());
+		
 		if (SkillSelection.get((Player) shooter) != Skill.ARTIFICE) return;
 		
 		fw.getWorld().createExplosion(fw.getLocation(), 1.0f, false, true, (Entity) shooter);
@@ -272,6 +272,9 @@ public class SkillListeners implements Listener {
 		Firework fw = (Firework) e.getDamager();
 		if (!(fw.getShooter() instanceof Player)) return;
 		if (SkillSelection.get((Player) fw.getShooter()) != Skill.ARTIFICE) return;
+		
+		System.out.println("entity " + e.getEntity().getName() + " should have take " + e.getFinalDamage() +
+				" and took " + 1.5 * e.getFinalDamage() + " instead");
 		
 		e.setDamage(1.5 * e.getFinalDamage());
 	}

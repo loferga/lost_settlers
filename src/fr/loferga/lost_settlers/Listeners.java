@@ -450,6 +450,7 @@ public class Listeners implements Listener {
 			if (result.getType() == Material.FIREWORK_ROCKET) {
 				Player p = (Player) e.getView().getPlayer();
 				Color color = TeamMngr.teamOf(p).getColor();
+				System.out.println(TeamMngr.teamOf(p).getName());
 				result.setItemMeta((ItemMeta) Recipes.setColor(result.getItemMeta(), color));
 				e.getInventory().setResult(result);
 			}
