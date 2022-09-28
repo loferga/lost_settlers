@@ -102,6 +102,8 @@ skills:
   construction: false
   # breaking a tnt make the explosion more ... explosive
   demolition: true
+  # fireworks break 1 block
+  artifice: true
   # no falling damages except in ennemies camps
   roublard: true
   ###############   COMBAT   ###############

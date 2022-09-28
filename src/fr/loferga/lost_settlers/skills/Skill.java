@@ -45,7 +45,7 @@ public enum Skill {
 	GLOUTON(
 			Material.COOKED_CHICKEN,
 			List.of(
-					Func.format("&6Talent :"), Func.format("&5Nourriture plus efficace"),
+					Func.format("&6Talent :"), Func.format("&5Ingestion efficace"),
 					Func.format("&6Equipement :"), Func.format("&5Pomme en or")
 					)
 			),
@@ -53,7 +53,14 @@ public enum Skill {
 	DEMOLITION(
 			Material.TNT,
 			List.of(
-					Func.format("&6Talent :"), Func.format("&5Explosifs plus puissants")
+					Func.format("&6Talent :"), Func.format("&5Explosifs améliorés")
+					)
+			),
+	ARTIFICE(
+			Material.FIREWORK_ROCKET,
+			List.of(
+					Func.format("&6Talent :"), Func.format("&5Feux d'artifices améliorés"),
+					Func.format("6Equipement :"), Func.format("&5Poudre à canon")
 					)
 			),
 	ROUBLARD(

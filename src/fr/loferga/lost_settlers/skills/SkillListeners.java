@@ -15,6 +15,7 @@ import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.TNTPrimed;
@@ -22,10 +23,12 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
+import org.bukkit.event.entity.FireworkExplodeEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -33,6 +36,7 @@ import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.projectiles.ProjectileSource;
 
 import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.Game;
@@ -245,6 +249,31 @@ public class SkillListeners implements Listener {
 		e.getLocation().getWorld().createExplosion(e.getLocation(), 5.2f, false, true, tnt.getSource());
 		e.setYield(1.0f);
 		e.setCancelled(true);
+	}
+	
+	// ARTIFICE
+	private static final boolean artifice = Func.primeContain(SkillSelection.getSkills(), Skill.ARTIFICE);
+	
+	@EventHandler
+	public void onFireworkExplode(FireworkExplodeEvent e) {
+		Firework fw = e.getEntity();
+		ProjectileSource shooter = fw.getShooter();
+		if (!(shooter instanceof Player)) return;
+		System.out.println(((Player) shooter).getName());
+		if (SkillSelection.get((Player) shooter) != Skill.ARTIFICE) return;
+		
+		fw.getWorld().createExplosion(fw.getLocation(), 1.0f, false, true, (Entity) shooter);
+	}
+	
+	@EventHandler
+	public void onPlayerDamagedFromFirework(EntityDamageByEntityEvent e) {
+		if (!artifice || SkillSelection.empty(Skill.ARTIFICE)) return;
+		if (!(e.getDamager() instanceof Firework)) return;
+		Firework fw = (Firework) e.getDamager();
+		if (!(fw.getShooter() instanceof Player)) return;
+		if (SkillSelection.get((Player) fw.getShooter()) != Skill.ARTIFICE) return;
+		
+		e.setDamage(1.5 * e.getFinalDamage());
 	}
 	
 	// ROUBLARD
