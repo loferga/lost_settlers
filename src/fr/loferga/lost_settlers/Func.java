@@ -1,6 +1,8 @@
 package fr.loferga.lost_settlers;
 
-import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -26,15 +28,15 @@ public class Func {
 	}
 	
 	// return the a list<String> only with the matching element with the *sample*
-	public static String[] matches(String[] list, String sample) {
-		int i = 0;                  // iteration pointer
-		int j = 0;                  // numer of keeped elements
-		int size = list.length;     // size
-		String[] keeped = new String[size];
-		while (i++<size)
-			if (list[i].startsWith(sample))
-				keeped[j++] = list[i];
-		return Arrays.copyOfRange(keeped, 0, j);
+	public static Collection<String> matches(Iterable<String> list, String sample) {
+		Collection<String> keeped = new HashSet<>();
+		Iterator<String> it = list.iterator();
+		while (it.hasNext()) {
+			String next = it.next();
+			if (next.startsWith(sample))
+				keeped.add(next);
+		}
+		return keeped;
 	}
 	
 	public static String toReadable(String msg, int i) {

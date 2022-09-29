@@ -2,6 +2,7 @@ package fr.loferga.lost_settlers.game;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -16,10 +17,13 @@ public class Start implements TabExecutor {
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
 		List<String> res = new ArrayList<>();
-		if (args.length == 1)
-			for (String wn : Main.getPlugin(Main.class).getConfig().getConfigurationSection("maps").getKeys(false))
+		Set<String> mapNames = Main.getPlugin(Main.class).getConfig().getConfigurationSection("maps").getKeys(false);
+		if (args.length == 1) {
+			for (String wn : mapNames)
 				if (!wn.equals("spawn"))
 					res.add(wn);
+		} else if (args.length == 2)
+			res.addAll(Func.matches(mapNames, args[1]));
 		return res;
 	}
 
