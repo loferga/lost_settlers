@@ -92,9 +92,6 @@ public class TeamMngr {
 					DyeColor.valueOf(((String) data.get(2)).toUpperCase()),
 					Color.fromRGB((int) data.get(3), (int) data.get(4), (int) data.get(5))
 				);
-			System.out.println(Color.ORANGE.getRed() + ", " + Color.ORANGE.getGreen() + ", " + Color.ORANGE.getBlue());
-			System.out.println(Color.RED.getRed() + ", " + Color.RED.getGreen() + ", " + Color.RED.getBlue());
-			System.out.println(Color.PURPLE.getRed() + ", " + Color.PURPLE.getGreen() + ", " + Color.PURPLE.getBlue());
 			i++;
 		}
 		return teams;

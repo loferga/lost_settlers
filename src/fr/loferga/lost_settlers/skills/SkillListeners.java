@@ -11,6 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
@@ -263,6 +264,7 @@ public class SkillListeners implements Listener {
 		if (SkillSelection.get((Player) shooter) != Skill.ARTIFICE) return;
 		
 		fw.getWorld().createExplosion(fw.getLocation(), 1.0f, false, true, (Entity) shooter);
+		for (Player p : fw.getWorld().getPlayers()) p.stopSound(Sound.ENTITY_GENERIC_EXPLODE);
 	}
 	
 	@EventHandler
@@ -273,10 +275,7 @@ public class SkillListeners implements Listener {
 		if (!(fw.getShooter() instanceof Player)) return;
 		if (SkillSelection.get((Player) fw.getShooter()) != Skill.ARTIFICE) return;
 		
-		System.out.println("entity " + e.getEntity().getName() + " should have take " + e.getFinalDamage() +
-				" and took " + 1.5 * e.getFinalDamage() + " instead");
-		
-		e.setDamage(1.5 * e.getFinalDamage());
+		e.setDamage(2 * e.getFinalDamage());
 	}
 	
 	// ROUBLARD
@@ -304,16 +303,17 @@ public class SkillListeners implements Listener {
 	@EventHandler
 	public void onPlayerEnterNewBlock(PlayerMoveEvent e) {
 		if (!pistage || SkillSelection.empty(Skill.PISTAGE)) return;
+		Player p = e.getPlayer();
+		if (GameMngr.gameIn(p) == null) return;
+		
 		Location from = e.getFrom();
 		Location to = e.getTo();
-		Player p = e.getPlayer();
-		
 		if (inAir.contains(p)) {inAir.remove(p); new Footprint(p); return;}
 		if ((int)from.getX() == (int)to.getX() && (int)from.getY() == (int)to.getY() && (int)from.getZ() == (int)to.getZ()) return;
 		
-		if (((Entity) p).isOnGround()) {
-			inAir.add(p);
-		} else new Footprint(p);
+		if (((Entity) p).isOnGround())
+			new Footprint(p);
+		else inAir.add(p);
 	}
 	
 	// PRECISION
