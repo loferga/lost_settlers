@@ -264,7 +264,6 @@ public class SkillListeners implements Listener {
 		if (SkillSelection.get((Player) shooter) != Skill.ARTIFICE) return;
 		
 		fw.getWorld().createExplosion(fw.getLocation(), 1.0f, false, true, (Entity) shooter);
-		for (Player p : fw.getWorld().getPlayers()) p.stopSound(Sound.ENTITY_GENERIC_EXPLODE);
 	}
 	
 	@EventHandler

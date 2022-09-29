@@ -1,5 +1,6 @@
 package fr.loferga.lost_settlers.game;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.Material;
@@ -72,19 +73,15 @@ public class MobMngr {
 		// get all the allowed potion effect types in temp, an excessively large array
 		String path = "mobs.effect.allowed";
 		List<String> pet = cfg.getStringList(path);
-		PotionEffectType[] temp = new PotionEffectType[pet.size()];
+		PotionEffectType[] res = new PotionEffectType[pet.size()];
 		int j = 0;
 		for (String str : pet) {
 			// potion effect type is allowed only if it's written in config.ymlkk
 			for (PotionEffectType p : PotionEffectType.values())
 				if (p.toString().toLowerCase().equals(str))
-					temp[j++] = p;
+					res[j++] = p;
 		}
-		// then clean the temp array to get res array
-		PotionEffectType[] res = new PotionEffectType[j];
-		for (int i = 0; i<j; i++)
-			res[i] = temp[i];
-		return res;
+		return Arrays.copyOfRange(res, 0, j);
 	}
 	
 	public static void setProperties(Entity ent, double ratio, boolean artifact) {

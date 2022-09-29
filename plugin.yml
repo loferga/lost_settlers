@@ -13,6 +13,8 @@ commands:
     description: LostSettlers command to send a message with all the players in a world
   lsteam:
     description: LostSettlers command to change a player\'s team, non-operators can only change their team
+  skill:
+    description: LostSettlers command to change a player\'s skill, non -operators can only change their skill
   start:
     description: LostSettlers command to start a new game in a specified world (set the worldspawn to the center of the camps)
     permission: op
