@@ -40,10 +40,10 @@ maps:
         
 
 teams:
-# <displayName>: "[flagMaterial, DyeColor, Color, ChatColor]"
-  Oranges: ["gold", "orange_concrete", "orange", "orange"]
-  Rouges: ["red", "red_concrete", "red", "red"]
-  Violets: ["light_purple", "purple_concrete", "purple", "purple"]
+# <teamName>: "[ChatColor, flagMaterial, DyeColor, red, green and blue value of team Color]"
+  Oranges: ["gold", "orange_concrete", "orange", 255, 120, 0]
+  Rouges: ["red", "red_concrete", "red", 255, 0, 0]
+  Violets: ["light_purple", "purple_concrete", "purple", 160, 0, 255]
 
 # WIP
 mobs:

@@ -69,23 +69,32 @@ public class TeamMngr {
 	 */
 	
 	public static LSTeam[] buildTeams(ConfigurationSection section, Scoreboard sb) {
+		/*
 		colors = new Color[] {
 				Color.AQUA, Color.BLACK, Color.BLUE, Color.FUCHSIA, Color.GRAY,
 				Color.GREEN, Color.LIME, Color.MAROON,Color.NAVY, Color.OLIVE,
 				Color.ORANGE, Color.PURPLE, Color.RED, Color.SILVER, Color.TEAL,
 				Color.WHITE, Color.YELLOW
 		};
+		*/
 		LSTeam[] teams = new LSTeam[section.getKeys(false).size()];
 		int i = 0;
 		for (String key : section.getKeys(false)) {
-			List<String> data = section.getStringList(key);
+			List<?> data = section.getList(key);
 			Team team = null;
 			try {
-				team = createTeam(sb, ChatColor.valueOf(data.get(0).toUpperCase()), key);
+				team = createTeam(sb, ChatColor.valueOf(((String) data.get(0)).toUpperCase()), key);
 			} catch (Exception e) {
 				team = sb.getTeam(key);
 			}
-			teams[i] = new LSTeam(team, Material.valueOf(data.get(1).toUpperCase()), DyeColor.valueOf(data.get(2).toUpperCase()), colorValueOf(data.get(3).toUpperCase()));
+			teams[i] = new LSTeam(
+					team, Material.valueOf(((String) data.get(1)).toUpperCase()),
+					DyeColor.valueOf(((String) data.get(2)).toUpperCase()),
+					Color.fromRGB((int) data.get(3), (int) data.get(4), (int) data.get(5))
+				);
+			System.out.println(Color.ORANGE.getRed() + ", " + Color.ORANGE.getGreen() + ", " + Color.ORANGE.getBlue());
+			System.out.println(Color.RED.getRed() + ", " + Color.RED.getGreen() + ", " + Color.RED.getBlue());
+			System.out.println(Color.PURPLE.getRed() + ", " + Color.PURPLE.getGreen() + ", " + Color.PURPLE.getBlue());
 			i++;
 		}
 		return teams;
@@ -98,15 +107,6 @@ public class TeamMngr {
 		team.setCanSeeFriendlyInvisibles(false);
 		team.setOption(Option.COLLISION_RULE, OptionStatus.ALWAYS);
 		return team;
-	}
-	
-	private static Color[] colors;
-	
-	private static Color colorValueOf(String str) {
-		for (Color clr : colors)
-			if (clr.toString().equals(str))
-				return clr;
-		return null;
 	}
 	
 	/*
