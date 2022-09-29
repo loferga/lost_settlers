@@ -26,7 +26,11 @@ public class TeamMngr {
 	private static ConfigurationSection section = Main.getPlugin(Main.class).getConfig().getConfigurationSection("teams");
 	private static Scoreboard sb = Bukkit.getScoreboardManager().getMainScoreboard();
 	
-	private static final LSTeam[] TEAMS = buildTeams(section, sb);
+	private static final LSTeam[] TEAMS = buildTeams(section);
+	public static final LSTeam NULL = new LSTeam(
+			createTeam(ChatColor.RESET, "NULL", true),
+					null, DyeColor.WHITE, Color.WHITE
+				);
 	
 	public static LSTeam[] get() {
 		return TEAMS;
@@ -40,6 +44,7 @@ public class TeamMngr {
 	public static void remove(Player p) {
 		LSTeam team = teamOf(p);
 		if (team != null) team.leave(p);
+		NULL.join(p);
 		DogsMngr.setDogsColor(p, DyeColor.WHITE);
 	}
 	
@@ -68,42 +73,38 @@ public class TeamMngr {
 	 * ============================================================================
 	 */
 	
-	public static LSTeam[] buildTeams(ConfigurationSection section, Scoreboard sb) {
-		/*
-		colors = new Color[] {
-				Color.AQUA, Color.BLACK, Color.BLUE, Color.FUCHSIA, Color.GRAY,
-				Color.GREEN, Color.LIME, Color.MAROON,Color.NAVY, Color.OLIVE,
-				Color.ORANGE, Color.PURPLE, Color.RED, Color.SILVER, Color.TEAL,
-				Color.WHITE, Color.YELLOW
-		};
-		*/
+	public static LSTeam[] buildTeams(ConfigurationSection section) {
 		LSTeam[] teams = new LSTeam[section.getKeys(false).size()];
 		int i = 0;
 		for (String key : section.getKeys(false)) {
 			List<?> data = section.getList(key);
-			Team team = null;
-			try {
-				team = createTeam(sb, ChatColor.valueOf(((String) data.get(0)).toUpperCase()), key);
-			} catch (Exception e) {
-				team = sb.getTeam(key);
-			}
-			teams[i] = new LSTeam(
-					team, Material.valueOf(((String) data.get(1)).toUpperCase()),
+			
+			teams[i++] = new LSTeam(
+					createTeam(ChatColor.valueOf(((String) data.get(0)).toUpperCase()), key, false),
+					Material.valueOf(((String) data.get(1)).toUpperCase()),
 					DyeColor.valueOf(((String) data.get(2)).toUpperCase()),
 					Color.fromRGB((int) data.get(3), (int) data.get(4), (int) data.get(5))
 				);
-			i++;
+			
 		}
 		return teams;
 	}
 	
-	private static Team createTeam(Scoreboard sb, ChatColor color, String name) {
-		Team team = sb.registerNewTeam(name);
+	private static Team createTeam(ChatColor color, String name, boolean canSeeInvisible) {
+		Team team = sb.getTeam(name);
+		if (team != null) team.unregister();
+		team = sb.registerNewTeam(name);
 		team.setColor(color);
 		team.setDisplayName(color + name);
-		team.setCanSeeFriendlyInvisibles(false);
+		team.setCanSeeFriendlyInvisibles(canSeeInvisible);
 		team.setOption(Option.COLLISION_RULE, OptionStatus.ALWAYS);
 		return team;
+	}
+	
+	public static void removeAllTeams() {
+		for (LSTeam team : TEAMS)
+			team.unregister();
+		NULL.unregister();
 	}
 	
 	/*

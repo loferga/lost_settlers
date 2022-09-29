@@ -57,7 +57,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -79,6 +78,10 @@ public class Listeners implements Listener {
 	
 	@EventHandler
 	public void onJoin(final PlayerJoinEvent e) {
+		Player p = e.getPlayer();
+		if (p.getWorld() != Main.hub) {GUIMngr.giveSelector(p); return;}
+		if (TeamMngr.teamOf(p) != null) return;
+			TeamMngr.join(p, TeamMngr.NULL);
 	}
 	
 	// events with multiples effects
@@ -163,6 +166,13 @@ public class Listeners implements Listener {
 				DogMngr.onOrder(e);
 			} else if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.hasItem() && e.getItem().getType() != Material.TNT)
 				e.setCancelled(campBlockBreak(e.getClickedBlock(), e.getPlayer()));
+		} else if (e.getAction() == Action.RIGHT_CLICK_AIR
+				|| (e.getAction() == Action.RIGHT_CLICK_BLOCK && !e.getClickedBlock().getType().isInteractable())) {
+			
+			if (e.getItem() == null || !GUIMngr.isSelector(e.getItem())) return;
+			
+			e.getPlayer().openInventory(GUIMngr.getTM(e.getPlayer()));
+			
 		}
 	}
 	
@@ -236,16 +246,6 @@ public class Listeners implements Listener {
 	 */
 	
 	@EventHandler
-	public void onPlayerToggleSneak(PlayerToggleSneakEvent e) {
-		Player p = e.getPlayer();
-		if (p.getWorld() == Main.hub &&
-				p.getGameMode() == GameMode.ADVENTURE &&
-				!p.getScoreboardTags().contains("noSelection")
-				)
-			p.openInventory(GUIMngr.getTM(p));
-	}
-	
-	@EventHandler
 	public void onInventoryClick(InventoryClickEvent e) {
 		if (GameMngr.gameIn((Player) e.getView().getPlayer()) == null) {
 			if (e.getCurrentItem() != null) {
@@ -264,7 +264,6 @@ public class Listeners implements Listener {
 			e.setCancelled(true);
 		}
 	}
-	
 	/*
 	 * ============================================================================
 	 *                                     RULES

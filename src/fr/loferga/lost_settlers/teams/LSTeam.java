@@ -75,4 +75,8 @@ public class LSTeam {
 		return team.hasEntry(p.getName());
 	}
 	
+	public void unregister() {
+		team.unregister();
+	}
+	
 }

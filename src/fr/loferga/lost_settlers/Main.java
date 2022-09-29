@@ -6,10 +6,12 @@ import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.comphenix.protocol.PacketType;
@@ -40,12 +42,17 @@ public class Main extends JavaPlugin{
 	public static Map<Integer, Set<Player>> glow = new HashMap<>();
 	public static World hub;
 	
+	public static final ItemStack SELECTOR = new ItemStack(Material.COMPASS, 1);
+	
 	public void onEnable() {
 		
 		saveDefaultConfig();
 		
 		hub = new WorldCreator(Main.getPlugin(Main.class).getConfig().getString("maps.spawn.worldname")).createWorld();
 		hub.setPVP(false);
+		
+		// in case of a reload, players that already are in hub need to be initialized
+		for (Player p : Main.hub.getPlayers()) {GUIMngr.giveSelector(p); TeamMngr.join(p, TeamMngr.NULL);}
 		
 		new MapMngr();
 		new GUIMngr();
@@ -91,11 +98,10 @@ public class Main extends JavaPlugin{
 	}
 	
 	public void onDisable() {
-		for (Player p : Bukkit.getOnlinePlayers()) {
-			if (p.getWorld() != hub)
-				TeamMngr.remove(p);
+		for (Player p : Bukkit.getOnlinePlayers())
+			if (MapMngr.isMap(p.getWorld()))
 				MapMngr.spawnTeleport(p);
-			}
+		TeamMngr.removeAllTeams();
 		ConsoleCommandSender console = getServer().getConsoleSender();
 		console.sendMessage("[LostSettlers] " + ChatColor.DARK_RED + "Plugin Disabled");
     }

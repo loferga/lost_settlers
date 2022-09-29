@@ -16,9 +16,11 @@ import org.bukkit.entity.Player;
 
 import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.Main;
+import fr.loferga.lost_settlers.gui.GUIMngr;
 import fr.loferga.lost_settlers.map.camps.Camp;
 import fr.loferga.lost_settlers.map.geometry.Point;
 import fr.loferga.lost_settlers.map.geometry.Vector;
+import fr.loferga.lost_settlers.teams.TeamMngr;
 
 public class MapMngr {
 	
@@ -46,6 +48,10 @@ public class MapMngr {
 			if (w.getName().endsWith(wn))
 				return w;
 		return null;
+	}
+	
+	public static boolean isMap(World w) {
+		return worlds.contains(w);
 	}
 	
 	public static void add(MapSettings ms) {
@@ -226,7 +232,10 @@ public class MapMngr {
 	}
 	
 	public static void spawnTeleport(Player p) {
+		p.getInventory().clear();
+		GUIMngr.giveSelector(p);
 		p.setGameMode(GameMode.ADVENTURE);
+		if (TeamMngr.teamOf(p) == null) TeamMngr.join(p, TeamMngr.NULL);
 		p.teleport(new Location(Bukkit.getWorlds().get(0), SPAWN.get(0), SPAWN.get(1), SPAWN.get(2)));
 	}
 	

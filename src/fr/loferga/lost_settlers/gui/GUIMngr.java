@@ -31,6 +31,28 @@ public class GUIMngr {
 	
 	private static Plugin plg = Main.getPlugin(Main.class);
 	
+	private static final NamespacedKey selectorKey = new NamespacedKey(plg, "selector");
+	
+	private static final ItemStack SELECTOR = buildSelector();
+	private static ItemStack buildSelector() {
+		ItemStack sel = new ItemStack(Material.COMPASS);
+		ItemMeta selm = sel.getItemMeta();
+		selm.setDisplayName(Func.format("&6Selection"));
+		selm.getPersistentDataContainer().set(
+				selectorKey, PersistentDataType.BYTE, (byte) 1
+			);
+		sel.setItemMeta(selm);
+		return sel;
+	}
+	
+	public static boolean isSelector(ItemStack i) {
+		return i.getItemMeta().getPersistentDataContainer().has(selectorKey, PersistentDataType.BYTE);
+	}
+	
+	public static void giveSelector(Player p) {
+		p.getInventory().setItem(8, SELECTOR);
+	}
+	
 	private static final ItemStack[] T_ITEMS = buildTeamsItem();
 	private static ItemStack[] buildTeamsItem() {
 		LSTeam[] teams = TeamMngr.get();
