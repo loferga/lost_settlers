@@ -1,7 +1,6 @@
 package fr.loferga.lost_settlers.map;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.World;
@@ -18,10 +17,13 @@ public class CloseWorld implements TabExecutor {
 	public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
 		List<String> res = new ArrayList<>();
 		if (args.length == 1)
-			for (World w : MapMngr.worlds)
-				res.add(w.getName().substring(3));
+			for (World w : MapMngr.worlds) {
+				String wname = w.getName().substring(3);
+				if (wname.startsWith(args[0]))
+					res.add(wname);
+			}
 		if (args.length == 2)
-			res.addAll(Arrays.asList("save", "restore"));
+			res.addAll(Func.matches(List.of("save", "restore"), args[1]));
 		return res;
 	}
 

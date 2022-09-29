@@ -15,12 +15,11 @@ import fr.loferga.lost_settlers.game.GameMngr;
 
 public class SelectTeam implements TabExecutor {
 	
-	public static final List<String> TEAM_NAMES = teamsNames();
+	public static final List<String> TEAMS_NAMES = teamsNames();
 	private static List<String> teamsNames() {
 		List<String> res = new ArrayList<>(Arrays.asList("#null"));
-		for (LSTeam team : TeamMngr.get()) {
+		for (LSTeam team : TeamMngr.get())
 			res.add(team.getRawName());
-		}
 		return res;
 	}
 
@@ -29,7 +28,7 @@ public class SelectTeam implements TabExecutor {
 		Player p = (Player) sender;
 		if (GameMngr.gameIn(p) == null) {
 			if (args.length == 1)
-				return TEAM_NAMES;
+				return Func.matches(TEAMS_NAMES, args[0]);
 			if (args.length == 2 && p.isOp())
 				return null;
 		}
@@ -78,6 +77,8 @@ public class SelectTeam implements TabExecutor {
 	
 	private void sendInvalid(Player p) {
 		p.sendMessage(Func.format("&cInvalid usage, please use:\n/lsteam <team>"));
+		if (p.isOp())
+			p.sendMessage(Func.format("&cor /lsteam <team> <player>"));
 	}
 
 }

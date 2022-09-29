@@ -33,18 +33,31 @@ public class SkillSelection {
 		return null;
 	}
 	
-	public static void select(Player p, String name) {
-		for (Skill s : getSkills())
-			if (selection.get(s).contains(p))
-				selection.get(s).remove(p);
+	public static boolean select(Player p, String name) {
 		try {
-			Skill s = Skill.valueOf(name);
-			if (selection.containsKey(s))
-				selection.get(s).add(p);
+			select(p, Skill.valueOf(name));
+			return true;
 		} catch (IllegalArgumentException e) {
-			System.out.println(ChatColor.RED + "[LS] IllegalArgumentException at "
-					+ "SkillSelection.select(Player p, String name), \"" + name +"\" is not a SkillName" );
+			System.out.println(ChatColor.RED + "[LS] IllegalArgumentException occured at "
+					+ "skill selection, \"" + name +"\" is not a SkillName" );
 		}
+		return false;
+	}
+	
+	public static void select(Player p, Skill skill) {
+		deselect(p);
+		if (selection.containsKey(skill))
+			selection.get(skill).add(p);
+		else System.out.println(ChatColor.RED + "[LS] Exception occured at "
+				+ "skill selection, \"" + skill.toString() +"\" is not allowed (change it in config.yml)" );
+	}
+	
+	public static void deselect(Player p) {
+		for (Skill s : getSkills())
+			if (selection.get(s).contains(p)) {
+				selection.get(s).remove(p);
+				break;
+			}
 	}
 	
 	public static boolean empty(Skill s) {

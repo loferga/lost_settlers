@@ -28,6 +28,7 @@ import fr.loferga.lost_settlers.map.ClearOres;
 import fr.loferga.lost_settlers.map.CloseWorld;
 import fr.loferga.lost_settlers.map.Lobby;
 import fr.loferga.lost_settlers.map.Warp;
+import fr.loferga.lost_settlers.skills.SkillCommand;
 import fr.loferga.lost_settlers.skills.SkillListeners;
 import fr.loferga.lost_settlers.teams.SelectTeam;
 import fr.loferga.lost_settlers.teams.TeamMngr;
@@ -53,6 +54,7 @@ public class Main extends JavaPlugin{
 		getCommand("lobby").setExecutor(new Lobby());
 		getCommand("all").setExecutor(new All());
 		getCommand("lsteam").setExecutor(new SelectTeam());
+		getCommand("skill").setExecutor(new SkillCommand());
 		getCommand("start").setExecutor(new Start());
 		getCommand("end").setExecutor(new End());
 		getCommand("warp").setExecutor(new Warp());

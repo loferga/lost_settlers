@@ -18,12 +18,9 @@ public class Start implements TabExecutor {
 	public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
 		List<String> res = new ArrayList<>();
 		Set<String> mapNames = Main.getPlugin(Main.class).getConfig().getConfigurationSection("maps").getKeys(false);
-		if (args.length == 1) {
-			for (String wn : mapNames)
-				if (!wn.equals("spawn"))
-					res.add(wn);
-		} else if (args.length == 2)
-			res.addAll(Func.matches(mapNames, args[1]));
+		mapNames.remove("spawn");
+		if (args.length == 1)
+			res.addAll(Func.matches(mapNames, args[0]));
 		return res;
 	}
 

@@ -2,6 +2,7 @@ package fr.loferga.lost_settlers.map;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -17,9 +18,9 @@ public class Warp implements TabExecutor {
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
 		List<String> res = new ArrayList<>();
+		Set<String> mapNames = Main.getPlugin(Main.class).getConfig().getConfigurationSection("maps").getKeys(false);
 		if (args.length == 1)
-			for (String wn : Main.getPlugin(Main.class).getConfig().getConfigurationSection("maps").getKeys(false))
-				res.add(wn);
+			res.addAll(Func.matches(mapNames, args[0]));
 		return res;
 	}
 
