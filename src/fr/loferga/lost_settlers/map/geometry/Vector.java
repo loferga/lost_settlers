@@ -1,5 +1,7 @@
 package fr.loferga.lost_settlers.map.geometry;
 
+import org.bukkit.Location;
+
 public class Vector {
 	
 	public Vector(double x, double y, double z) {
@@ -22,6 +24,22 @@ public class Vector {
 	
 	public double z() {
 		return z;
+	}
+	
+	public void setX(double x) {
+		this.x = x;
+	}
+	
+	public void setY(double y) {
+		this.y = y;
+	}
+	
+	public void setZ(double z) {
+		this.z = z;
+	}
+	
+	public void addTo(Location location) {
+		location.add(x, y, z);
 	}
 	
 	public double[] values() {

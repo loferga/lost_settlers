@@ -18,10 +18,10 @@ public class MapSettings {
 		this.chamber = cfg.getBoolean("chamber_active");
 		this.lodes = cfg.getBoolean("lodes_active");
 		
-		this.camps = new Camp[cfg.getConfigurationSection("camps.positions").getKeys(false).size()];
-		buildCamps(cfg.getConfigurationSection("camps"));
 		this.cSize = cfg.getDouble("camps.settings.camp_size");
 		this.vSize = cfg.getDouble("camps.settings.vital_size");
+		this.camps = new Camp[cfg.getConfigurationSection("camps.positions").getKeys(false).size()];
+		buildCamps(cfg.getConfigurationSection("camps"));
 		
 		this.highestGround = cfg.getDouble("highest_ground");
 		if (chamber)
@@ -41,7 +41,7 @@ public class MapSettings {
 					camp,
 					null,
 					new Location(world, (double) data.get(0), (double) data.get(1), (double) data.get(2)),
-					(boolean) data.get(3)
+					(boolean) data.get(3), vSize
 				);
  			i++;
 		}

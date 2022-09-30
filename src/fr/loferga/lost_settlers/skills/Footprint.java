@@ -35,7 +35,6 @@ public class Footprint extends BukkitRunnable {
 	}
 	
 	private void createParticle(Player p) {
-		System.out.println("enter createParticle");
 		double ratio = c1aff((double) duration / maxD, 0.9);
 		int[] c = new int[] {255, 0, 0};
 		if (TeamMngr.teamOf(p) == team)

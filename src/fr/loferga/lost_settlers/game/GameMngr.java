@@ -113,7 +113,8 @@ public class GameMngr {
 		String[] rt = Func.toReadableTime(gameTime);
 		Bukkit.broadcastMessage(Func.format("&eLa partie s\'est terminee en &3" + rt[0] + rt[1] + rt[2] + "&e."));
 		game.clearFlags();
-		game.unfreezeChamber();
+		for (Camp c : game.getMapSettings().camps)
+			c.killZoneEffect();
 		World gw = game.getWorld();
 		gw.getWorldBorder().setSize(Double.MAX_VALUE);
 		gw.setDifficulty(Difficulty.PEACEFUL);

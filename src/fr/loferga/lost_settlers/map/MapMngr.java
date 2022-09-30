@@ -153,15 +153,15 @@ public class MapMngr {
 			}
 			// BARRIER
 			Location barrierLoc = c.getLocation().clone().add(RANGE, 1, RANGE+1);
-			org.bukkit.util.Vector move = new org.bukkit.util.Vector(-1, 0, 0);
+			Vector move = new Vector(-1, 0, 0);
 			int sideLen = ((int) (RANGE+1)*2);
 			for (int side = 0; side<4; side++) {
 				for (int i = 0; i<sideLen; i++) {
 					setBlockType(barrierLoc.clone(), Material.BARRIER, mem);
-					barrierLoc.add(move);
+					move.addTo(barrierLoc);
 				}
 				turnLeft(move);
-				barrierLoc.add(move);
+				move.addTo(barrierLoc);
 			}
 			
 		}
@@ -173,12 +173,12 @@ public class MapMngr {
 		bloc.getBlock().setType(type);
 	}
 	
-	private static void turnLeft(org.bukkit.util.Vector vec) {
-		if (vec.getX()!=0) {
-			vec.setZ(vec.getX());
+	private static void turnLeft(Vector vec) {
+		if (vec.x()!=0) {
+			vec.setZ(vec.x());
 			vec.setX(0);
 		} else {
-			vec.setX(-vec.getZ());
+			vec.setX(-vec.z());
 			vec.setZ(0);
 		}
 	}

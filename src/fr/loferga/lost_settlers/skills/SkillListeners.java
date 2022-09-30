@@ -306,7 +306,11 @@ public class SkillListeners implements Listener {
 		
 		Location from = e.getFrom();
 		Location to = e.getTo();
-		if (inAir.contains(p)) {inAir.remove(p); new Footprint(p); return;}
+		if (inAir.contains(p)) {
+			if (((Entity) p).isOnGround()) {inAir.remove(p); new Footprint(p);}
+			return;
+		}
+		
 		if ((int)from.getX() == (int)to.getX() && (int)from.getY() == (int)to.getY() && (int)from.getZ() == (int)to.getZ()) return;
 		
 		if (((Entity) p).isOnGround())
