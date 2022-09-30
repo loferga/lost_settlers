@@ -6,9 +6,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 
 import fr.loferga.lost_settlers.Func;
-import fr.loferga.lost_settlers.map.geometry.Matrix;
-import fr.loferga.lost_settlers.map.geometry.Point;
-import fr.loferga.lost_settlers.map.geometry.Vector;
+import fr.loferga.lost_settlers.map.geometry.*;
 
 public class Lode {
 	
