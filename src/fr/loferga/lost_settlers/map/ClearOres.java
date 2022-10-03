@@ -13,6 +13,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
 import fr.loferga.lost_settlers.Func;
+import fr.loferga.lost_settlers.map.settings.MapSettings;
 
 public class ClearOres implements TabExecutor {
 	

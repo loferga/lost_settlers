@@ -17,7 +17,7 @@ public class CloseWorld implements TabExecutor {
 	public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
 		List<String> res = new ArrayList<>();
 		if (args.length == 1)
-			for (World w : MapMngr.worlds) {
+			for (World w : MapMngr.getWorlds()) {
 				String wname = w.getName().substring(3);
 				if (wname.startsWith(args[0]))
 					res.add(wname);
@@ -33,7 +33,7 @@ public class CloseWorld implements TabExecutor {
 			Player p = (Player) sender;
 			if (args.length == 2)
 				if (args[1].equals("save") || args[1].equals("restore"))
-					for (World w : MapMngr.worlds)
+					for (World w : MapMngr.getWorlds())
 						if (w.getName().endsWith(args[0])) {
 							for (Player wp : w.getPlayers())
 								MapMngr.spawnTeleport(wp);

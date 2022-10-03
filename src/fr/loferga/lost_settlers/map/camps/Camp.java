@@ -11,13 +11,12 @@ import fr.loferga.lost_settlers.teams.LSTeam;
 
 public class Camp {
 
-	public Camp(String name, LSTeam team, Location location, boolean direction, double vSize) {
+	public Camp(String name, LSTeam team, Location location, boolean direction) {
 		this.name = name;
 		this.owners = new ArrayList<>(Arrays.asList(new Owner(team, System.currentTimeMillis())));
 		this.rivals = new ArrayList<>(Arrays.asList(team));
 		this.location = location;
 		this.direction = direction;
-		this.zoneEffect = new ZoneEffect(this, vSize);
 	}
 
 	private String name;
@@ -27,6 +26,10 @@ public class Camp {
 	private boolean direction;
 
 	private ZoneEffect zoneEffect;
+	
+	public void startZoneEffect() {
+		zoneEffect = new ZoneEffect(this);
+	}
 	
 	public void killZoneEffect() {
 		zoneEffect.stop();

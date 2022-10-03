@@ -6,6 +6,7 @@ import org.bukkit.Particle;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import fr.loferga.lost_settlers.Main;
+import fr.loferga.lost_settlers.map.MapMngr;
 import fr.loferga.lost_settlers.map.geometry.Vector;
 
 public class ZoneEffect extends BukkitRunnable {
@@ -17,9 +18,9 @@ public class ZoneEffect extends BukkitRunnable {
 	
 	private double vSize;
 	
-	public ZoneEffect(Camp camp, double vSize) {
+	public ZoneEffect(Camp camp) {
 		this.camp = camp;
-		this.vSize = vSize;
+		this.vSize = MapMngr.getMapSettings(camp.getLocation().getWorld()).vitalSize;
 		this.vSize -= this.vSize%STEP;
 		runTaskTimer(Main.getPlugin(Main.class), 0L, 5L);
 	}

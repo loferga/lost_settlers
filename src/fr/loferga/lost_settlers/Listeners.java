@@ -96,7 +96,7 @@ public class Listeners implements Listener {
 			if (g.pvp() && p.getGameMode() == GameMode.SURVIVAL)
 				if ((int)from.getX() != (int)to.getX() || (int)from.getZ() != (int)to.getZ())
 					campArea(p);
-				else if (g.getMapSettings().chamber && (int)from.getY() != (int)to.getY() && g.isInChamber(to))
+				else if (MapMngr.getMapSettings(from.getWorld()).isChamberActive() && (int)from.getY() != (int)to.getY() && g.isInChamber(to))
 					g.addPlayerInChamber(p);
 		}
 	}
@@ -181,11 +181,13 @@ public class Listeners implements Listener {
 		Location loc = e.getLocation();
 		Game game = GameMngr.getGame(loc.getWorld());
 		if (game != null && e.getEntity() instanceof Monster) {
-			if (game.isInChamber(loc))
+			if (game.getMapSettings().isChamberActive() && game.isInChamber(loc))
 				spawnMagmaCube(loc);
-			double ratio = game.undergroundLevel(loc);
-			if (ratio<=1)
-				MobMngr.setProperties(e.getEntity(), Math.abs(1-ratio), game.isInChamber(loc));
+			if (game.getMapSettings().isLodesActive()) {
+				double ratio = game.undergroundLevel(loc);
+				if (ratio<=1)
+					MobMngr.setProperties(e.getEntity(), Math.abs(1-ratio), game.isInChamber(loc));
+			}
 		}
 	}
 	

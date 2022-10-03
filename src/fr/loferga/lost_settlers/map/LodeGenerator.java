@@ -4,7 +4,9 @@ import org.bukkit.Material;
 
 public class LodeGenerator {
 	
-	protected LodeGenerator(Material ore, double yratio, int gaussFactor, double gaussOffset, double[] sizeBounds, int count) {
+	// DATA HOLDER
+	
+	public LodeGenerator(Material ore, double yratio, int gaussFactor, double gaussOffset, double[] sizeBounds, int count) {
 		this.ore = ore;
 		this.yratio = yratio;
 		this.gaussFactor = gaussFactor;
@@ -13,11 +15,11 @@ public class LodeGenerator {
 		this.count = count;
 	}
 	
-	protected Material ore;
-	protected double yratio;
-	protected int gaussFactor;
-	protected double gaussOffset;
-	protected double[] sizeBounds;
-	protected int count;
+	public Material ore;
+	public double yratio;
+	public int gaussFactor;
+	public double gaussOffset;
+	public double[] sizeBounds;
+	public int count;
 	
 }

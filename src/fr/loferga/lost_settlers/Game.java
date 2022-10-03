@@ -23,8 +23,8 @@ import fr.loferga.lost_settlers.dogs.Anger;
 import fr.loferga.lost_settlers.dogs.ComeBack;
 import fr.loferga.lost_settlers.game.GameMngr;
 import fr.loferga.lost_settlers.map.MapMngr;
-import fr.loferga.lost_settlers.map.MapSettings;
 import fr.loferga.lost_settlers.map.camps.Camp;
+import fr.loferga.lost_settlers.map.settings.MapSettings;
 import fr.loferga.lost_settlers.rules.Wounded;
 import fr.loferga.lost_settlers.skills.SkillRules;
 import fr.loferga.lost_settlers.teams.LSTeam;
@@ -49,17 +49,15 @@ public class Game extends BukkitRunnable {
 			res.get(TeamMngr.indexOf(TeamMngr.teamOf(p))).add(p);
 		this.teams = res;
 		
-		MapSettings ms = MapMngr.getMapSettings(world);
-		if (ms == null)
-			ms = new MapSettings(world, Main.getPlugin(Main.class).getConfig().getConfigurationSection("maps." + world.getName().substring(4)));
-		this.ms = ms;
+		this.ms = MapMngr.getMapSettings(world);
+		if (ms.canHostGame()) {
 		
-		Plugin plg = Main.getPlugin(Main.class);
-		Anger.getInstance().start(plg);
-		ComeBack.getInstance().start(plg);
-		Wounded.getInstance().start(plg);
-		SkillRules.getInstance().start(plg);
-		
+			Plugin plg = Main.getPlugin(Main.class);
+			Anger.getInstance().start(plg);
+			ComeBack.getInstance().start(plg);
+			Wounded.getInstance().start(plg);
+			SkillRules.getInstance().start(plg);
+		}
 	}
 	
 	private boolean pvp;
@@ -81,7 +79,7 @@ public class Game extends BukkitRunnable {
 		System.out.println("[LS] flags placing ...");
 		initFlags();
 		MapMngr.setWorldBorder(world, ms);
-		if (ms.lodes) {
+		if (ms.isLodesActive()) {
 			System.out.println("[LS] lodes generation ... ");
 			MapMngr.generateLodes(world, ms);
 		}
@@ -175,7 +173,6 @@ public class Game extends BukkitRunnable {
 	}
 	
 	public double undergroundLevel(Location loc) {
-		
 		return loc.getY() / ms.highestGround;
 	}
 	
@@ -223,7 +220,7 @@ public class Game extends BukkitRunnable {
 	private void getChamberLava() {
 		Location center = MapMngr.getMapCenter(world, ms);
 		double xm = center.getX() + ms.playableArea;
-		double ym = (int) ms.chamberHeight;
+		double ym = ms.chamberHeight;
 		double zm = center.getZ() + ms.playableArea;
 		for (double x = center.getX() - ms.playableArea; x < xm; x+=1)
 			for (double y = 3; y < ym; y+=1)
@@ -321,7 +318,7 @@ public class Game extends BukkitRunnable {
 	public void run() {
 		if (pvp)
 			conquest();
-		if (chrono % 20 == 0) { respawn(); if (ms.chamber) chamber(chrono); }
+		if (chrono % 20 == 0) { respawn(); if (ms.isChamberActive()) chamber(chrono); }
 		//DISPLAY
 		if (chrono >= goals[c]) {
 			if (c<3) {
@@ -463,17 +460,17 @@ public class Game extends BukkitRunnable {
 	
 	public boolean teamProtect(LSTeam t, Camp c) {
 		for (Player p : TeamMngr.alivePlayers(teams.get(TeamMngr.indexOf(t))))
-			if (inPerimeter(p.getLocation(), ms.vSize) != null)
+			if (inPerimeter(p.getLocation(), ms.vitalSize) != null)
 				return true;
 		return false;
 	}
 	
 	public Camp campIn(Location loc) {
-		return inPerimeter(loc, ms.cSize);
+		return inPerimeter(loc, ms.campSize);
 	}
 	
 	public Camp vitalIn(Location loc) {
-		return inPerimeter(loc, ms.vSize);
+		return inPerimeter(loc, ms.vitalSize);
 	}
 	
 	private Camp inPerimeter(Location loc, double P) {

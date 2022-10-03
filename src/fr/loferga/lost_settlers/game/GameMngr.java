@@ -11,13 +11,14 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.SpawnCategory;
 
 import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.Game;
 import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.map.MapMngr;
-import fr.loferga.lost_settlers.map.MapSettings;
 import fr.loferga.lost_settlers.map.camps.Camp;
+import fr.loferga.lost_settlers.map.settings.MapSettings;
 import fr.loferga.lost_settlers.skills.SkillListeners;
 import fr.loferga.lost_settlers.teams.LSTeam;
 import fr.loferga.lost_settlers.teams.TeamMngr;
@@ -74,13 +75,12 @@ public class GameMngr {
 		Main.getPlugin(Main.class).reloadConfig();
 		for (Player p : Main.hub.getPlayers()) p.sendMessage(Func.format("Chargement de la carte &e" + wn));
 		World world = MapMngr.newWorld(wn);
-		MapSettings ms = new MapSettings(world, Main.getPlugin(Main.class).getConfig().getConfigurationSection("maps." + wn));
-		MapMngr.add(ms);
+		MapSettings ms = MapMngr.getMapSettings(world);
 		world.setDifficulty(Difficulty.EASY);
 		world.setTime(0);
 		world.setSpawnFlags(true, true);
-		world.setWaterAnimalSpawnLimit(8);
-		world.setMonsterSpawnLimit(20);
+		world.setSpawnLimit(SpawnCategory.WATER_ANIMAL, 8);
+		world.setSpawnLimit(SpawnCategory.MONSTER, 20);
 		Location center = MapMngr.getMapCenter(world, ms);
 		if (center != world.getSpawnLocation()) world.setSpawnLocation(center);
 		// GAME

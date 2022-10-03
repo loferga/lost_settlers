@@ -1,9 +1,9 @@
 package fr.loferga.lost_settlers.map;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -20,49 +20,50 @@ import fr.loferga.lost_settlers.gui.GUIMngr;
 import fr.loferga.lost_settlers.map.camps.Camp;
 import fr.loferga.lost_settlers.map.geometry.Point;
 import fr.loferga.lost_settlers.map.geometry.Vector;
+import fr.loferga.lost_settlers.map.settings.MapSettings;
 import fr.loferga.lost_settlers.teams.TeamMngr;
 
 public class MapMngr {
 	
-	public static List<World> worlds = new ArrayList<>();
-	private static List<MapSettings> mapsSettings = new ArrayList<>();
+	private static Map<World, MapSettings> mapsSettings = new HashMap<>();
 	
 	private static final List<Double> SPAWN = Main.getPlugin(Main.class).getConfig().getDoubleList("maps.spawn.location");
 	private static final double RANGE = Main.getPlugin(Main.class).getConfig().getDouble("tp_range");
 	
 	public static World newWorld(String wn) {
 		World w = new WorldCreator("ls_" + wn).createWorld();
-		worlds.add(w);
+		mapsSettings.put(w, MapSettings.retrieveData(w));
 		w.setAutoSave(false);
 		return w;
+	}
+	
+	public static Set<World> getWorlds() {
+		return mapsSettings.keySet();
 	}
 	
 	public static void forget(World world, boolean save) {
 		Bukkit.unloadWorld(world, save);
 		Bukkit.getWorlds().remove(world);
-		worlds.remove(world);
+		mapsSettings.remove(world);
 	}
 	
 	public static World getWorldFromName(String wn) {
-		for (World w : worlds)
+		for (World w : mapsSettings.keySet())
 			if (w.getName().endsWith(wn))
 				return w;
 		return null;
 	}
 	
 	public static boolean isMap(World w) {
-		return worlds.contains(w);
+		return mapsSettings.containsKey(w);
 	}
 	
-	public static void add(MapSettings ms) {
-		mapsSettings.add(ms);
+	public static void add(World w, MapSettings ms) {
+		mapsSettings.put(w, ms);
 	}
 	
 	public static MapSettings getMapSettings(World world) {
-		for (MapSettings ms : mapsSettings)
-			if (ms.world == world)
-				return ms;
-		return null;
+		return mapsSettings.get(world);
 	}
 	
 	/*
@@ -133,6 +134,7 @@ public class MapMngr {
 	public static Map<Location, Material> setMap(MapSettings ms) {
 		Map<Location, Material> mem = new HashMap<>();
 		for (Camp c : ms.camps) {
+			c.startZoneEffect();
 			// BEAMS
 			Location beamLoc = c.getLocation().clone().add(0, -1, 0);
 			setBlockType(beamLoc.clone(), Material.valueOf(c.getOwner().getDyeColor().toString() + "_STAINED_GLASS"), mem);

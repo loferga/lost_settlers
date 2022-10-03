@@ -22,6 +22,7 @@ import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -31,6 +32,7 @@ import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.FireworkExplodeEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
@@ -216,6 +218,16 @@ public class SkillListeners implements Listener {
 		int duration = eff.getDuration();
 		p.addPotionEffect(new PotionEffect(eff.getType(), duration + (int)((1/5)*duration), eff.getAmplifier(), true, true));
 		e.setCancelled(true);
+	}
+	
+	@EventHandler
+	public void onRightClickAir(PlayerInteractEvent e) {
+		if (!glouton || SkillSelection.empty(Skill.GLOUTON)) return;
+		if (e.getAction() != Action.RIGHT_CLICK_AIR) return;
+		ItemStack item = e.getItem();
+		if (item == null || item.getType() != Material.PACKED_MUD) return;
+		
+		new FoodLevelChangeEvent(e.getPlayer(), 4);
 	}
 	
 	public static void giveGoldenApple(Player p) {
