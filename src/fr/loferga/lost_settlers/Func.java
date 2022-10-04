@@ -40,6 +40,15 @@ public class Func {
 		return keeped;
 	}
 	
+	public static <T extends Enum<T>> T valueOf(Class<T> e, String str) {
+		try {
+			return Enum.valueOf(e, str);
+		} catch (NullPointerException nullPException) {
+			nullPException.printStackTrace();
+		}
+		return null;
+	}
+	
 	public static String toReadable(String msg, int i) {
 		String msgu = msg.toUpperCase();
 		return msgu.substring(0, i).concat(msgu.substring(i).toLowerCase());

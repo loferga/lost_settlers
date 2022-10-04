@@ -17,8 +17,8 @@ import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.Game;
 import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.map.MapMngr;
+import fr.loferga.lost_settlers.map.MapSettings;
 import fr.loferga.lost_settlers.map.camps.Camp;
-import fr.loferga.lost_settlers.map.settings.MapSettings;
 import fr.loferga.lost_settlers.skills.SkillListeners;
 import fr.loferga.lost_settlers.teams.LSTeam;
 import fr.loferga.lost_settlers.teams.TeamMngr;
@@ -73,7 +73,7 @@ public class GameMngr {
 	public static void start(String wn) {
 		// MAP
 		Main.getPlugin(Main.class).reloadConfig();
-		for (Player p : Main.hub.getPlayers()) p.sendMessage(Func.format("Chargement de la carte &e" + wn));
+		for (Player p : MapMngr.HUB.getPlayers()) p.sendMessage(Func.format("Chargement de la carte &e" + wn));
 		World world = MapMngr.newWorld(wn);
 		MapSettings ms = MapMngr.getMapSettings(world);
 		world.setDifficulty(Difficulty.EASY);
@@ -84,7 +84,7 @@ public class GameMngr {
 		Location center = MapMngr.getMapCenter(world, ms);
 		if (center != world.getSpawnLocation()) world.setSpawnLocation(center);
 		// GAME
-		Game game = new Game(world, TeamMngr.teamedPlayers(Main.hub));
+		Game game = new Game(world, TeamMngr.teamedPlayers(MapMngr.HUB));
 		game.buildMap();
 		add(game);
 		// PLAYERS

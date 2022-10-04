@@ -79,7 +79,7 @@ public class Listeners implements Listener {
 	@EventHandler
 	public void onJoin(final PlayerJoinEvent e) {
 		Player p = e.getPlayer();
-		if (p.getWorld() != Main.hub) {GUIMngr.giveSelector(p); return;}
+		if (p.getWorld() != MapMngr.HUB) {GUIMngr.giveSelector(p); return;}
 		if (TeamMngr.teamOf(p) != null) return;
 			TeamMngr.join(p, TeamMngr.NULL);
 	}

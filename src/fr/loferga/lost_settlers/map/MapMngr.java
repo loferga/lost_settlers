@@ -1,7 +1,6 @@
 package fr.loferga.lost_settlers.map;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,25 +19,44 @@ import fr.loferga.lost_settlers.gui.GUIMngr;
 import fr.loferga.lost_settlers.map.camps.Camp;
 import fr.loferga.lost_settlers.map.geometry.Point;
 import fr.loferga.lost_settlers.map.geometry.Vector;
-import fr.loferga.lost_settlers.map.settings.MapSettings;
 import fr.loferga.lost_settlers.teams.TeamMngr;
 
 public class MapMngr {
 	
 	private static Map<World, MapSettings> mapsSettings = new HashMap<>();
+	public static final World HUB = newWorld("lobby");
 	
-	private static final List<Double> SPAWN = Main.getPlugin(Main.class).getConfig().getDoubleList("maps.spawn.location");
+	private static final int[] SPAWN = mapsSettings.get(HUB).worldSpawn;
 	private static final double RANGE = Main.getPlugin(Main.class).getConfig().getDouble("tp_range");
 	
 	public static World newWorld(String wn) {
-		World w = new WorldCreator("ls_" + wn).createWorld();
-		mapsSettings.put(w, MapSettings.retrieveData(w));
+		MapSettings ms = new MapSettings(wn);
+		World w = createWorld(wn, ms);
+		mapsSettings.put(w, ms);
+		return w;
+	}
+	
+	private static final String WORLD_NAME_PREFIX = "ls_";
+	
+	private static World createWorld(String wn, MapSettings ms) {
+		String name = WORLD_NAME_PREFIX + wn;
+		if (ms.isWorldNameSet()) name = ms.worldName;
+		WorldCreator wc = new WorldCreator(name);
+		
+		if (ms.isSeedSet()) wc.seed(ms.seed);
+		if (ms.isWorldTypeSet()) wc.type(ms.worldType);
+		World w = wc.createWorld();
+		if (ms.isWorldSpawnSet()) w.setSpawnLocation(ms.worldSpawn[0], ms.worldSpawn[1], ms.worldSpawn[2]);
+		ms.buildCamps(w);
 		w.setAutoSave(false);
+		
 		return w;
 	}
 	
 	public static Set<World> getWorlds() {
-		return mapsSettings.keySet();
+		Set<World> w = mapsSettings.keySet();
+		w.remove(HUB);
+		return w;
 	}
 	
 	public static void forget(World world, boolean save) {
@@ -238,7 +256,7 @@ public class MapMngr {
 		GUIMngr.giveSelector(p);
 		p.setGameMode(GameMode.ADVENTURE);
 		if (TeamMngr.teamOf(p) == null) TeamMngr.join(p, TeamMngr.NULL);
-		p.teleport(new Location(Bukkit.getWorlds().get(0), SPAWN.get(0), SPAWN.get(1), SPAWN.get(2)));
+		p.teleport(new Location(HUB, (double) SPAWN[0] + 0.5, (double) SPAWN[1], (double) SPAWN[2] + 0.5));
 	}
 	
 }

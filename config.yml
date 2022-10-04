@@ -4,10 +4,10 @@
 # camps are squared, a face of this square is 2 times camp_size, same for vital_zone
 
 maps:
-  spawn:
+  lobby:
   # spawn coordinates in the lobby world
-    worldname: "lobby"
-    location: [0.5, 10.0, 0.5]
+    world_name: "lobby"
+    world_spawn: [0, 10, 0]
   generic:
     playable_area: 190
     camps:

@@ -18,7 +18,7 @@ public class Start implements TabExecutor {
 	public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
 		List<String> res = new ArrayList<>();
 		Set<String> mapNames = Main.getPlugin(Main.class).getConfig().getConfigurationSection("maps").getKeys(false);
-		mapNames.remove("spawn");
+		mapNames.remove("lobby");
 		if (args.length == 1)
 			res.addAll(Func.matches(mapNames, args[0]));
 		return res;
@@ -31,7 +31,7 @@ public class Start implements TabExecutor {
 			if (args.length == 1) {
 				List<String> maps = new ArrayList<>();
 				for (String wn : Main.getPlugin(Main.class).getConfig().getConfigurationSection("maps").getKeys(false))
-					if (!wn.equals("spawn"))
+					if (!wn.equals("lobby"))
 						maps.add(wn);
 				if (maps.contains(args[0])) {
 					GameMngr.start(args[0]);

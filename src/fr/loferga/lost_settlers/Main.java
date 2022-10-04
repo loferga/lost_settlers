@@ -7,8 +7,6 @@ import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -40,7 +38,6 @@ public class Main extends JavaPlugin{
 	private static ProtocolManager protocolManager;
 	
 	public static Map<Integer, Set<Player>> glow = new HashMap<>();
-	public static World hub;
 	
 	public static final ItemStack SELECTOR = new ItemStack(Material.COMPASS, 1);
 	
@@ -48,14 +45,14 @@ public class Main extends JavaPlugin{
 		
 		saveDefaultConfig();
 		
-		hub = new WorldCreator(Main.getPlugin(Main.class).getConfig().getString("maps.spawn.worldname")).createWorld();
-		hub.setPVP(false);
-		
-		// in case of a reload, players that already are in hub need to be initialized
-		for (Player p : Main.hub.getPlayers()) {GUIMngr.giveSelector(p); TeamMngr.join(p, TeamMngr.NULL);}
-		
 		new MapMngr();
 		new GUIMngr();
+		
+		MapMngr.HUB.setPVP(false);
+		
+		// in case of a reload, players that already are in hub need to be initialized
+		for (Player p : MapMngr.HUB.getPlayers()) {GUIMngr.giveSelector(p); TeamMngr.join(p, TeamMngr.NULL);}
+		
 		Recipes.createRecipes(this);
 		
 		getCommand("lobby").setExecutor(new Lobby());

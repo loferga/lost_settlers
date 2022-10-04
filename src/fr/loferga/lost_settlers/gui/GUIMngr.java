@@ -22,6 +22,7 @@ import fr.loferga.lost_settlers.Game;
 import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.dogs.DogMngr;
 import fr.loferga.lost_settlers.game.GameMngr;
+import fr.loferga.lost_settlers.map.MapMngr;
 import fr.loferga.lost_settlers.skills.Skill;
 import fr.loferga.lost_settlers.skills.SkillSelection;
 import fr.loferga.lost_settlers.teams.LSTeam;
@@ -170,7 +171,7 @@ public class GUIMngr {
 	public static Inventory getTM(Player p) {
 		Inventory inv = Bukkit.createInventory(null, TEAM_MENU.getSize(), "Selection");
 		inv.setContents(TEAM_MENU.getContents());
-		int[] teamSize = TeamMngr.teamsSizes(Main.hub);
+		int[] teamSize = TeamMngr.teamsSizes(MapMngr.HUB);
 		int i = 0, j, length = T_ITEMS.length;
 		while (i < length) {
 			j = 1;
@@ -270,7 +271,7 @@ public class GUIMngr {
 	// ### REFRESH ###
 	
 	public static void refreshTM() {
-		for (Player p : Main.hub.getPlayers())
+		for (Player p : MapMngr.HUB.getPlayers())
 			if (p.getOpenInventory() != null)
 				if (p.getOpenInventory().getTitle().equals("Selection")) {
 					p.openInventory(getTM(p));
