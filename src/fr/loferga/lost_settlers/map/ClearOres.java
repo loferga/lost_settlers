@@ -31,7 +31,7 @@ public class ClearOres implements TabExecutor {
 				Location center = MapMngr.getMapCenter(pw, ms);
 				int area = ms.playableArea;
 				for (int x = (int) (center.getX()-area); x < center.getX()+area; x++)
-					for (int y = 2; y < ms.highestGround; y++)
+					for (int y = -63; y < ms.highestGround; y++)
 						for (int z = (int) (center.getZ()-area); z < center.getZ()+area; z++) {
 							Block b = new Location(p.getWorld(), x, y, z).getBlock();
 							if (b.getType().toString().endsWith("ORE"))
