@@ -24,8 +24,8 @@ import fr.loferga.lost_settlers.util.Func;
 
 public class MapMngr {
 	
-	public static boolean auto_load = Main.getPlugin(Main.class).getConfig().contains("load_worlds_on_start")
-			&& Main.getPlugin(Main.class).getConfig().getBoolean("load_worlds_on_start");
+	public static boolean auto_load = Main.getPlugin(Main.class).getConfig().contains("preload_worlds")
+			&& Main.getPlugin(Main.class).getConfig().getBoolean("preload_worlds");
 	
 	private static BiMap<World, MapSettings> mapsSettings = new BiMap<>();
 	public static final World HUB = newWorld("lobby");
@@ -51,8 +51,9 @@ public class MapMngr {
 	}
 	
 	private static World createWorld(String wn, MapSettings ms) {
-		String name = WORLD_NAME_PREFIX + wn;
+		String name = wn;
 		if (ms.isWorldNameSet()) name = ms.worldName;
+		else if (!name.startsWith(WORLD_NAME_PREFIX)) name = WORLD_NAME_PREFIX + name;
 		WorldCreator wc = new WorldCreator(name);
 		
 		if (ms.isSeedSet()) wc.seed(ms.seed);
