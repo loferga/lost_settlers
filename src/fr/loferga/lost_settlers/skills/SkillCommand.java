@@ -10,8 +10,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
-import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.game.GameMngr;
+import fr.loferga.lost_settlers.util.Func;
 
 public class SkillCommand implements TabExecutor {
 	

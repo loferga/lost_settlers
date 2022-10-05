@@ -10,8 +10,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 
-import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.Main;
+import fr.loferga.lost_settlers.util.Func;
 
 public enum Skill {
 	

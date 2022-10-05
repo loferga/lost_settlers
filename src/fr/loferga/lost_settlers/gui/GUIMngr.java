@@ -17,7 +17,6 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 
-import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.Game;
 import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.dogs.DogMngr;
@@ -27,6 +26,7 @@ import fr.loferga.lost_settlers.skills.Skill;
 import fr.loferga.lost_settlers.skills.SkillSelection;
 import fr.loferga.lost_settlers.teams.LSTeam;
 import fr.loferga.lost_settlers.teams.TeamMngr;
+import fr.loferga.lost_settlers.util.Func;
 
 public class GUIMngr {
 	

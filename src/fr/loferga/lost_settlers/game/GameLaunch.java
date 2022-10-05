@@ -10,10 +10,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.Game;
 import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.map.MapMngr;
+import fr.loferga.lost_settlers.util.Func;
 
 public class GameLaunch extends BukkitRunnable {
 	

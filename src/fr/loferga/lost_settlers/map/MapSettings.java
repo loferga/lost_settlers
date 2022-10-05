@@ -10,9 +10,9 @@ import org.bukkit.WorldType;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 
-import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.map.camps.Camp;
+import fr.loferga.lost_settlers.util.Func;
 import net.md_5.bungee.api.ChatColor;
 
 public class MapSettings {
@@ -26,6 +26,7 @@ public class MapSettings {
 	public int[] worldSpawn = null;
 	
 	// game launch required parameters
+	public int teamN = -1;
 	public int playableArea = -1;
 	public int campSize = -1;
 	public int vitalSize = -1;
@@ -42,6 +43,7 @@ public class MapSettings {
 		if (cfg.contains("world_type")) worldType = Func.valueOf(WorldType.class, cfg.getString("world_type"));
 		if (cfg.contains("world_name")) worldName = cfg.getString("world_name");
 		if (cfg.contains("world_spawn")) worldSpawn = toIntArray(cfg.getIntegerList("world_spawn"));
+		if (cfg.contains("team_number")) teamN = cfg.getInt("team_number");
 		if (cfg.contains("playable_area")) playableArea = cfg.getInt("playable_area");
 		if (cfg.contains("camps")) {
 			if (cfg.contains("camps.camp_size")) campSize = cfg.getInt("camps.camp_size");
@@ -64,13 +66,16 @@ public class MapSettings {
 	}
 	
 	public boolean canHostGame() {
-		boolean canHost = playableArea != -1 && campSize != -1 && vitalSize != -1 && camps != null;
+		boolean canHost = teamN != -1 && playableArea != -1 && campSize != -1 && vitalSize != -1 && camps != null;
 		if (!canHost) printSetValues();
 		return canHost;
 	}
 	
 	private void printSetValues() {
 		ConsoleCommandSender csl = Main.getPlugin(Main.class).getServer().getConsoleSender();
+		if (teamN == -1)
+			csl.sendMessage("[LostSettlers] " + ChatColor.DARK_RED + "team_number is not set in config.yml");
+		else csl.sendMessage("[LostSettlers] " + ChatColor.DARK_GREEN + "team_number is set");
 		if (playableArea == -1)
 			csl.sendMessage("[LostSettlers] " + ChatColor.DARK_RED + "playable_area is not set in config.yml");
 		else csl.sendMessage("[LostSettlers] " + ChatColor.DARK_GREEN + "playable_area is set");
@@ -109,12 +114,15 @@ public class MapSettings {
 		return generators != null && highestGround != -1;
 	}
 	
+	private static final String CAMP_PREFIX = "camps.positions.";
+	
 	public void buildCamps(World world) {
 		if (!cfg.contains("camps.positions")) return;
-		Set<String> keys = cfg.getKeys(false);
+		Set<String> keys = cfg.getConfigurationSection(CAMP_PREFIX).getKeys(false);
+		camps = new Camp[keys.size()];
 		int i = 0;
 		for (String camp : keys) {
-			List<?> data = cfg.getList(camp);
+			List<?> data = cfg.getList(CAMP_PREFIX + camp);
 			camps[i] = new Camp(
 					camp,
 					null,
@@ -125,11 +133,14 @@ public class MapSettings {
 		}
 	}
 	
+	private static final String LODES_PREFIX = "lodes.ores.";
+	
 	public void buildGenerators() {
-		Set<String> keys = cfg.getKeys(false);
+		Set<String> keys = cfg.getConfigurationSection(LODES_PREFIX).getKeys(false);
+		generators = new LodeGenerator[keys.size()];
 		int i = 0;
 		for (String ore : keys) {
-			List<?> data = cfg.getList(ore);
+			List<?> data = cfg.getList(LODES_PREFIX + ore);
 			List<?> rv = (List<?>) data.get(3);
 			generators[i] = new LodeGenerator(
 					Material.valueOf(ore.toUpperCase()),

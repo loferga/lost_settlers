@@ -7,8 +7,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.game.GameMngr;
+import fr.loferga.lost_settlers.util.Func;
 
 public class SkillRules extends BukkitRunnable {
 	

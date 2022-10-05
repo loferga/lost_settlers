@@ -5,8 +5,8 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 
-import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.map.geometry.*;
+import fr.loferga.lost_settlers.util.Func;
 
 public class Lode {
 	

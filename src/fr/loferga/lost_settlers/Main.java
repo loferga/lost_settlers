@@ -1,9 +1,5 @@
 package fr.loferga.lost_settlers;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -11,13 +7,6 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.wrappers.WrappedWatchableObject;
 
 import fr.loferga.lost_settlers.game.Start;
 import fr.loferga.lost_settlers.gui.GUIMngr;
@@ -32,12 +21,9 @@ import fr.loferga.lost_settlers.skills.SkillCommand;
 import fr.loferga.lost_settlers.skills.SkillListeners;
 import fr.loferga.lost_settlers.teams.SelectTeam;
 import fr.loferga.lost_settlers.teams.TeamMngr;
+import fr.loferga.lost_settlers.util.Glow;
 
 public class Main extends JavaPlugin{
-	
-	private static ProtocolManager protocolManager;
-	
-	public static Map<Integer, Set<Player>> glow = new HashMap<>();
 	
 	public static final ItemStack SELECTOR = new ItemStack(Material.COMPASS, 1);
 	
@@ -67,26 +53,7 @@ public class Main extends JavaPlugin{
 		getServer().getPluginManager().registerEvents(new Listeners(), this);
 		getServer().getPluginManager().registerEvents(new SkillListeners(), this);
 		
-		protocolManager = ProtocolLibrary.getProtocolManager();
-		protocolManager.addPacketListener(
-				new PacketAdapter(this, PacketType.Play.Server.ENTITY_METADATA) {
-					@Override
-				    public void onPacketSending(PacketEvent e) {
-				    	WrappedWatchableObject wwo = e.getPacket().getWatchableCollectionModifier().read(0).get(0);
-				    	if (wwo.getIndex() == 0 && (byte) wwo.getRawValue() == 0b01000000) {
-				    		Integer eID = e.getPacket().getIntegers().read(0);
-				    		if (glow.keySet().contains(eID)) {
-				    			if (!glow.get(eID).contains(e.getPlayer()))
-				    				e.setCancelled(true);
-				    			else
-				    				if (glow.get(eID).size() > 1)
-				    					glow.get(eID).remove(e.getPlayer());
-				    				else
-				    					glow.remove(eID);
-				    		}
-				    	}
-					}
-				 });
+		Glow.addPacketListener(this);
 		
 		ConsoleCommandSender console = getServer().getConsoleSender();
 		console.sendMessage("[LostSettlers] ===============================");

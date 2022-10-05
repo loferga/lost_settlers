@@ -13,17 +13,18 @@ import org.bukkit.WorldBorder;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
 
-import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.gui.GUIMngr;
 import fr.loferga.lost_settlers.map.camps.Camp;
 import fr.loferga.lost_settlers.map.geometry.Point;
 import fr.loferga.lost_settlers.map.geometry.Vector;
 import fr.loferga.lost_settlers.teams.TeamMngr;
+import fr.loferga.lost_settlers.util.BiMap;
+import fr.loferga.lost_settlers.util.Func;
 
 public class MapMngr {
 	
-	private static Map<World, MapSettings> mapsSettings = new HashMap<>();
+	private static BiMap<World, MapSettings> mapsSettings = new BiMap<>();
 	public static final World HUB = newWorld("lobby");
 	
 	private static final int[] SPAWN = mapsSettings.get(HUB).worldSpawn;
@@ -82,6 +83,10 @@ public class MapMngr {
 	
 	public static MapSettings getMapSettings(World world) {
 		return mapsSettings.get(world);
+	}
+	
+	public static World getWorld(MapSettings ms) {
+		return mapsSettings.getKey(ms);
 	}
 	
 	/*

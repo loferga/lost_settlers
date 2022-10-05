@@ -23,9 +23,9 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.util.Vector;
 
-import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.game.GameMngr;
 import fr.loferga.lost_settlers.teams.TeamMngr;
+import fr.loferga.lost_settlers.util.Func;
 
 public class DogMngr {
 	

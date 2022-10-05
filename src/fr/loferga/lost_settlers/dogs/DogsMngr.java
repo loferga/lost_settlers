@@ -13,8 +13,8 @@ import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 
-import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.teams.TeamMngr;
+import fr.loferga.lost_settlers.util.Func;
 
 public class DogsMngr {
 	

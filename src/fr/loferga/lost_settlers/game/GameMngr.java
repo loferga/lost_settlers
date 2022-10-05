@@ -13,7 +13,6 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.SpawnCategory;
 
-import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.Game;
 import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.map.MapMngr;
@@ -22,6 +21,7 @@ import fr.loferga.lost_settlers.map.camps.Camp;
 import fr.loferga.lost_settlers.skills.SkillListeners;
 import fr.loferga.lost_settlers.teams.LSTeam;
 import fr.loferga.lost_settlers.teams.TeamMngr;
+import fr.loferga.lost_settlers.util.Func;
 
 public class GameMngr {
 	

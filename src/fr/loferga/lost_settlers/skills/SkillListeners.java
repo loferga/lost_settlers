@@ -11,6 +11,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
@@ -40,12 +42,12 @@ import org.bukkit.inventory.Recipe;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.projectiles.ProjectileSource;
 
-import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.Game;
 import fr.loferga.lost_settlers.dogs.DogMngr;
 import fr.loferga.lost_settlers.game.GameMngr;
 import fr.loferga.lost_settlers.map.camps.Camp;
 import fr.loferga.lost_settlers.teams.TeamMngr;
+import fr.loferga.lost_settlers.util.Func;
 
 public class SkillListeners implements Listener {
 	
@@ -204,7 +206,7 @@ public class SkillListeners implements Listener {
 		if (!glouton || SkillSelection.empty(Skill.GLOUTON)) return;
 		if (SkillSelection.get((Player) e.getEntity()) != Skill.GLOUTON) return;
 		
-		e.setFoodLevel(2 * e.getEntity().getFoodLevel());
+		e.setFoodLevel(2 * e.getFoodLevel());
 	}
 	
 	@EventHandler
@@ -213,8 +215,9 @@ public class SkillListeners implements Listener {
 		if (!(e.getEntity() instanceof Player)) return;
 		Player p = (Player) e.getEntity();
 		if (SkillSelection.get(p) != Skill.GLOUTON) return;
-		
 		PotionEffect eff = e.getNewEffect();
+		if (eff == null || !eff.isAmbient()) return;
+		
 		int duration = eff.getDuration();
 		p.addPotionEffect(new PotionEffect(eff.getType(), duration + (int)((1/5)*duration), eff.getAmplifier(), true, true));
 		e.setCancelled(true);
@@ -226,8 +229,12 @@ public class SkillListeners implements Listener {
 		if (e.getAction() != Action.RIGHT_CLICK_AIR) return;
 		ItemStack item = e.getItem();
 		if (item == null || item.getType() != Material.PACKED_MUD) return;
+		Player p = e.getPlayer();
+		if (p.getFoodLevel() >= 20) return;
 		
-		new FoodLevelChangeEvent(e.getPlayer(), 4);
+		p.setFoodLevel(p.getFoodLevel() + 4);
+		item.setAmount(item.getAmount()-1);
+		p.getWorld().playSound(p, Sound.ENTITY_PLAYER_BURP, SoundCategory.PLAYERS, 1.0f, 1.0f);
 	}
 	
 	public static void giveGoldenApple(Player p) {

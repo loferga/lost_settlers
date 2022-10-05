@@ -14,8 +14,8 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 
-import fr.loferga.lost_settlers.Func;
 import fr.loferga.lost_settlers.Main;
+import fr.loferga.lost_settlers.util.Func;
 import io.netty.util.internal.ThreadLocalRandom;
 
 public class MobMngr {

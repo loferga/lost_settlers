@@ -29,6 +29,7 @@ import fr.loferga.lost_settlers.rules.Wounded;
 import fr.loferga.lost_settlers.skills.SkillRules;
 import fr.loferga.lost_settlers.teams.LSTeam;
 import fr.loferga.lost_settlers.teams.TeamMngr;
+import fr.loferga.lost_settlers.util.Func;
 
 public class Game extends BukkitRunnable {
 	
@@ -50,14 +51,12 @@ public class Game extends BukkitRunnable {
 		this.teams = res;
 		
 		this.ms = MapMngr.getMapSettings(world);
-		if (ms.canHostGame()) {
 		
-			Plugin plg = Main.getPlugin(Main.class);
-			Anger.getInstance().start(plg);
-			ComeBack.getInstance().start(plg);
-			Wounded.getInstance().start(plg);
-			SkillRules.getInstance().start(plg);
-		}
+		Plugin plg = Main.getPlugin(Main.class);
+		Anger.getInstance().start(plg);
+		ComeBack.getInstance().start(plg);
+		Wounded.getInstance().start(plg);
+		SkillRules.getInstance().start(plg);
 	}
 	
 	private boolean pvp;

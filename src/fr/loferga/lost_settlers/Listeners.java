@@ -73,6 +73,7 @@ import fr.loferga.lost_settlers.map.camps.Camp;
 import fr.loferga.lost_settlers.rules.Wounded;
 import fr.loferga.lost_settlers.teams.LSTeam;
 import fr.loferga.lost_settlers.teams.TeamMngr;
+import fr.loferga.lost_settlers.util.Func;
 
 public class Listeners implements Listener {
 	

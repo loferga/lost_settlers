@@ -14,6 +14,8 @@ import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import fr.loferga.lost_settlers.util.Func;
+
 public class Recipes {
 	
 	private static final String[][] N = new String[][] {
