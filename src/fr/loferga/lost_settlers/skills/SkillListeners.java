@@ -232,7 +232,7 @@ public class SkillListeners implements Listener {
 		Player p = e.getPlayer();
 		if (p.getFoodLevel() >= 20) return;
 		
-		p.setFoodLevel(p.getFoodLevel() + 4);
+		p.setFoodLevel(p.getFoodLevel() + 2);
 		item.setAmount(item.getAmount()-1);
 		p.getWorld().playSound(p, Sound.ENTITY_PLAYER_BURP, SoundCategory.PLAYERS, 1.0f, 1.0f);
 	}

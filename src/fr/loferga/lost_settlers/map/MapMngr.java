@@ -24,20 +24,31 @@ import fr.loferga.lost_settlers.util.Func;
 
 public class MapMngr {
 	
+	public static boolean auto_load = Main.getPlugin(Main.class).getConfig().contains("load_worlds_on_start")
+			&& Main.getPlugin(Main.class).getConfig().getBoolean("load_worlds_on_start");
+	
 	private static BiMap<World, MapSettings> mapsSettings = new BiMap<>();
 	public static final World HUB = newWorld("lobby");
 	
 	private static final int[] SPAWN = mapsSettings.get(HUB).worldSpawn;
 	private static final double RANGE = Main.getPlugin(Main.class).getConfig().getDouble("tp_range");
 	
+	private static final String WORLD_NAME_PREFIX = "ls_";
+	
 	public static World newWorld(String wn) {
-		MapSettings ms = new MapSettings(wn);
+		MapSettings ms = getFromName(wn);
+		if (ms == null) ms = new MapSettings(wn);
 		World w = createWorld(wn, ms);
 		mapsSettings.put(w, ms);
 		return w;
 	}
 	
-	private static final String WORLD_NAME_PREFIX = "ls_";
+	private static MapSettings getFromName(String wn) {
+		World w = getWorldFromName(wn);
+		if (w != null)
+			return mapsSettings.get(w);
+		return null;
+	}
 	
 	private static World createWorld(String wn, MapSettings ms) {
 		String name = WORLD_NAME_PREFIX + wn;
@@ -61,9 +72,16 @@ public class MapMngr {
 	}
 	
 	public static void forget(World world, boolean save) {
-		Bukkit.unloadWorld(world, save);
-		Bukkit.getWorlds().remove(world);
-		mapsSettings.remove(world);
+		if (auto_load && save)
+			world.save();
+		else {
+			Bukkit.unloadWorld(world, save);
+			if (!auto_load)
+				mapsSettings.remove(world);
+			else
+				newWorld(world.getName());
+		}
+		
 	}
 	
 	public static World getWorldFromName(String wn) {

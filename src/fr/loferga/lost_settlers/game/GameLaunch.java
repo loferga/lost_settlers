@@ -26,20 +26,23 @@ public class GameLaunch extends BukkitRunnable {
 		this.runTaskTimer(plugin, 0L, 20L);
 	}
 	
-	private int chrono = 5;
-	private String codes = "b46eaa";
+	private static final char NL = '@';
+	
+	private int chrono = 10;
+	private String codes = "b46e"+NL+"a"+NL+NL+NL+NL+NL;
 
 	@Override
 	public void run() {
-		for (Player p : game.getPlayers()) {
-			p.sendTitle(Func.format("&" + codes.charAt(chrono) + chrono), null, 10, 10, 20);
-			p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
-		}
-		if (chrono <= 0) {
+		char c = codes.charAt(chrono);
+		if (c != NL)
+			for (Player p : game.getPlayers()) {
+				p.sendTitle(Func.format("&" + c + chrono), null, 10, 10, 20);
+				p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
+			}
+		if (chrono-- <= 0) {
 			launchGame();
 			cancel();
 		}
-		chrono--;
 	}
 	
 	private void launchGame() {

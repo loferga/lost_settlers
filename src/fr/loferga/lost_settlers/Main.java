@@ -34,6 +34,11 @@ public class Main extends JavaPlugin{
 		new MapMngr();
 		new GUIMngr();
 		
+		if (MapMngr.auto_load)
+			for (String wn : getConfig().getConfigurationSection("maps").getKeys(false))
+				if (!wn.equals("lobby"))
+					MapMngr.newWorld(wn);
+		
 		MapMngr.HUB.setPVP(false);
 		
 		// in case of a reload, players that already are in hub need to be initialized
