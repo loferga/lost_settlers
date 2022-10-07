@@ -1,5 +1,6 @@
 package fr.loferga.lost_settlers;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,6 +14,7 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.enchantments.EnchantmentOffer;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Breedable;
@@ -34,6 +36,8 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.enchantment.EnchantItemEvent;
+import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
 import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -58,6 +62,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.BrewerInventory;
+import org.bukkit.inventory.EnchantingInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
@@ -527,6 +532,38 @@ public class Listeners implements Listener {
 	// ENCHANTMENTS
 	
 	// TODO when enchanted item is placed, generate EnchantOffers for existing enchantments (when it's possible) with increasing ammount of XP
+	// test phase (test if enchantOffers appear, are clickable and trigger EnchantItemEvent)
+	
+	@EventHandler
+	public void onEnchantImprove(EnchantItemEvent e) {
+		ItemStack it = e.getItem();
+		if (it.getEnchantments().isEmpty()) return;
+		
+		e.getEnchantsToAdd().clear();
+		Map<Enchantment, Integer> iEnch = it.getEnchantments();
+		int b = e.whichButton();
+		for (Enchantment enchant : iEnch.keySet())
+			if (b-- == 0)
+				e.getEnchantsToAdd().put(enchant, it.getEnchantmentLevel(enchant) + 1);
+				//it.addEnchantment(enchant, it.getEnchantmentLevel(enchant) + 1);
+	}
+	
+	@EventHandler
+	public void onEnchantPrepareOnEnchanted(PrepareItemEnchantEvent e) {
+		Map<Enchantment, Integer> enchants = ((EnchantingInventory) e.getView().getTopInventory()).getItem().getEnchantments();
+		if (enchants.isEmpty()) return;
+		
+		e.setCancelled(false);
+		EnchantmentOffer[] offers = e.getOffers();
+		int i = 0;
+		for (Enchantment enchant : enchants.keySet()) {
+			int level = enchants.get(enchant);
+			if (level != enchant.getMaxLevel())
+				offers[i++] = new EnchantmentOffer(enchant, level + 1, 3 * level);
+		}
+		while (i<3)
+			offers[i++] = null;
+	}
 	
 	// ISSUE /!\
 	@EventHandler
