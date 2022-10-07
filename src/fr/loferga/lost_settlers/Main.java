@@ -2,10 +2,8 @@ package fr.loferga.lost_settlers;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import fr.loferga.lost_settlers.game.Start;
@@ -24,8 +22,6 @@ import fr.loferga.lost_settlers.teams.TeamMngr;
 import fr.loferga.lost_settlers.util.Glow;
 
 public class Main extends JavaPlugin{
-	
-	public static final ItemStack SELECTOR = new ItemStack(Material.COMPASS, 1);
 	
 	public void onEnable() {
 		
