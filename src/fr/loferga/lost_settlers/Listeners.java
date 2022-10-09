@@ -1,6 +1,5 @@
 package fr.loferga.lost_settlers;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,9 +14,7 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentOffer;
-import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Breedable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
@@ -38,7 +35,6 @@ import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
-import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
@@ -48,6 +44,7 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.BrewEvent;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -65,8 +62,11 @@ import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.EnchantingInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 
 import fr.loferga.lost_settlers.dogs.Anger;
 import fr.loferga.lost_settlers.dogs.DogMngr;
@@ -531,9 +531,6 @@ public class Listeners implements Listener {
 	
 	// ENCHANTMENTS
 	
-	// TODO when enchanted item is placed, generate EnchantOffers for existing enchantments (when it's possible) with increasing ammount of XP
-	// test phase (test if enchantOffers appear, are clickable and trigger EnchantItemEvent)
-	
 	@EventHandler
 	public void onEnchantImprove(EnchantItemEvent e) {
 		ItemStack it = e.getItem();
@@ -565,14 +562,6 @@ public class Listeners implements Listener {
 			offers[i++] = null;
 	}
 	
-	// ISSUE /!\
-	@EventHandler
-	public void onEntityBreed(EntityBreedEvent e) {
-		((Breedable) e.getFather()).setBreed(true);
-		((Breedable) e.getMother()).setBreed(true);
-		((Ageable) e.getEntity()).setAge(-100);
-	}
-	
 	// BREWING
 	
 	@EventHandler
@@ -589,6 +578,20 @@ public class Listeners implements Listener {
 		BrewerInventory binv = (BrewerInventory) e.getInventory();
 		if (binv.getHolder().getFuelLevel() == 0)
 			binv.setFuel(new ItemStack(Material.BLAZE_POWDER, 1));
+	}
+	
+	@EventHandler
+	public void onMoveItem(InventoryClickEvent e) {
+		if (e.getAction() != InventoryAction.MOVE_TO_OTHER_INVENTORY
+				&& e.getAction() != InventoryAction.PLACE_ALL
+				&& e.getAction() != InventoryAction.PLACE_ONE) return;
+		ItemStack i = e.getCurrentItem();
+		if (i.getType() != Material.POTION) return;
+		if (!i.hasItemMeta() || ((PotionMeta) i.getItemMeta()).getBasePotionData().getType() != PotionType.WATER) return;
+		
+		PotionMeta pm = (PotionMeta) i.getItemMeta();
+		pm.setBasePotionData(new PotionData(PotionType.AWKWARD));
+		i.setItemMeta(pm);
 	}
 	
 	// EXIT CASE
