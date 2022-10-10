@@ -466,11 +466,11 @@ public class Game extends BukkitRunnable {
 	}
 	
 	public Camp campIn(Location loc) {
-		return inPerimeter(loc, ms.campSize);
+		return inPerimeter(loc, ms.campSize + 0.5);
 	}
 	
 	public Camp vitalIn(Location loc) {
-		return inPerimeter(loc, ms.vitalSize);
+		return inPerimeter(loc, ms.vitalSize + 0.5);
 	}
 	
 	private Camp inPerimeter(Location loc, double P) {

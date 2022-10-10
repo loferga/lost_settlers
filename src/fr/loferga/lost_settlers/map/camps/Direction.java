@@ -4,7 +4,7 @@ import fr.loferga.lost_settlers.map.geometry.Vector;
 
 public enum Direction {
 	
-	NORTH(0, 0, -1), EAST(1, 0, 0), SOUTH(0, 0, 1), WEST(-1, 0, 0);
+	NORTH(1, 0, 0), EAST(0, 0, 1), SOUTH(-1, 0, 0), WEST(0, 0, -1);
 	
 	public Vector vector;
 	

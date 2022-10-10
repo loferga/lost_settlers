@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.GameRule;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -24,7 +25,7 @@ import fr.loferga.lost_settlers.util.Func;
 
 public class MapMngr {
 	
-	public static boolean auto_load = Main.getPlugin(Main.class).getConfig().contains("preload_worlds")
+	public static boolean auto_load = Main.getPlugin(Main.class).getConfig().contains("preload_worlds", true)
 			&& Main.getPlugin(Main.class).getConfig().getBoolean("preload_worlds");
 	
 	private static BiMap<World, MapSettings> mapsSettings = new BiMap<>();
@@ -39,6 +40,7 @@ public class MapMngr {
 		MapSettings ms = getFromName(wn);
 		if (ms == null) ms = new MapSettings(wn);
 		World w = createWorld(wn, ms);
+		w.setGameRule(GameRule.DISABLE_RAIDS, true);
 		mapsSettings.put(w, ms);
 		return w;
 	}
@@ -119,7 +121,7 @@ public class MapMngr {
 		double cx = world.getWorldBorder().getCenter().getX();
 		double cz = world.getWorldBorder().getCenter().getZ();
 		for (LodeGenerator generator : ms.generators) {
-			createLodes(world, generator, new double[] {cx-d, 2, cz-d}, new double[] {cx+d, ms.highestGround,  cz+d});
+			createLodes(world, generator, new double[] {cx-d, -63, cz-d}, new double[] {cx+d, ms.highestGround,  cz+d});
 			System.out.println("[LodeGenerator] " + generator.ore.toString() + " generated");
 		}
 	}

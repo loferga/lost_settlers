@@ -2,6 +2,7 @@ package fr.loferga.lost_settlers;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameRule;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -36,6 +37,7 @@ public class Main extends JavaPlugin{
 					MapMngr.newWorld(wn);
 		
 		MapMngr.HUB.setPVP(false);
+		MapMngr.HUB.setGameRule(GameRule.KEEP_INVENTORY, true);
 		
 		// in case of a reload, players that already are in hub need to be initialized
 		for (Player p : MapMngr.HUB.getPlayers()) {GUIMngr.giveSelector(p); TeamMngr.join(p, TeamMngr.NULL);}

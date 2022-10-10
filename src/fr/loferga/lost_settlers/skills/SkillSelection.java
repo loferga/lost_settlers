@@ -20,7 +20,7 @@ public class SkillSelection {
 		Map<Skill, Set<Player>> res = new HashMap<>();
 		for (Skill s : Skill.values()) {
 			String path = "skills." + s.toString().toLowerCase();
-			if (cfg.contains(path) && cfg.getBoolean(path))
+			if (cfg.contains(path, true) && cfg.getBoolean(path))
 				res.put(s, new HashSet<>());
 		}
 		return res;

@@ -40,22 +40,23 @@ public class MapSettings {
 	
 	public MapSettings(String wn) {
 		cfg = Main.getPlugin(Main.class).getConfig().getConfigurationSection("maps." + wn);
-		if (cfg.contains("seed")) seed = cfg.getLong("seed");
-		if (cfg.contains("world_type")) worldType = Func.valueOf(WorldType.class, cfg.getString("world_type"));
-		if (cfg.contains("world_name")) worldName = cfg.getString("world_name");
-		if (cfg.contains("world_spawn")) worldSpawn = toIntArray(cfg.getIntegerList("world_spawn"));
-		if (cfg.contains("team_number")) teamN = cfg.getInt("team_number");
-		if (cfg.contains("playable_area")) playableArea = cfg.getInt("playable_area");
-		if (cfg.contains("camps")) {
-			if (cfg.contains("camps.camp_size")) campSize = cfg.getInt("camps.camp_size");
-			if (cfg.contains("camps.vital_size")) vitalSize = cfg.getInt("camps.vital_size");
+		if (cfg.contains("seed", true)) seed = cfg.getLong("seed");
+		if (cfg.contains("world_type", true)) worldType = Func.valueOf(WorldType.class, cfg.getString("world_type"));
+		if (cfg.contains("world_name", true)) worldName = cfg.getString("world_name");
+		if (cfg.contains("world_spawn", true)) worldSpawn = toIntArray(cfg.getIntegerList("world_spawn"));
+		if (cfg.contains("team_number", true)) teamN = cfg.getInt("team_number");
+		if (cfg.contains("playable_area", true)) playableArea = cfg.getInt("playable_area");
+		if (cfg.contains("camps", true)) {
+			if (cfg.contains("camps.camp_size", true)) campSize = cfg.getInt("camps.camp_size");
+			if (cfg.contains("camps.vital_size", true)) vitalSize = cfg.getInt("camps.vital_size");
 		}
-		if (cfg.contains("chamber")) {
-			if (cfg.contains("chamber_height")) chamberHeight = cfg.getDouble("chamber.chamber_height");
+		if (cfg.contains("chamber", true)) {
+			if (cfg.contains("chamber_height", true)) chamberHeight = cfg.getDouble("chamber.chamber_height");
 		}
-		if (cfg.contains("lodes")) {
-			if (cfg.contains("lodes.highest_ground")) highestGround = cfg.getInt("lodes.highest_ground");
-			if (cfg.contains("lodes.ores")) buildGenerators();
+		if (cfg.contains("lodes", true)) {
+			if (cfg.contains("lodes.highest_ground", true)) highestGround = cfg.getInt("lodes.highest_ground");
+			System.out.println("cfg contain lodes");
+			if (cfg.contains("lodes.ores", true)) buildGenerators();
 		}
 	}
 	
@@ -118,7 +119,7 @@ public class MapSettings {
 	private static final String CAMP_PREFIX = "camps.positions.";
 	
 	public void buildCamps(World world) {
-		if (!cfg.contains("camps.positions")) return;
+		if (!cfg.contains("camps.positions", true)) return;
 		Set<String> keys = cfg.getConfigurationSection(CAMP_PREFIX).getKeys(false);
 		camps = new Camp[keys.size()];
 		int i = 0;
@@ -129,6 +130,7 @@ public class MapSettings {
 				dir = Direction.valueOf(((String) data.get(3)).toUpperCase());
 			} catch (Exception e) {
 				camps = null;
+				System.out.println(data.get(3) + " is not a direction");
 				return;
 			}
 			camps[i] = new Camp(

@@ -477,7 +477,7 @@ public class Listeners implements Listener {
 		if (!(e.getEntity() instanceof Player)) return;
 		Player p = (Player) e.getEntity();
 		PotionEffect eff = e.getNewEffect();
-		if (!(e.getNewEffect() == null || e.getNewEffect().isAmbient())) return;  // not clearing effect && not already modified
+		if (e.getNewEffect() == null || e.getNewEffect().isAmbient()) return;  // not clearing effect && not already modified
 		
 		String effN = e.getNewEffect().getType().getName();
 		if (effN.equals("INVISIBILITY")) {                                                            // no particles

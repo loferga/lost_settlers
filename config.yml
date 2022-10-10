@@ -1,10 +1,8 @@
 # ~ = arbitrary values
 # \ = optional
 
-# spawn: spawn coordinates in your default server world
-# ores: <material_name>: [yratio (% of lower y took), gauss factor, gauss offset, [bounds of i, j, k (lode size)], lodes per 100^3 cubes]
-# <~campStringID>: [<x>, <y>, <z>, <isFacingNorth?>]
 # camps are squared, a face of this square is 2 times camp_size, same for vital_zone
+# the game is designed to have camp_size > vital_size
 
 # time in seconds
 pvp_time: 60
@@ -15,23 +13,64 @@ tp_range: 5.5
 # keeps worlds loades
 preload_worlds: true
 
+# lobby is a required parameter, set the properties of the lobby world
+# \ general parameters:
+#
+# \<seed>: long           | generation parameter, set world seed
+# \<world_type>: string   | generation parameter, set world type when generating
+# \<world_name>: string   | bypass the world name convention ("ls_<world_name>") to have world names without the "ls_" prefix
+# \<world_spawn>: int[]   | set worldspawn
+#
+# \ game parameters (required to launch a game but you can use the world even if it's not set):
+#
+# \<team_number>: int     | set the number of teams in a game in that world
+# \<playable_area>: int   | set the distance between the furthest camp and the game world border
+# \<camps>: section       | hold the camps parameters
+# \<camps.camp_size>: int                          | set the extended camp zone (where ennemies can't break/place/interact)
+# \<camps.vital_size>: int                         | set the vital camp zone (where ennemies capture if they are in)
+# \<camps.positions>: list                         | hold the camps positions
+# \<camps.positions.~campStringID>: [
+#                                    <x>: float, <y>: float, <z>: float,   | x, y and z coordinate of the camp
+#                                    <Direction>: string                   | "north", ..., ..., "west" camp flag facing dir
+#                                   ]
+#
+# \ game optional parameters
+#
+# \<chamber>: section     | hold magmatic chamber parameters
+# \<chamber.chamber_height>: int                   | set the height of the chamber (chamber goes from -65 to this parameter)
+# \<lodes>: section       | hold the lodes generation paramaters
+# \<lodes.highest_ground>: int                     | set the highest block that can hold a lode (highest stone block in most cases)
+# \<lodes.ores>: list                              | hold the lodes generators (you can generate a load of any block)
+# \<lodes.ores.material_name>: [
+#                               <yratio>: float,                           | % of lower y took
+#                               <gauss factor>: int,                       | how strongly the distribution is centered around the average
+#                               <gauss offset>: float,                     | how offset the distriution is from the average
+#                               <bounds of lodes>: list [
+#                                                        <lowest i>: float, <max i>: float,
+#                                                        <lowest j>: float, <max j>: float,
+#                                                        <lowest k>: float, <max k>: float
+#                                                       ],
+#                               <lodes number>: int                        | lodes per 100^3 cube
+#                              ]
+
 maps:
-  spawn:
+  lobby:
     world_name: "lobby"
     world_spawn: [0, 10, 0]
+  # ~<default world name>:
   test:
     playable_area: 200
     camps:
-      camp_size: 19.5
-      vital_size: 8.5
+      camp_size: 19
+      vital_size: 8
       positions:
-        meadow: [-116.5, 71.0, 346.5, "east"]
-        coast: [0.5, 80.0, 480.5, "north"]
-        lake: [-112.5, 101.0, 480.5, "west"]
-    highest_ground: 95
-    chamber_height: -17
-    lodes_active: false
+        meadow: [-116.5, 71.0, 346.5, "south"]
+        coast: [0.5, 80.0, 480.5, "west"]
+        hill: [-112.5, 101.0, 480.5, "north"]
+    chamber:
+      chamber_height: -17
     lodes:
+      highest_ground: 95
       ores:
         coal_ore:       [1.0, 5, 1.3, [2.0, 4.5, 1.0, 3.5, 1.0, 1.5], 115]
         iron_ore:       [1.0, 2, 1.2, [1.5, 3.5, 1.0, 2.5, 1.0, 1.5], 240]

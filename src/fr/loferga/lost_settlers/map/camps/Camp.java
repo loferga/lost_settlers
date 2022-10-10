@@ -84,6 +84,7 @@ public class Camp {
 	public void placeFlag() {
 		Location loc = location.clone().add(0, 11.0, 0);
 		Vector dir = direction.vector;
+		Vector minus2dir = dir.clone().multiply(-2);
 		Material flagMat = getOwner().getFlag();
 		int i = 0;
 		while (i < 11) {
@@ -92,23 +93,25 @@ public class Camp {
 				loc.getBlock().setType(Material.OAK_FENCE);
 			if (i < 3) {
 				dir.addTo(loc).getBlock().setType(flagMat);
-				dir.clone().multiply(-2).addTo(loc).getBlock().setType(flagMat);
+				minus2dir.addTo(loc).getBlock().setType(flagMat);
 				dir.addTo(loc);
 			}
 			i++;
 		}
 		dir.addTo(loc).getBlock().setType(Material.ENCHANTING_TABLE);
-		dir.clone().multiply(-2).addTo(loc).getBlock().setType(Material.CHISELED_STONE_BRICKS);
+		minus2dir.addTo(loc).getBlock().setType(Material.CHISELED_STONE_BRICKS);
 		loc.add(0, 1, 0).getBlock().setType(Material.BREWING_STAND);
 	}
 	
 	public void modifyFlag(Material mat) {
-		Location loc = location.clone().add(0, 11.0, 0);
+		Location loc = location.clone().add(0, 10, 0);
 		Vector dir = direction.vector;
+		Vector minus2dir = dir.clone().multiply(-2);
+		Vector downdir = dir.clone(); downdir.y = -1;
 		for (int i = 0; i<3; i++) {
 			dir.addTo(loc).getBlock().setType(mat);
-			dir.clone().multiply(-2).addTo(loc).getBlock().setType(mat);
-			dir.addTo(loc);
+			minus2dir.addTo(loc).getBlock().setType(mat);
+			downdir.addTo(loc);
 		}
 	}
 
