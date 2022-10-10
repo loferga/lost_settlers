@@ -126,7 +126,7 @@ public class MapSettings {
 			List<?> data = cfg.getList(CAMP_PREFIX + camp);
 			Direction dir = null;
 			try {
-				dir = Direction.valueOf((String) data.get(3));
+				dir = Direction.valueOf(((String) data.get(3)).toUpperCase());
 			} catch (Exception e) {
 				camps = null;
 				return;
