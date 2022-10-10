@@ -49,12 +49,12 @@ public class ZoneEffect extends BukkitRunnable {
 	}
 	
 	private static void turnLeft(Vector vec) {
-		if (vec.x()!=0) {
-			vec.setZ(vec.x());
-			vec.setX(0);
+		if (vec.x != 0) {
+			vec.z = vec.x;
+			vec.x = 0;
 		} else {
-			vec.setX(-vec.z());
-			vec.setZ(0);
+			vec.x = -vec.z;
+			vec.z = 0;
 		}
 	}
 	

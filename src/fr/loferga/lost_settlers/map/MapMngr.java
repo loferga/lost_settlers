@@ -147,9 +147,9 @@ public class MapMngr {
 		double klen = Func.random(kmin, kmax);
 		Vector i = new Vector(Func.random(-1, 1), Func.random(-1, 1), Func.random(-1, 1)).normalize().multiply(ilen);
 		ijk[0] = i;
-		Vector j = new Vector(ijk[0].y(), -ijk[0].x(), 0).normalize().multiply(jlen);
+		Vector j = new Vector(ijk[0].y, -ijk[0].x, 0).normalize().multiply(jlen);
 		ijk[1] = j;
-		ijk[2] = new Vector(i.y()*j.z() - i.z()*j.y(), i.z()*j.x() - i.x()*j.z(), i.x()*j.y() - i.y()*j.x()).normalize().multiply(klen);
+		ijk[2] = new Vector(i.y*j.z - i.z*j.y, i.z*j.x - i.x*j.z, i.x*j.y - i.y*j.x).normalize().multiply(klen);
 		return ijk;
 	}
 	
@@ -218,12 +218,12 @@ public class MapMngr {
 	}
 	
 	private static void turnLeft(Vector vec) {
-		if (vec.x()!=0) {
-			vec.setZ(vec.x());
-			vec.setX(0);
+		if (vec.x != 0) {
+			vec.z = vec.x;
+			vec.x = 0;
 		} else {
-			vec.setX(-vec.z());
-			vec.setZ(0);
+			vec.x = -vec.z;
+			vec.z = 0;
 		}
 	}
 	

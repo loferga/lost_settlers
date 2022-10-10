@@ -34,9 +34,9 @@ public class Lode {
 		Vector OX = O.vectorTo(pos[0], pos[1], pos[2]);
 		// matrice de passage Pbb'
 		Matrix P = new Matrix(new double[][] {
-			{i.x(), j.x(), k.x()},
-			{i.y(), j.y(), k.y()},
-			{i.z(), j.z(), k.z()}
+			{i.x, j.x, k.x},
+			{i.y, j.y, k.y},
+			{i.z, j.z, k.z}
 		});
 		// on Xb = Pbb' * Xb' = Xb' = Xb/Pbb' = Xb' = Xb * Pbb'^-1 donc Xl = P.inverse().multiply(OX)
 		Point Xl = P.inverse().multiply(OX.toMatrix()).toPoint();

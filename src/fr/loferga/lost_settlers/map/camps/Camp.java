@@ -7,11 +7,12 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
+import fr.loferga.lost_settlers.map.geometry.Vector;
 import fr.loferga.lost_settlers.teams.LSTeam;
 
 public class Camp {
 
-	public Camp(String name, LSTeam team, Location location, boolean direction) {
+	public Camp(String name, LSTeam team, Location location, Direction direction) {
 		this.name = name;
 		this.owners = new ArrayList<>(Arrays.asList(new Owner(team, System.currentTimeMillis())));
 		this.rivals = new ArrayList<>(Arrays.asList(team));
@@ -23,7 +24,7 @@ public class Camp {
 	private List<Owner> owners;
 	private List<LSTeam> rivals;
 	private Location location;
-	private boolean direction;
+	private Direction direction;
 
 	private ZoneEffect zoneEffect;
 	
@@ -51,7 +52,7 @@ public class Camp {
 		return new double[] { location.getX(), location.getY(), location.getZ() };
 	}
 
-	public boolean getDirection() {
+	public Direction getDirection() {
 		return direction;
 	}
 
@@ -80,26 +81,35 @@ public class Camp {
 		return owners.get(owners.size() - 1).getTime();
 	}
 
-	public void placeFlag(Material mat) {
+	public void placeFlag() {
 		Location loc = location.clone().add(0, 11.0, 0);
-		double trig = (direction ? 1 : 0) * (Math.PI / 2); // transform a boolean into 0 or 1 and *pi/2 to get a
-															// direction
-		double[] dir = new double[] { Math.cos(trig), Math.sin(trig) };
+		Vector dir = direction.vector;
+		Material flagMat = getOwner().getFlag();
 		int i = 0;
 		while (i < 11) {
 			loc.add(0, -1, 0);
 			if (loc.getBlock().getType() != Material.OAK_FENCE)
 				loc.getBlock().setType(Material.OAK_FENCE);
 			if (i < 3) {
-				loc.add(dir[0], 0, dir[1]).getBlock().setType(mat);
-				loc.add(-2 * dir[0], 0, -2 * dir[1]).getBlock().setType(mat);
-				loc.add(dir[0], 0, dir[1]);
+				dir.addTo(loc).getBlock().setType(flagMat);
+				dir.clone().multiply(-2).addTo(loc).getBlock().setType(flagMat);
+				dir.addTo(loc);
 			}
 			i++;
 		}
-		loc.add(dir[0], 0, dir[1]).getBlock().setType(Material.ENCHANTING_TABLE);
-		loc.add(-2 * dir[0], 0, -2 * dir[1]).getBlock().setType(Material.CHISELED_STONE_BRICKS);
+		dir.addTo(loc).getBlock().setType(Material.ENCHANTING_TABLE);
+		dir.clone().multiply(-2).addTo(loc).getBlock().setType(Material.CHISELED_STONE_BRICKS);
 		loc.add(0, 1, 0).getBlock().setType(Material.BREWING_STAND);
+	}
+	
+	public void modifyFlag(Material mat) {
+		Location loc = location.clone().add(0, 11.0, 0);
+		Vector dir = direction.vector;
+		for (int i = 0; i<3; i++) {
+			dir.addTo(loc).getBlock().setType(mat);
+			dir.clone().multiply(-2).addTo(loc).getBlock().setType(mat);
+			dir.addTo(loc);
+		}
 	}
 
 }

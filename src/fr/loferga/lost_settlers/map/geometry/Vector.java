@@ -10,36 +10,12 @@ public class Vector {
 		this.z = z;
 	}
 	
-	private double x;
-	private double y;
-	private double z;
-
-	public double x() {
-		return x;
-	}
+	public double x;
+	public double y;
+	public double z;
 	
-	public double y() {
-		return y;
-	}
-	
-	public double z() {
-		return z;
-	}
-	
-	public void setX(double x) {
-		this.x = x;
-	}
-	
-	public void setY(double y) {
-		this.y = y;
-	}
-	
-	public void setZ(double z) {
-		this.z = z;
-	}
-	
-	public void addTo(Location location) {
-		location.add(x, y, z);
+	public Location addTo(Location location) {
+		return location.add(x, y, z);
 	}
 	
 	public double[] values() {
@@ -63,6 +39,10 @@ public class Vector {
 	
 	public Matrix toMatrix() {
 		return new Matrix(new double[][] {{x}, {y}, {z}});
+	}
+	
+	public Vector clone() {
+		return new Vector(x, y, z);
 	}
 	
 }

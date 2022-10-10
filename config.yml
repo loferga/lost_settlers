@@ -1,35 +1,40 @@
 # ~ = arbitrary values
 # \ = optional
 
+# spawn: spawn coordinates in your default server world
+# ores: <material_name>: [yratio (% of lower y took), gauss factor, gauss offset, [bounds of i, j, k (lode size)], lodes per 100^3 cubes]
+# <~campStringID>: [<x>, <y>, <z>, <isFacingNorth?>]
 # camps are squared, a face of this square is 2 times camp_size, same for vital_zone
 
+# time in seconds
+pvp_time: 60
+# delay in seconds
+regeneration_delay: 15
+# range of teleportation around flags
+tp_range: 5.5
+# keeps worlds loades
+preload_worlds: true
+
 maps:
-  lobby:
-  # spawn coordinates in the lobby world
+  spawn:
     world_name: "lobby"
     world_spawn: [0, 10, 0]
-  generic:
-    playable_area: 190
+  test:
+    playable_area: 200
     camps:
+      camp_size: 19.5
+      vital_size: 8.5
       positions:
-      # <~campStringID>: [<x>, <y>, <z>, <isFacingNorth?>]
-        hill: [-879.5, 70.0, 435.5, true]
-        river: [-935.5, 64.0, 312.5, false]
-        foreset: [-1027.5, 64.0, 415.5, true]
-      settings:
-        camp_size: 19.5
-        vital_size: 8.5
-    chamber_active: true
-    chamber:
-      max_height: 16
-    lodes_active: true
+        meadow: [-116.5, 71.0, 346.5, "east"]
+        coast: [0.5, 80.0, 480.5, "north"]
+        lake: [-112.5, 101.0, 480.5, "west"]
+    highest_ground: 95
+    chamber_height: -17
+    lodes_active: false
     lodes:
-    # highest ground to generate ores (in the majority of cases take the highest stone block)
-      highest_ground: 72
       ores:
-      # <materialName>: [yratio (% of lower y took), gauss factor, gauss offset, [bounds of i, j, k (lode size)], lodes per 100^3 cubes]
-        coal_ore:       [1.0, 5, 1.2, [2.0, 4.5, 1.0, 3.5, 1.0, 1.5], 115]
-        iron_ore:       [1.0, 2, 1.1, [1.5, 3.5, 1.0, 2.5, 1.0, 1.5], 160]
+        coal_ore:       [1.0, 5, 1.3, [2.0, 4.5, 1.0, 3.5, 1.0, 1.5], 115]
+        iron_ore:       [1.0, 2, 1.2, [1.5, 3.5, 1.0, 2.5, 1.0, 1.5], 240]
         copper_ore:     [0.8, 3, 1.0, [1.0, 2.0, 0.5, 1.5, 0.5, 1.0], 60]
         gold_ore:       [0.6, 2, 0.8, [1.5, 2.5, 1.0, 2.0, 0.5, 1.0], 60]
         redstone_ore:   [0.3, 3, 1.2, [1.0, 2.0, 1.0, 1.5, 0.5, 1.0], 50]
@@ -114,10 +119,3 @@ skills:
   # remove bow and crossbow innaccuracy but arrows deal less damages
   precision: true
 # WIP
-
-# time in seconds
-pvp_time: 600
-# delay in seconds
-regeneration_delay: 15
-# range of teleportation around flags
-tp_range: 5.5

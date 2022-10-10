@@ -12,6 +12,7 @@ import org.bukkit.configuration.ConfigurationSection;
 
 import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.map.camps.Camp;
+import fr.loferga.lost_settlers.map.camps.Direction;
 import fr.loferga.lost_settlers.util.Func;
 import net.md_5.bungee.api.ChatColor;
 
@@ -123,11 +124,18 @@ public class MapSettings {
 		int i = 0;
 		for (String camp : keys) {
 			List<?> data = cfg.getList(CAMP_PREFIX + camp);
+			Direction dir = null;
+			try {
+				dir = Direction.valueOf((String) data.get(3));
+			} catch (Exception e) {
+				camps = null;
+				return;
+			}
 			camps[i] = new Camp(
 					camp,
 					null,
 					new Location(world, (double) data.get(0), (double) data.get(1), (double) data.get(2)),
-					(boolean) data.get(3)
+					dir
 				);
  			i++;
 		}

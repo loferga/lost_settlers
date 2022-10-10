@@ -25,6 +25,7 @@ import fr.loferga.lost_settlers.game.GameMngr;
 import fr.loferga.lost_settlers.map.MapMngr;
 import fr.loferga.lost_settlers.map.MapSettings;
 import fr.loferga.lost_settlers.map.camps.Camp;
+import fr.loferga.lost_settlers.map.camps.Direction;
 import fr.loferga.lost_settlers.rules.Wounded;
 import fr.loferga.lost_settlers.skills.SkillRules;
 import fr.loferga.lost_settlers.teams.LSTeam;
@@ -417,7 +418,7 @@ public class Game extends BukkitRunnable {
 		for (Player p : teams.get(TeamMngr.indexOf(t)))
 			p.playSound(c.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.MASTER, 10.0f, 1.0f);
 		c.setOwner(t);
-		c.placeFlag(t.getFlag());
+		c.modifyFlag(t.getFlag());
 		winCondition(t, null);
 	}
 	
@@ -500,13 +501,13 @@ public class Game extends BukkitRunnable {
 	}
 	public void conquest(Camp c, LSTeam t) {
 		addConquest(c, t);
-		c.placeFlag(Material.GRAY_CONCRETE);
+		c.modifyFlag(Material.GRAY_CONCRETE);
 	}
 
 	public void initFlags() {
 		assignRandomTeams();
 		for (Camp c : ms.camps)
-			c.placeFlag(c.getOwner().getFlag());
+			c.placeFlag();
 	}
 	
 	private void assignRandomTeams() {
@@ -524,7 +525,7 @@ public class Game extends BukkitRunnable {
 	
 	public void clearFlags() {
 		for (Camp c : ms.camps)
-			c.placeFlag(Material.WHITE_CONCRETE);
+			c.modifyFlag(Material.WHITE_CONCRETE);
 	}
 	
 	// is there a flag where the location point
@@ -537,7 +538,7 @@ public class Game extends BukkitRunnable {
 			if (isNearBy(x, cp[0], 0.5) && isNearBy(y, cp[1] + 6, 5.5) && isNearBy(z, cp[2], 0.5))
 				isFlag = true;
 			if (isNearBy(y, cp[1] + 9.5, 1.5)) {
-				if (c.getDirection()) {
+				if (c.getDirection() == Direction.NORTH || c.getDirection() == Direction.SOUTH) {
 					if (isNearBy(x, cp[0], 0.5) && isNearBy(z, cp[2], 1.5))
 						isFlag = true;
 				} else {
