@@ -76,6 +76,8 @@ public class GameMngr {
 		for (Player p : MapMngr.HUB.getPlayers()) p.sendMessage(Func.format("Chargement de la carte &e" + wn));
 		World world = MapMngr.newWorld(wn);
 		MapSettings ms = MapMngr.getMapSettings(world);
+		if (!ms.canHostGame()) return;
+		
 		world.setDifficulty(Difficulty.EASY);
 		world.setTime(0);
 		world.setSpawnFlags(true, true);

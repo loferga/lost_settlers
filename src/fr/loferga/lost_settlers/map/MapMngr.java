@@ -84,7 +84,6 @@ public class MapMngr {
 			else
 				newWorld(world.getName());
 		}
-		
 	}
 	
 	public static World getWorldFromName(String wn) {

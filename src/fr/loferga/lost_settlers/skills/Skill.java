@@ -25,8 +25,7 @@ public enum Skill {
 	ABATTAGE(
 			Material.IRON_AXE,
 			List.of(
-					Func.format("&6Talent :"), Func.format("&5Faire s'abattre les arbres"),
-					Func.format("&6Equipement :"), Func.format("&5Hache en fer amochée")
+					Func.format("&6Talent :"), Func.format("&5Faire s'abattre les arbres")
 					)
 			),
 	DRESSAGE(
@@ -38,8 +37,7 @@ public enum Skill {
 	FERMIER(
 			Material.IRON_HOE,
 			List.of(
-					Func.format("&6Talent :"), Func.format("&5Rammasse plus de récoltes"),
-					Func.format("&6Equipement :"), Func.format("&5Faux en fer amochée")
+					Func.format("&6Talent :"), Func.format("&5Rammasse plus de récoltes")
 					)
 			),
 	GLOUTON(
@@ -59,8 +57,7 @@ public enum Skill {
 	ARTIFICE(
 			Material.FIREWORK_ROCKET,
 			List.of(
-					Func.format("&6Talent :"), Func.format("&5Feux d'artifices améliorés"),
-					Func.format("6Equipement :"), Func.format("&5Poudre à canon")
+					Func.format("&6Talent :"), Func.format("&5Feux d'artifices améliorés")
 					)
 			),
 	ROUBLARD(

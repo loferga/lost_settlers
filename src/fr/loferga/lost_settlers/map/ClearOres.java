@@ -29,12 +29,17 @@ public class ClearOres implements TabExecutor {
 				World pw = p.getWorld();
 				MapSettings ms = MapMngr.getMapSettings(pw);
 				Location center = MapMngr.getMapCenter(pw, ms);
-				int area = ms.playableArea;
-				for (int x = (int) (center.getX()-area); x < center.getX()+area; x++)
-					for (int y = -63; y < ms.highestGround; y++)
-						for (int z = (int) (center.getZ()-area); z < center.getZ()+area; z++) {
+				int area =  ms.playableArea;
+				int[] maxs = {
+						(int) (center.getX()+area),
+						ms.isLodesActive() ? ms.highestGround : (int) center.getY(),
+						(int) (center.getZ()+area)
+				};
+				for (int x = (int) (center.getX()-area); x < maxs[0]; x++)
+					for (int y = -63; y < maxs[1]; y++)
+						for (int z = (int) (center.getZ()-area); z < maxs[2]; z++) {
 							Block b = new Location(p.getWorld(), x, y, z).getBlock();
-							if (b.getType().toString().endsWith("ORE"))
+							if (b.getType().toString().endsWith("ORE") || b.getType().toString().startsWith("RAW_"))
 								if (b.getType().toString().startsWith("DEEPSLATE"))
 									b.setType(Material.DEEPSLATE);
 								else
