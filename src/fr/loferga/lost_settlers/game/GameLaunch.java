@@ -46,7 +46,7 @@ public class GameLaunch extends BukkitRunnable {
 	}
 	
 	private void launchGame() {
-		game.runTaskTimer(Main.getPlugin(Main.class), 0L, 1L);
+		game.runTaskTimer(Main.plg, 0L, 1L);
 		MapMngr.clearMap(map);
 		for (Player p : game.getPlayers()) {
 			p.setGameMode(GameMode.SURVIVAL);

@@ -3,6 +3,7 @@ package fr.loferga.lost_settlers.dogs;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.bukkit.entity.LivingEntity;
@@ -12,7 +13,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class Anger extends BukkitRunnable {
 	
-	private static boolean running = false;
+	private boolean running = false;
 	
 	// Singleton methods
 	private static Anger anger = null;
@@ -53,16 +54,16 @@ public class Anger extends BukkitRunnable {
 	
 	public static Set<Wolf> getDogAngryAt(LivingEntity target) {
 		Set<Wolf> res = new HashSet<>();
-		for (Wolf wolf : targets.keySet())
-			if (targets.get(wolf) == target)
-				res.add(wolf);
+		for (Entry<Wolf, LivingEntity> e : targets.entrySet())
+			if (e.getValue() == target)
+				res.add(e.getKey());
 		return res;
 	}
 	
 	@Override
 	public void run() {
-		for (Wolf wolf : targets.keySet())
-			wolf.setTarget(targets.get(wolf));
+		for (Entry<Wolf, LivingEntity> e : targets.entrySet())
+			e.getKey().setTarget(e.getValue());
 	}
 
 }

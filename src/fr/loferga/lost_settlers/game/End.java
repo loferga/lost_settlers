@@ -20,20 +20,20 @@ public class End implements TabExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (sender instanceof Player) {
-			Player p = (Player) sender;
-			if (args.length == 0) {
-				Game game = GameMngr.getGame(p.getWorld());
-				if (game != null) {
-					GameMngr.stop(game, null);
-					return true;
-				} else {
-					p.sendMessage(Func.format("&cNo game is running"));
-					return false;
-				}
+		if (!(sender instanceof Player)) return false;
+		
+		Player p = (Player) sender;
+		if (args.length == 0) {
+			Game game = GameMngr.getGame(p.getWorld());
+			if (game != null) {
+				GameMngr.stop(game, null);
+				return true;
+			} else {
+				p.sendMessage(Func.format("&cNo game is running"));
+				return false;
 			}
-			sendInvalid(p);
 		}
+		sendInvalid(p);
 		return false;
 	}
 

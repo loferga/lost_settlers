@@ -29,6 +29,8 @@ import fr.loferga.lost_settlers.util.Func;
 
 public class DogMngr {
 	
+	private DogMngr() {/*fonction holder class, it should never be instantiated*/}
+	
 	protected static Map<AnimalTamer, List<Wolf>> tamers = new HashMap<>();
 	
 	public static Map<AnimalTamer, List<Wolf>> get() {
@@ -52,10 +54,7 @@ public class DogMngr {
 	}
 	
 	public static boolean ownership(Wolf wolf, Player p) {
-		if (tamers.containsKey(p))
-			if (tamers.get(p).contains(wolf))
-				return true;
-		return false;
+		return tamers.containsKey(p) && tamers.get(p).contains(wolf);
 	}
 	
 	/*
@@ -77,7 +76,7 @@ public class DogMngr {
 						comeBack(dogs, p);
 						p.getWorld().playSound(p.getLocation(), "custom.whistle_back", SoundCategory.PLAYERS, 2.0f, 1.0f);
 						for (Wolf dog : dogs)
-							Func.glowFor((LivingEntity)dog, new HashSet<>(Set.of(p)), 10);
+							Func.glowFor(dog, new HashSet<>(Set.of(p)), 10);
 					}
 					prevTarget.remove(p);
 				} else if (!(target instanceof Player) || GameMngr.gameIn(p).pvp()) {

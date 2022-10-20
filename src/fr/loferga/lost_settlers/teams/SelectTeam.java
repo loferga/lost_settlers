@@ -15,7 +15,7 @@ import fr.loferga.lost_settlers.util.Func;
 
 public class SelectTeam implements TabExecutor {
 	
-	public static final List<String> TEAMS_NAMES = teamsNames();
+	private static final List<String> TEAMS_NAMES = teamsNames();
 	private static List<String> teamsNames() {
 		List<String> res = new ArrayList<>(Arrays.asList("#null"));
 		for (LSTeam team : TeamMngr.get())
@@ -37,8 +37,7 @@ public class SelectTeam implements TabExecutor {
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (sender instanceof Player) {
-			Player p = (Player) sender;
+		if (sender instanceof Player p) {
 			if (args.length == 2) {
 				if (p.isOp())
 					p = Bukkit.getPlayer(args[1]);

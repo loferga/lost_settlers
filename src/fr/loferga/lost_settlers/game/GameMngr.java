@@ -25,6 +25,8 @@ import fr.loferga.lost_settlers.util.Func;
 
 public class GameMngr {
 	
+	private GameMngr() {/*fonction holder class, it should never be instantiated*/}
+	
 	private static List<Game> games = new ArrayList<>();
 	
 	public static boolean noGames() {
@@ -72,7 +74,7 @@ public class GameMngr {
 	
 	public static void start(String wn) {
 		// MAP
-		Main.getPlugin(Main.class).reloadConfig();
+		Main.plg.reloadConfig();
 		for (Player p : MapMngr.HUB.getPlayers()) p.sendMessage(Func.format("Chargement de la carte &e" + wn));
 		World world = MapMngr.newWorld(wn);
 		MapSettings ms = MapMngr.getMapSettings(world);
@@ -106,7 +108,7 @@ public class GameMngr {
 		SkillListeners.giveEquipment(game);
 		for (Entity i : world.getEntitiesByClasses(Item.class))
 			i.remove();
-		new GameLaunch(game, MapMngr.setMap(ms), Main.getPlugin(Main.class));
+		new GameLaunch(game, MapMngr.setMap(ms), Main.plg);
 	}
 	
 	public static void stop(Game game, LSTeam winner) {

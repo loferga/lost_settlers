@@ -20,16 +20,17 @@ public class Lobby implements TabExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (sender instanceof Player) {
-			Player p = (Player) sender;
-			if (args.length == 0) {
-				World w = p.getWorld();
-				MapMngr.spawnTeleport(p);
-				if (w.getPlayers().size() == 0) MapMngr.forget(w, false);
-				return true;
-			}
-			sendInvalid(p);
+		if (!(sender instanceof Player)) return false;
+		
+		Player p = (Player) sender;
+		if (args.length == 0) {
+			World w = p.getWorld();
+			MapMngr.spawnTeleport(p);
+			// TODO when do we want to forget on lobby?
+			if (w.getPlayers().isEmpty()) MapMngr.forget(w, false);
+			return true;
 		}
+		sendInvalid(p);
 		return false;
 	}
 	

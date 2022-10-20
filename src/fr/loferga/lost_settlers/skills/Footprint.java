@@ -22,7 +22,7 @@ public class Footprint extends BukkitRunnable {
 		team = TeamMngr.teamOf(p);
 		maxD = SkillSelection.get(p) == Skill.PISTAGE ? 15 : 30;
 		duration = maxD;
-		runTaskTimer(Main.getPlugin(Main.class), 0L, 20L);
+		runTaskTimer(Main.plg, 0L, 20L);
 	}
 
 	@Override

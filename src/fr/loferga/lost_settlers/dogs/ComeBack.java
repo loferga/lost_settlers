@@ -3,6 +3,7 @@ package fr.loferga.lost_settlers.dogs;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.bukkit.entity.LivingEntity;
@@ -13,7 +14,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class ComeBack extends BukkitRunnable {
 	
-	private static boolean running = false;
+	private boolean running = false;
 	
 	// Singleton methods
 	private static ComeBack comeBack = null;
@@ -46,14 +47,14 @@ public class ComeBack extends BukkitRunnable {
 	}
 	
 	public static void removeDog(Wolf wolf) {
-		for (LivingEntity ent : targets.keySet()) {
-			if (targets.get(ent).contains(wolf)) {
-				if (targets.get(ent).size() > 1) {
-					targets.get(ent).remove(wolf);
+		for (Entry<LivingEntity, Set<Wolf>> e : targets.entrySet()) {
+			if (e.getValue().contains(wolf)) {
+				if (e.getValue().size() > 1) {
+					e.getValue().remove(wolf);
 				} else {
-					targets.remove(ent);
-					teleport.remove(ent);
-					ent.remove();
+					targets.remove(e.getKey());
+					teleport.remove(e.getKey());
+					e.getKey().remove();
 				}
 			}
 		}
@@ -76,12 +77,12 @@ public class ComeBack extends BukkitRunnable {
 	
 	@Override
 	public void run() {
-		for (LivingEntity ent : targets.keySet()) {
+		for (Entry<LivingEntity, Set<Wolf>> e : targets.entrySet()) {
 			Set<Wolf> wset = new HashSet<>();
-			wset.addAll(targets.get(ent));
+			wset.addAll(e.getValue());
 			for (Wolf wolf : wset) {
-				if (wolf.getLocation().distance(ent.getLocation()) > 4)
-					wolf.setTarget(ent);
+				if (wolf.getLocation().distance(e.getKey().getLocation()) > 4)
+					wolf.setTarget(e.getKey());
 				else {
 					removeDog(wolf);
 					wolf.setAngry(false);
@@ -89,8 +90,8 @@ public class ComeBack extends BukkitRunnable {
 				}
 			}
 		}
-		for (LivingEntity ent : teleport.keySet())
-			ent.teleport(teleport.get(ent));
+		for (Entry<LivingEntity, Player> e : teleport.entrySet())
+			e.getKey().teleport(e.getValue());
 	}
 
 }

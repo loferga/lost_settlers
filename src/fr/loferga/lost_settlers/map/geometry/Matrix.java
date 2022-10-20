@@ -37,11 +37,11 @@ public class Matrix {
 		// minors and cofactors
 		for (int i = 0; i < v.length; i++)
 			for (int j = 0; j < v[i].length; j++)
-				inverse[i][j] = Math.pow(-1, i + j)
+				inverse[i][j] = Math.pow(-1, (double) i + j)
 						* submatrix(i, j).determinant();
 		
 		// adjugate and determinant
-		double det = 1.0 / this.determinant();
+		double det = 1.0 / determinant();
 		for (int i = 0; i < inverse.length; i++) {
 			for (int j = 0; j <= i; j++) {
 				double temp = inverse[i][j];
@@ -64,9 +64,6 @@ public class Matrix {
 	}
 	
 	private double determinant() {
-		if (v.length != v[0].length)
-			throw new IllegalStateException("invalid dimensions");
-		
 		if (v.length == 2)
 			return v[0][0] * v[1][1] - v[0][1] * v[1][0];
 		
@@ -76,6 +73,5 @@ public class Matrix {
 					* this.submatrix(0, i).determinant();
 		return det;
 	}
-	
 	
 }

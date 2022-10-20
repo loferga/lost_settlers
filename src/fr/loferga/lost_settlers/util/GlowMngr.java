@@ -9,25 +9,23 @@ import org.bukkit.plugin.Plugin;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
 
-public class Glow {
+public class GlowMngr {
 	
-	private static ProtocolManager protocolManager;
+	private GlowMngr() {/*fonction holder class, it should never be instantiated*/}
 	
-	public static Map<Integer, Set<Player>> glow = new HashMap<>();
+	private static Map<Integer, Set<Player>> glow = new HashMap<>();
 	
 	public static void addGlow(Integer i, Set<Player> pset) {
 		glow.put(i, pset);
 	}
 	
 	public static void addPacketListener(Plugin plg) {
-
-		protocolManager = ProtocolLibrary.getProtocolManager();
-		protocolManager.addPacketListener(
+		
+		ProtocolLibrary.getProtocolManager().addPacketListener(
 				new PacketAdapter(plg, PacketType.Play.Server.ENTITY_METADATA) {
 					@Override
 				    public void onPacketSending(PacketEvent e) {

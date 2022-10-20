@@ -29,25 +29,25 @@ public class CloseWorld implements TabExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (sender instanceof Player) {
-			Player p = (Player) sender;
-			if (args.length == 2)
-				if (args[1].equals("save") || args[1].equals("restore"))
-					for (World w : MapMngr.getWorlds())
-						if (w.getName().endsWith(args[0])) {
-							for (Player wp : w.getPlayers())
-								MapMngr.spawnTeleport(wp);
-							if (args[1].equals("save")) {
-								MapMngr.forget(w, true);
-								p.sendMessage(Func.format("&aLa carte est sauvegardee"));
-							} else {
-								MapMngr.forget(w, false);
-								p.sendMessage(Func.format("&aLa carte est restauree"));
-							}
-							return true;
+		if (!(sender instanceof Player)) return false;
+		
+		Player p = (Player) sender;
+		if (args.length == 2
+		&& args[1].equals("save") || args[1].equals("restore"))
+				for (World w : MapMngr.getWorlds())
+					if (w.getName().endsWith(args[0])) {
+						for (Player wp : w.getPlayers())
+							MapMngr.spawnTeleport(wp);
+						if (args[1].equals("save")) {
+							MapMngr.forget(w, true);
+							p.sendMessage(Func.format("&aLa carte est sauvegardee"));
+						} else {
+							MapMngr.forget(w, false);
+							p.sendMessage(Func.format("&aLa carte est restauree"));
 						}
-			sendInvalid(p);
-		}
+						return true;
+					}
+		sendInvalid(p);
 		return false;
 	}
 	

@@ -23,33 +23,33 @@ public class ClearOres implements TabExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (sender instanceof Player) {
-			Player p = (Player) sender;
-			if (args.length == 0) {
-				World pw = p.getWorld();
-				MapSettings ms = MapMngr.getMapSettings(pw);
-				Location center = MapMngr.getMapCenter(pw, ms);
-				int area =  ms.playableArea;
-				int[] maxs = {
-						(int) (center.getX()+area),
-						ms.isLodesActive() ? ms.highestGround : (int) center.getY(),
-						(int) (center.getZ()+area)
-				};
-				for (int x = (int) (center.getX()-area); x < maxs[0]; x++)
-					for (int y = -63; y < maxs[1]; y++)
-						for (int z = (int) (center.getZ()-area); z < maxs[2]; z++) {
-							Block b = new Location(p.getWorld(), x, y, z).getBlock();
-							if (b.getType().toString().endsWith("ORE") || b.getType().toString().startsWith("RAW_"))
-								if (b.getType().toString().startsWith("DEEPSLATE"))
-									b.setType(Material.DEEPSLATE);
-								else
-									b.setType(Material.STONE);
-						}
-				p.sendMessage(Func.format("&eOres Cleared!"));
-				return true;
-			}
-			sendInvalid(p);
+		if (!(sender instanceof Player)) return false;
+		
+		Player p = (Player) sender;
+		if (args.length == 0) {
+			World pw = p.getWorld();
+			MapSettings ms = MapMngr.getMapSettings(pw);
+			Location center = MapMngr.getMapCenter(pw, ms);
+			int area =  ms.playableArea;
+			int[] maxs = {
+					(int) (center.getX()+area),
+					ms.isLodesActive() ? ms.highestGround : (int) center.getY(),
+					(int) (center.getZ()+area)
+			};
+			for (int x = (int) (center.getX()-area); x < maxs[0]; x++)
+				for (int y = -63; y < maxs[1]; y++)
+					for (int z = (int) (center.getZ()-area); z < maxs[2]; z++) {
+						Block b = new Location(p.getWorld(), x, y, z).getBlock();
+						if (b.getType().toString().endsWith("ORE") || b.getType().toString().startsWith("RAW_"))
+							if (b.getType().toString().startsWith("DEEPSLATE"))
+								b.setType(Material.DEEPSLATE);
+							else
+								b.setType(Material.STONE);
+					}
+			p.sendMessage(Func.format("&eOres Cleared!"));
+			return true;
 		}
+		sendInvalid(p);
 		return false;
 	}
 	

@@ -5,6 +5,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameRule;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import fr.loferga.lost_settlers.game.Start;
@@ -16,22 +17,29 @@ import fr.loferga.lost_settlers.map.ClearOres;
 import fr.loferga.lost_settlers.map.CloseWorld;
 import fr.loferga.lost_settlers.map.Lobby;
 import fr.loferga.lost_settlers.map.Warp;
+import fr.loferga.lost_settlers.rules.CombatTracker;
+import fr.loferga.lost_settlers.rules.Wounded;
 import fr.loferga.lost_settlers.skills.SkillCommand;
 import fr.loferga.lost_settlers.skills.SkillListeners;
 import fr.loferga.lost_settlers.teams.SelectTeam;
 import fr.loferga.lost_settlers.teams.TeamMngr;
-import fr.loferga.lost_settlers.util.Glow;
+import fr.loferga.lost_settlers.util.GlowMngr;
 
 public class Main extends JavaPlugin{
 	
+	public static final Plugin plg = getPlugin(Main.class);
+	
+	public static final String LOG_PREFIX = "[LostSettlers] ";
+	
+	@Override
 	public void onEnable() {
 		
 		saveDefaultConfig();
 		
-		new MapMngr();
-		new GUIMngr();
+//		new MapMngr();
+//		new GUIMngr();
 		
-		if (MapMngr.auto_load)
+		if (MapMngr.AUTO_LOAD)
 			for (String wn : getConfig().getConfigurationSection("maps").getKeys(false))
 				if (!wn.equals("lobby"))
 					MapMngr.newWorld(wn);
@@ -42,7 +50,7 @@ public class Main extends JavaPlugin{
 		// in case of a reload, players that already are in hub need to be initialized
 		for (Player p : MapMngr.HUB.getPlayers()) {GUIMngr.giveSelector(p); TeamMngr.join(p, TeamMngr.NULL);}
 		
-		Recipes.createRecipes(this);
+		Recipes.createRecipes();
 		
 		getCommand("lobby").setExecutor(new Lobby());
 		getCommand("all").setExecutor(new All());
@@ -55,8 +63,10 @@ public class Main extends JavaPlugin{
 		getCommand("clearores").setExecutor(new ClearOres());
 		getServer().getPluginManager().registerEvents(new Listeners(), this);
 		getServer().getPluginManager().registerEvents(new SkillListeners(), this);
+		getServer().getPluginManager().registerEvents(Wounded.getInstance(), this);
+		getServer().getPluginManager().registerEvents(CombatTracker.getInstance(), this);
 		
-		Glow.addPacketListener(this);
+		GlowMngr.addPacketListener(this);
 		
 		ConsoleCommandSender console = getServer().getConsoleSender();
 		console.sendMessage("[LostSettlers] ===============================");
@@ -64,6 +74,7 @@ public class Main extends JavaPlugin{
 		console.sendMessage("[LostSettlers] ===============================");
 	}
 	
+	@Override
 	public void onDisable() {
 		for (Player p : Bukkit.getOnlinePlayers())
 			if (MapMngr.isMap(p.getWorld()))

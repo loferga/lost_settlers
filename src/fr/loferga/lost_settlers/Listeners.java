@@ -2,6 +2,7 @@ package fr.loferga.lost_settlers;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.bukkit.ChatColor;
@@ -17,8 +18,6 @@ import org.bukkit.enchantments.EnchantmentOffer;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.ExperienceOrb;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MagmaCube;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
@@ -36,11 +35,8 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
-import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.BrewEvent;
@@ -75,7 +71,6 @@ import fr.loferga.lost_settlers.game.MobMngr;
 import fr.loferga.lost_settlers.gui.GUIMngr;
 import fr.loferga.lost_settlers.map.MapMngr;
 import fr.loferga.lost_settlers.map.camps.Camp;
-import fr.loferga.lost_settlers.rules.Wounded;
 import fr.loferga.lost_settlers.teams.LSTeam;
 import fr.loferga.lost_settlers.teams.TeamMngr;
 import fr.loferga.lost_settlers.util.Func;
@@ -87,7 +82,8 @@ public class Listeners implements Listener {
 		Player p = e.getPlayer();
 		if (p.getWorld() != MapMngr.HUB) {GUIMngr.giveSelector(p); return;}
 		if (TeamMngr.teamOf(p) != null) return;
-			TeamMngr.join(p, TeamMngr.NULL);
+		
+		TeamMngr.join(p, TeamMngr.NULL);
 	}
 	
 	// events with multiples effects
@@ -120,9 +116,7 @@ public class Listeners implements Listener {
 			
 			Player dmger = (Player) e.getDamager();
 			Game game = GameMngr.gameIn(dmger);
-			if (game != null && (game.pvp() || TeamMngr.teamOf(dmged) == TeamMngr.teamOf(dmger))) {
-				putInCombat(dmged, dmger);
-			} else
+			if (game != null && !game.pvp())
 				e.setCancelled(true);
 				
 		} else if (src instanceof Arrow) {
@@ -131,8 +125,8 @@ public class Listeners implements Listener {
 			if (src instanceof SpectralArrow) {
 				
 				SpectralArrow sa = (SpectralArrow) e.getDamager();
-				if (sa.getShooter() instanceof Player)
-					Func.glowFor(dmged, TeamMngr.teamOf((Player) sa.getShooter()).getPlayers(), 600);
+				if (sa.getShooter() instanceof Player shooter)
+					Func.glowFor(dmged, TeamMngr.teamOf(shooter).getPlayers(), 600);
 				
 			}
 				
@@ -193,7 +187,7 @@ public class Listeners implements Listener {
 		if (game.getMapSettings().isLodesActive()) {
 			double ratio = game.undergroundLevel(loc);
 			if (ratio<=1)
-				MobMngr.setProperties(e.getEntity(), Math.abs(1-ratio), game.isInChamber(loc));
+				MobMngr.setProperties(e.getEntity(), Math.abs(1-ratio)/*, game.isInChamber(loc)*/);
 		}
 		
 	}
@@ -248,10 +242,10 @@ public class Listeners implements Listener {
 		if (GameMngr.gameIn((Player) e.getView().getPlayer()) == null) {
 			if (e.getCurrentItem() == null) return;
 			
-			if (e.getView().getTitle() == "Selection") {
+			if (e.getView().getTitle().equals("Selection")) {
 				GUIMngr.clickTM((Player) e.getWhoClicked(), e.getCurrentItem());
 				e.setCancelled(true);
-			} else if (e.getView().getTitle() == "Talents") {
+			} else if (e.getView().getTitle().equals("Talents")) {
 				boolean res = GUIMngr.clickSM((Player) e.getWhoClicked(), e.getCurrentItem());
 				if (res) e.getWhoClicked().openInventory(GUIMngr.getTM((Player) e.getWhoClicked()));
 				e.setCancelled(true);
@@ -267,34 +261,13 @@ public class Listeners implements Listener {
 	 *                                     RULES
 	 * ============================================================================
 	 */
-	// ##### XP ######
-	
-	final static int X = 2;
-	
-	private static void dropExp(Location loc, int xpAmount) {
-		int r = xpAmount;
-		int x = X;
-		while (r > 0) {
-			int xp;
-			if (r >= x) {
-				xp = x;
-				r -= x;
-			} else {
-				xp = r;
-				r = 0;
-			}
-			ExperienceOrb orb = (ExperienceOrb) loc.getWorld().spawnEntity(loc, EntityType.EXPERIENCE_ORB);
-			orb.setExperience(xp);
-			x *= X;
-		}
-	}
 	
 	// ##### ORES #####
 	
 	private void oreExp(Block b) {
 		if (!isOre(b.getType().toString())) return;
 		
-		dropExp(b.getLocation(), oreToExp(b.getType().toString()));
+		Func.dropExp(b.getLocation(), oreToExp(b.getType().toString()));
 	}
 	
 	private static boolean isOre(String bn) {
@@ -351,7 +324,7 @@ public class Listeners implements Listener {
 	
 	private static void spawnMagmaCube(Location loc) {
 		MagmaCube magma = (MagmaCube) loc.getWorld().spawnEntity(loc, EntityType.MAGMA_CUBE);
-		magma.setSize((int) (Math.random() * 4));
+		magma.setSize((int) (Func.random(0, 4)));
 	}
 	
 	// ##### NO DAMAGE BONUS ARROW #####
@@ -364,38 +337,15 @@ public class Listeners implements Listener {
 		};
 	
 	private static boolean isBonusArrow(Arrow a) {
-		boolean bonus = a.getCustomEffects().size() > 0;
-		int i = 0, length = a.getCustomEffects().size();
+		boolean bonus = !a.getCustomEffects().isEmpty();
+		int i = 0;
+		int length = a.getCustomEffects().size();
 		while (i<length && bonus) {
 			if (Func.primeContain(badEffects, a.getCustomEffects().get(i)))
 				bonus = false;
 			i++;
 		}
 		return bonus;
-	}
-	
-	// ##### NATURAL REGEN #####
-	
-	private static void putInCombat(Player dmged, Player dmger) {
-		Wounded.addPlayer(dmged);
-		Wounded.addPlayer(dmger);
-	}
-	
-	@EventHandler
-	public void onEntityDamage(EntityDamageEvent e) {
-		if (!(e.getEntity() instanceof Player)) return;
-		Player p = (Player) e.getEntity();
-		if (GameMngr.gameIn(p) == null) return;
-		if (e.getCause() == DamageCause.FIRE_TICK) return;
-		
-		Wounded.addPlayer(p);
-	}
-	
-	@EventHandler
-	public void onEntityRegainHealth(EntityRegainHealthEvent e) {
-		if (!(e.getEntity() instanceof Player) || !(Wounded.isInCombat((Player) e.getEntity()))) return;
-		
-		e.setCancelled(true);
 	}
 	
 	// ##### DEATH #####
@@ -426,7 +376,7 @@ public class Listeners implements Listener {
 			else
 				game.winCondition(null, null);
 			e.setDroppedExp(0);
-			dropExp(dead.getLocation(), dead.getTotalExperience());
+			Func.dropExp(dead.getLocation(), dead.getTotalExperience());
 		} else
 			game.addRespawn(dead);
 		GUIMngr.refreshDTM();
@@ -441,7 +391,7 @@ public class Listeners implements Listener {
 		
 		Player p = (Player) e.getView().getPlayer();
 		Color color = TeamMngr.teamOf(p).getColor();
-		result.setItemMeta((ItemMeta) Recipes.setColor(result.getItemMeta(), color));
+		result.setItemMeta(Recipes.setColor(result.getItemMeta(), color));
 		e.getInventory().setResult(result);
 	}
 	
@@ -455,8 +405,8 @@ public class Listeners implements Listener {
 		
 		ItemMeta im = e.getResult().getItemMeta();
 		Map<Enchantment, Integer> enchantments = im.getEnchants();
-		for (Enchantment ench : enchantments.keySet())
-			im.addEnchant(ench, enchantments.get(ench) + 1, true);
+		for (Entry<Enchantment, Integer> entry : enchantments.entrySet())
+			im.addEnchant(entry.getKey(), entry.getValue() + 1, true);
 		e.getResult().setItemMeta(im);
 	}
 	
@@ -465,7 +415,7 @@ public class Listeners implements Listener {
 	@EventHandler
 	public void onPlayerTeleport(PlayerTeleportEvent e) {
 		if (GameMngr.gameIn(e.getPlayer()) != null && e.getCause() == TeleportCause.ENDER_PEARL) {
-			Player p = (Player) e.getPlayer();
+			Player p = e.getPlayer();
 			p.setHealth(2*p.getHealth()/3);
 		}
 	}
@@ -484,10 +434,10 @@ public class Listeners implements Listener {
 			p.addPotionEffect(new PotionEffect(eff.getType(), eff.getDuration(), eff.getAmplifier(), true, false));
 			e.setCancelled(true);
 		} else if (effN.equals("FIRE_RESISTANCE")) {                   // decreased duration
-			p.addPotionEffect(new PotionEffect(eff.getType(), (int) (80 + eff.getDuration()/25), eff.getAmplifier(), true, true));
+			p.addPotionEffect(new PotionEffect(eff.getType(), 80 + eff.getDuration()/25, eff.getAmplifier(), true, true));
 			e.setCancelled(true);
 		} else if (effN.equals("INCREASE_DAMAGE")) {                   // decreased duration
-			p.addPotionEffect(new PotionEffect(eff.getType(), (int) (60 + eff.getDuration()/20), eff.getAmplifier(), true, true));
+			p.addPotionEffect(new PotionEffect(eff.getType(), 60 + eff.getDuration()/20, eff.getAmplifier(), true, true));
 			e.setCancelled(true);
 		}
 		// TODO replace strength vanilla effect with a percent damage increase (not flat) with EntityDamagedByEntityEvent
@@ -522,8 +472,8 @@ public class Listeners implements Listener {
 			if (game.isFlag(b)) {
 				e.setCancelled(true);
 				Entity src = e.getEntity();
-				if (e.getEntity() instanceof TNTPrimed)
-					src = ((TNTPrimed) e.getEntity()).getSource();
+				if (e.getEntity() instanceof TNTPrimed tnt)
+					src = tnt.getSource();
 				e.getLocation().getWorld().createExplosion(e.getLocation(), 4f, false, false, src);
 				return;
 			}
@@ -553,10 +503,10 @@ public class Listeners implements Listener {
 		e.setCancelled(false);
 		EnchantmentOffer[] offers = e.getOffers();
 		int i = 0;
-		for (Enchantment enchant : enchants.keySet()) {
-			int level = enchants.get(enchant);
-			if (level != enchant.getMaxLevel())
-				offers[i++] = new EnchantmentOffer(enchant, level + 1, 3 * level);
+		for (Entry<Enchantment, Integer> entry : enchants.entrySet()) {
+			int level = entry.getValue();
+			if (level != entry.getKey().getMaxLevel())
+				offers[i++] = new EnchantmentOffer(entry.getKey(), level + 1, 3 * level);
 		}
 		while (i<3)
 			offers[i++] = null;
@@ -600,7 +550,7 @@ public class Listeners implements Listener {
 	public void onQuit(PlayerQuitEvent e) {
 		MapMngr.spawnTeleport(e.getPlayer());
 		TeamMngr.remove(e.getPlayer());
-		Set<Wolf> angry = Anger.getDogAngryAt((LivingEntity) e.getPlayer());
+		Set<Wolf> angry = Anger.getDogAngryAt(e.getPlayer());
 		if (angry == null) return;
 		
 		for (Wolf w : angry) {

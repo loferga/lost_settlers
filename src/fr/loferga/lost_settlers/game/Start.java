@@ -17,7 +17,7 @@ public class Start implements TabExecutor {
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
 		List<String> res = new ArrayList<>();
-		Set<String> mapNames = Main.getPlugin(Main.class).getConfig().getConfigurationSection("maps").getKeys(false);
+		Set<String> mapNames = Main.plg.getConfig().getConfigurationSection("maps").getKeys(false);
 		mapNames.remove("lobby");
 		if (args.length == 1)
 			res.addAll(Func.matches(mapNames, args[0]));
@@ -26,20 +26,20 @@ public class Start implements TabExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (sender instanceof Player) {
-			Player snd = (Player) sender;
-			if (args.length == 1) {
-				List<String> maps = new ArrayList<>();
-				for (String wn : Main.getPlugin(Main.class).getConfig().getConfigurationSection("maps").getKeys(false))
-					if (!wn.equals("lobby"))
-						maps.add(wn);
-				if (maps.contains(args[0])) {
-					GameMngr.start(args[0]);
-					return true;
-				}
+		if (!(sender instanceof Player)) return false;
+		
+		Player snd = (Player) sender;
+		if (args.length == 1) {
+			List<String> maps = new ArrayList<>();
+			for (String wn : Main.plg.getConfig().getConfigurationSection("maps").getKeys(false))
+				if (!wn.equals("lobby"))
+					maps.add(wn);
+			if (maps.contains(args[0])) {
+				GameMngr.start(args[0]);
+				return true;
 			}
-			sendInvalid(snd);
 		}
+		sendInvalid(snd);
 		return false;
 	}
 

@@ -19,11 +19,13 @@ import org.bukkit.scoreboard.Team.Option;
 import org.bukkit.scoreboard.Team.OptionStatus;
 
 import fr.loferga.lost_settlers.Main;
-import fr.loferga.lost_settlers.dogs.DogsMngr;
+import fr.loferga.lost_settlers.dogs.DogMngr;
 
 public class TeamMngr {
 	
-	private static ConfigurationSection section = Main.getPlugin(Main.class).getConfig().getConfigurationSection("teams");
+	private TeamMngr() {/*fonction holder class, it should never be instantiated*/}
+	
+	private static ConfigurationSection section = Main.plg.getConfig().getConfigurationSection("teams");
 	private static Scoreboard sb = Bukkit.getScoreboardManager().getMainScoreboard();
 	
 	private static final LSTeam[] TEAMS = buildTeams(section);
@@ -38,14 +40,14 @@ public class TeamMngr {
 	
 	public static void join(Player p, LSTeam team) {
 		team.join(p);
-		DogsMngr.setDogsColor(p, team.getDyeColor());
+		DogMngr.setDogsColor(p, team.getDyeColor());
 	}
 	
 	public static void remove(Player p) {
 		LSTeam team = teamOf(p);
 		if (team != null) team.leave(p);
 		NULL.join(p);
-		DogsMngr.setDogsColor(p, DyeColor.WHITE);
+		DogMngr.setDogsColor(p, DyeColor.WHITE);
 	}
 	
 	public static LSTeam teamOf(Player p) {

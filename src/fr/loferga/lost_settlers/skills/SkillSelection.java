@@ -1,6 +1,6 @@
 package fr.loferga.lost_settlers.skills;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -13,11 +13,13 @@ import fr.loferga.lost_settlers.Main;
 
 public class SkillSelection {
 	
-	private static FileConfiguration cfg = Main.getPlugin(Main.class).getConfig();
+	private SkillSelection() {/*fonction holder class, it should never be instantiated*/}
+	
+	private static FileConfiguration cfg = Main.plg.getConfig();
 	
 	private static Map<Skill, Set<Player>> selection = buildSelection();
 	private static Map<Skill, Set<Player>> buildSelection() {
-		Map<Skill, Set<Player>> res = new HashMap<>();
+		Map<Skill, Set<Player>> res = new EnumMap<>(Skill.class);
 		for (Skill s : Skill.values()) {
 			String path = "skills." + s.toString().toLowerCase();
 			if (cfg.contains(path, true) && cfg.getBoolean(path))

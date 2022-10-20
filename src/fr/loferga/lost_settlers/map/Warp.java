@@ -26,21 +26,20 @@ public class Warp implements TabExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (sender instanceof Player) {
-			Player p = (Player) sender;
-			if (args.length == 1) {
-				if (Main.getPlugin(Main.class).getConfig().getConfigurationSection("maps").getKeys(false).contains(args[0])) {
-					if (args[0].equals("spawn"))
-						MapMngr.spawnTeleport(p);
-					else {
-						World destw = MapMngr.newWorld(args[0]);
-						p.teleport(destw.getSpawnLocation());
-					}
-					return true;
-				}
+		if (!(sender instanceof Player)) return false;
+		
+		Player p = (Player) sender;
+		if (args.length == 1
+		&& Main.plg.getConfig().getConfigurationSection("maps").getKeys(false).contains(args[0])) {
+			if (args[0].equals("spawn"))
+				MapMngr.spawnTeleport(p);
+			else {
+				World destw = MapMngr.newWorld(args[0]);
+				p.teleport(destw.getSpawnLocation());
 			}
-			sendInvalid(p);
+			return true;
 		}
+		sendInvalid(p);
 		return false;
 	}
 	

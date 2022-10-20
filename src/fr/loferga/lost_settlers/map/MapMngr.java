@@ -2,6 +2,7 @@ package fr.loferga.lost_settlers.map;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
@@ -25,14 +26,16 @@ import fr.loferga.lost_settlers.util.Func;
 
 public class MapMngr {
 	
-	public static boolean auto_load = Main.getPlugin(Main.class).getConfig().contains("preload_worlds", true)
-			&& Main.getPlugin(Main.class).getConfig().getBoolean("preload_worlds");
+	private MapMngr() {/*fonction holder class, it should never be instantiated*/}
+	
+	public static final boolean AUTO_LOAD = Main.plg.getConfig().contains("preload_worlds", true)
+			&& Main.plg.getConfig().getBoolean("preload_worlds");
 	
 	private static BiMap<World, MapSettings> mapsSettings = new BiMap<>();
 	public static final World HUB = newWorld("lobby");
 	
 	private static final int[] SPAWN = mapsSettings.get(HUB).worldSpawn;
-	private static final double RANGE = Main.getPlugin(Main.class).getConfig().getDouble("tp_range");
+	private static final double RANGE = Main.plg.getConfig().getDouble("tp_range");
 	
 	private static final String WORLD_NAME_PREFIX = "ls_";
 	
@@ -75,11 +78,11 @@ public class MapMngr {
 	}
 	
 	public static void forget(World world, boolean save) {
-		if (auto_load && save)
+		if (AUTO_LOAD && save)
 			world.save();
 		else {
 			Bukkit.unloadWorld(world, save);
-			if (!auto_load)
+			if (!AUTO_LOAD)
 				mapsSettings.remove(world);
 			else
 				newWorld(world.getName());
@@ -229,8 +232,8 @@ public class MapMngr {
 	}
 	
 	public static void clearMap(Map<Location, Material> map) {
-		for (Location loc : map.keySet())
-			loc.getBlock().setType(map.get(loc));
+		for (Entry<Location, Material> entry : map.entrySet())
+			entry.getKey().getBlock().setType(entry.getValue());
 	}
 
 	public static Location getMapCenter(World world, MapSettings mapSettings) {
@@ -247,7 +250,7 @@ public class MapMngr {
 			}
 			point[0] /= camps.length;
 			point[1] /= camps.length;
-			mapCenter = new Location(world, point[0], world.getHighestBlockYAt((int) point[0], (int) point[1]) + 5, point[1]);
+			mapCenter = new Location(world, point[0], (double) world.getHighestBlockYAt((int) point[0], (int) point[1]) + 5, point[1]);
 		}
 		return mapCenter;
 	}
@@ -281,7 +284,7 @@ public class MapMngr {
 		GUIMngr.giveSelector(p);
 		p.setGameMode(GameMode.ADVENTURE);
 		if (TeamMngr.teamOf(p) == null) TeamMngr.join(p, TeamMngr.NULL);
-		p.teleport(new Location(HUB, (double) SPAWN[0] + 0.5, (double) SPAWN[1], (double) SPAWN[2] + 0.5));
+		p.teleport(new Location(HUB, SPAWN[0] + 0.5, SPAWN[1], SPAWN[2] + 0.5));
 	}
 	
 }

@@ -36,10 +36,6 @@ public class Camp {
 		zoneEffect.stop();
 	}
 
-	public String getName() {
-		return name;
-	}
-
 	public LSTeam getOwner() {
 		return owners.get(owners.size() - 1).getTeam();
 	}
@@ -85,7 +81,8 @@ public class Camp {
 		Location loc = location.clone().add(0, 11.0, 0);
 		Vector dir = direction.vector;
 		Vector minus2dir = dir.clone().multiply(-2);
-		Material flagMat = getOwner().getFlag();
+		LSTeam owner = getOwner();
+		Material flagMat = owner != null ? owner.getFlag() : Material.WHITE_CONCRETE;
 		int i = 0;
 		while (i < 11) {
 			loc.add(0, -1, 0);
@@ -113,6 +110,11 @@ public class Camp {
 			minus2dir.addTo(loc).getBlock().setType(mat);
 			downdir.addTo(loc);
 		}
+	}
+	
+	@Override
+	public String toString() {
+		return name;
 	}
 
 }

@@ -18,6 +18,8 @@ import fr.loferga.lost_settlers.util.Func;
 
 public class Recipes {
 	
+	private Recipes() {/*fonction holder class, it should never be instantiated*/}
+	
 	private static final String[][] N = new String[][] {
 		new String[] {"short", "&ccourte "},
 		new String[] {"middle", "&6moyenne "},
@@ -42,7 +44,7 @@ public class Recipes {
 		return (c & (1 << i)) != 0;
 	}
 	
-	public static void createRecipes(Main main) {
+	public static void createRecipes() {
 		// Fireworks
 		for (char t = 0; t<4; t++) {
 			for (int gp = 1; gp<4; gp++) {
@@ -60,7 +62,7 @@ public class Recipes {
 	}
 	
 	private static ShapelessRecipe getFireworkRecipe(String key, String name, int Gp, int P, Material[] recipe, boolean flicker, boolean trail) {
-		NamespacedKey nk = new NamespacedKey(Main.getPlugin(Main.class), key);
+		NamespacedKey nk = new NamespacedKey(Main.plg, key);
 		ItemStack i = new ItemStack(Material.FIREWORK_ROCKET, P * 4);
 		FireworkMeta fm = (FireworkMeta) i.getItemMeta();
 		fm.setDisplayName(name);
@@ -96,7 +98,8 @@ public class Recipes {
 	
 	private static boolean effectsContains(List<FireworkEffect> effects, boolean flicker) {
 		boolean contain = false;
-		int i = 0, length = effects.size();
+		int i = 0;
+		int length = effects.size();
 		while (i<length && !contain) {
 			if (flicker) {
 				if (effects.get(i).hasFlicker()) {

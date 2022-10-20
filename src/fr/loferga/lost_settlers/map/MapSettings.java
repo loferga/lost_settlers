@@ -39,7 +39,7 @@ public class MapSettings {
 	public LodeGenerator[] generators = null;
 	
 	public MapSettings(String wn) {
-		cfg = Main.getPlugin(Main.class).getConfig().getConfigurationSection("maps." + wn);
+		cfg = Main.plg.getConfig().getConfigurationSection("maps." + wn);
 		if (cfg.contains("seed", true)) seed = cfg.getLong("seed");
 		if (cfg.contains("world_type", true)) worldType = Func.valueOf(WorldType.class, cfg.getString("world_type"));
 		if (cfg.contains("world_name", true)) worldName = cfg.getString("world_name");
@@ -50,12 +50,10 @@ public class MapSettings {
 			if (cfg.contains("camps.camp_size", true)) campSize = cfg.getInt("camps.camp_size");
 			if (cfg.contains("camps.vital_size", true)) vitalSize = cfg.getInt("camps.vital_size");
 		}
-		if (cfg.contains("chamber", true)) {
-			if (cfg.contains("chamber_height", true)) chamberHeight = cfg.getDouble("chamber.chamber_height");
-		}
+		if (cfg.contains("chamber", true) && cfg.contains("chamber_height", true))
+			chamberHeight = cfg.getDouble("chamber.chamber_height");
 		if (cfg.contains("lodes", true)) {
 			if (cfg.contains("lodes.highest_ground", true)) highestGround = cfg.getInt("lodes.highest_ground");
-			System.out.println("cfg contain lodes");
 			if (cfg.contains("lodes.ores", true)) buildGenerators();
 		}
 	}
@@ -74,22 +72,22 @@ public class MapSettings {
 	}
 	
 	private void printSetValues() {
-		ConsoleCommandSender csl = Main.getPlugin(Main.class).getServer().getConsoleSender();
+		ConsoleCommandSender csl = Main.plg.getServer().getConsoleSender();
 		if (teamN == -1)
-			csl.sendMessage("[LostSettlers] " + ChatColor.DARK_RED + "team_number is not set in config.yml");
-		else csl.sendMessage("[LostSettlers] " + ChatColor.DARK_GREEN + "team_number is set");
+			csl.sendMessage(Main.LOG_PREFIX + ChatColor.DARK_RED + "team_number is not set in config.yml");
+		else csl.sendMessage(Main.LOG_PREFIX + ChatColor.DARK_GREEN + "team_number is set");
 		if (playableArea == -1)
-			csl.sendMessage("[LostSettlers] " + ChatColor.DARK_RED + "playable_area is not set in config.yml");
-		else csl.sendMessage("[LostSettlers] " + ChatColor.DARK_GREEN + "playable_area is set");
+			csl.sendMessage(Main.LOG_PREFIX + ChatColor.DARK_RED + "playable_area is not set in config.yml");
+		else csl.sendMessage(Main.LOG_PREFIX + ChatColor.DARK_GREEN + "playable_area is set");
 		if (campSize == -1)
-			csl.sendMessage("[LostSettlers] " + ChatColor.DARK_RED + "camp_size is not set in config.yml");
-		else csl.sendMessage("[LostSettlers] " + ChatColor.DARK_GREEN + "camp_size is set");
+			csl.sendMessage(Main.LOG_PREFIX + ChatColor.DARK_RED + "camp_size is not set in config.yml");
+		else csl.sendMessage(Main.LOG_PREFIX + ChatColor.DARK_GREEN + "camp_size is set");
 		if (vitalSize == -1)
-			csl.sendMessage("[LostSettlers] " + ChatColor.DARK_RED + "vital_size is not set in config.yml");
-		else csl.sendMessage("[LostSettlers] " + ChatColor.DARK_GREEN + "vital_size is set");
+			csl.sendMessage(Main.LOG_PREFIX + ChatColor.DARK_RED + "vital_size is not set in config.yml");
+		else csl.sendMessage(Main.LOG_PREFIX + ChatColor.DARK_GREEN + "vital_size is set");
 		if (camps == null)
-			csl.sendMessage("[LostSettlers] " + ChatColor.DARK_RED + "camps are not set in config.yml");
-		else csl.sendMessage("[LostSettlers] " + ChatColor.DARK_GREEN + "camps are set");
+			csl.sendMessage(Main.LOG_PREFIX + ChatColor.DARK_RED + "camps are not set in config.yml");
+		else csl.sendMessage(Main.LOG_PREFIX + ChatColor.DARK_GREEN + "camps are set");
 	}
 	
 	public boolean isSeedSet() {

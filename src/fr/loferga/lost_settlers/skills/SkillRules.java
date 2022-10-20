@@ -12,7 +12,7 @@ import fr.loferga.lost_settlers.util.Func;
 
 public class SkillRules extends BukkitRunnable {
 	
-	private static boolean running = false;
+	private boolean running = false;
 	
 	// Singleton methods
 	private static SkillRules skills = null;
@@ -36,18 +36,18 @@ public class SkillRules extends BukkitRunnable {
 		cancel();
 	}
 	
-	private static final boolean clairvoyance = Func.primeContain(SkillSelection.getSkills(), Skill.CLAIRVOYANCE);
+	private static final boolean CLAIRVOYANCE = Func.primeContain(SkillSelection.getSkills(), Skill.CLAIRVOYANCE);
 	
 	@Override
 	public void run() {
 		// Lucide
-		if (clairvoyance)
+		if (CLAIRVOYANCE)
 			for (Player c : SkillSelection.getSet(Skill.CLAIRVOYANCE))
 				if (GameMngr.gameIn(c)!=null)
 					for (Player other : GameMngr.gameIn(c).getAliveEnnemies(c))
-						if (!other.isInvisible())
-							if (other.getLocation().distance(c.getLocation()) < 10)
-								Func.glowFor(other, new HashSet<>(Set.of(c)), 2);
+						if (!other.isInvisible()
+						&& other.getLocation().distance(c.getLocation()) < 10)
+							Func.glowFor(other, new HashSet<>(Set.of(c)), 2);
 	}
 	
 }

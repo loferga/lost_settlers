@@ -3,12 +3,15 @@ package fr.loferga.lost_settlers.util;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -18,6 +21,8 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 
 public class Func {
+	
+	private Func() {/*fonction holder class, it should never be instantiated*/}
 	
 	public static String format(String msg) {
 		return ChatColor.translateAlternateColorCodes('&', msg);
@@ -54,12 +59,15 @@ public class Func {
 		return msgu.substring(0, i).concat(msgu.substring(i).toLowerCase());
 	}
 	
+	private static Random rng = new Random();
+	
 	public static double random(double min, double max) {
-		return ThreadLocalRandom.current().nextDouble(min, max);
+		return rng.nextDouble(min, max);
 	}
 	
 	public static <T> boolean primeContain(T[] array, T e) {
-		int i = 0, length = array.length;
+		int i = 0;
+		int length = array.length;
 		boolean contain = false;
 		while (i<length && !contain) {
 			if (array[i] == e)
@@ -85,6 +93,32 @@ public class Func {
 		return rt;
 	}
 	
+	public static <T> T pop(List<T> l) {
+		T res = l.get(0);
+		l.remove(0);
+		return res;
+	}
+	
+	private static final int X = 2;
+	
+	public static void dropExp(Location loc, int xpAmount) {
+		int r = xpAmount;
+		int x = X;
+		while (r > 0) {
+			int xp;
+			if (r >= x) {
+				xp = x;
+				r -= x;
+			} else {
+				xp = r;
+				r = 0;
+			}
+			ExperienceOrb orb = (ExperienceOrb) loc.getWorld().spawnEntity(loc, EntityType.EXPERIENCE_ORB);
+			orb.setExperience(xp);
+			x *= X;
+		}
+	}
+	
 	public static double gauss(int n) {
 		double rng = Math.random();
 		for (int i = 0; i<n; i++)
@@ -107,7 +141,7 @@ public class Func {
 	}
 	
 	public static void glowFor(LivingEntity ent, Set<Player> p, int duration) {
-		Glow.addGlow(ent.getEntityId(), p);
+		GlowMngr.addGlow(ent.getEntityId(), p);
 		ent.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, duration, 0, false, false));
 	}
 	

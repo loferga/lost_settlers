@@ -15,7 +15,7 @@ import fr.loferga.lost_settlers.util.Func;
 
 public class SkillCommand implements TabExecutor {
 	
-	public static final List<String> SKILLS_NAMES = skillsNames();
+	private static final List<String> SKILLS_NAMES = skillsNames();
 	private static List<String> skillsNames() {
 		List<String> res = new ArrayList<>(Arrays.asList("#null"));
 		for (Skill skill : SkillSelection.getSkills())
@@ -37,30 +37,31 @@ public class SkillCommand implements TabExecutor {
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (sender instanceof Player) {
-			Player p = (Player) sender;
-			if (args.length == 2) {
-				if (p.isOp())
-					p = Bukkit.getPlayer(args[1]);
-				else {
-					p.sendMessage(Func.format("\"" + args[1] + "\"&c is not a valid player"));
-					return false;
-				}
+		if (!(sender instanceof Player)) return false;
+		
+		Player p = (Player) sender;
+		if (args.length == 2) {
+			if (p.isOp())
+				p = Bukkit.getPlayer(args[1]);
+			else {
+				p.sendMessage(Func.format("\"" + args[1] + "\"&c is not a valid player"));
+				return false;
 			}
-			if (args.length == 1 || args.length == 2) {
-				if (GameMngr.gameIn(p) != null) return false;
-				if (args[0].equals("#null")) {
-					SkillSelection.deselect(p);
-					p.sendMessage(Func.format("&eVous ne possédez plus de talent"));
-					return true;
-				}
-				boolean selection = SkillSelection.select(p, args[0].toUpperCase());
-				if (selection)
-					p.sendMessage(Func.format("&eVous possédez désormais le talent &3" + args[0]));
-				return selection;
-			}
-			sendInvalid(p);
 		}
+		if (args.length == 1 || args.length == 2) {
+			if (GameMngr.gameIn(p) != null) return false;
+			if (args[0].equals("#null")) {
+				SkillSelection.deselect(p);
+				p.sendMessage(Func.format("&eVous ne possédez plus de talent"));
+				return true;
+			}
+			boolean selection = SkillSelection.select(p, args[0].toUpperCase());
+			if (selection)
+				p.sendMessage(Func.format("&eVous possédez désormais le talent &3" + args[0]));
+			return selection;
+		}
+		
+		sendInvalid(p);
 		return false;
 	}
 	

@@ -8,28 +8,16 @@ public class Point {
 		this.z = z;
 	}
 		
-	protected double x;
-	protected double y;
-	protected double z;
-	
-	public double x() {
-		return x;
-	}
-	
-	public double y() {
-		return y;
-	}
-	
-	public double z() {
-		return z;
-	}
+	public double x;
+	public double y;
+	public double z;
 	
 	public double[] coords() {
 		return new double[] {x, y, z};
 	}
-		
-	public Vector vectorTo(double X, double Y, double Z) {
-		return new Vector(X-x, Y-y, Z-z);
+	
+	public Vector vectorTo(double px, double py, double pz) {
+		return new Vector(px-x, py-y, pz-z);
 	}
 
 }

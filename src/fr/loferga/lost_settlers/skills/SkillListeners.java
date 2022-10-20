@@ -13,7 +13,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
-import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -66,8 +65,7 @@ public class SkillListeners implements Listener {
 		Iterator<Recipe> it = Bukkit.recipeIterator();
 		while (it.hasNext()) {
 			Recipe next = it.next();
-			if (next instanceof FurnaceRecipe) {
-				FurnaceRecipe frec = (FurnaceRecipe) next;
+			if (next instanceof FurnaceRecipe frec) {
 				Material imat = frec.getInput().getType();
 				if (!(Func.primeContain(undesirable, imat) || Func.primeContain(LOGS, imat)))
 					res.add(frec);
@@ -103,7 +101,7 @@ public class SkillListeners implements Listener {
 		
 		Player p = e.getPlayer();
 		Collection<ItemStack> drops = e.getBlock().getDrops(p.getInventory().getItemInMainHand(), p);
-		if (drops.size()>0) {
+		if (!drops.isEmpty()) {
 			e.setDropItems(false);
 			for (ItemStack i : drops)
 				p.getWorld().dropItemNaturally(e.getBlock().getLocation(), getFurnaceResult(i));
@@ -118,11 +116,11 @@ public class SkillListeners implements Listener {
 	}
 	
 	// ABATTAGE
-	private static final boolean abattage = Func.primeContain(SkillSelection.getSkills(), Skill.ABATTAGE);
+	private static final boolean ABATTAGE = Func.primeContain(SkillSelection.getSkills(), Skill.ABATTAGE);
 	
 	@EventHandler
 	public void onBlockLogBreak(BlockBreakEvent e) {
-		if (!abattage || SkillSelection.empty(Skill.ABATTAGE)) return;
+		if (!ABATTAGE || SkillSelection.empty(Skill.ABATTAGE)) return;
 		if (SkillSelection.get(e.getPlayer()) != Skill.ABATTAGE) return;
 		if (e.getPlayer().getGameMode() == GameMode.CREATIVE) return;
 		
@@ -199,11 +197,11 @@ public class SkillListeners implements Listener {
 	*/
 	
 	// GLOUTON
-	private static final boolean glouton = Func.primeContain(SkillSelection.getSkills(), Skill.GLOUTON);
+	private static final boolean GLOUTON = Func.primeContain(SkillSelection.getSkills(), Skill.GLOUTON);
 	
 	@EventHandler
 	public void onFoodLevelChange(FoodLevelChangeEvent e) {
-		if (!glouton || SkillSelection.empty(Skill.GLOUTON)) return;
+		if (!GLOUTON || SkillSelection.empty(Skill.GLOUTON)) return;
 		if (SkillSelection.get((Player) e.getEntity()) != Skill.GLOUTON) return;
 		
 		e.setFoodLevel(2 * e.getFoodLevel());
@@ -211,7 +209,7 @@ public class SkillListeners implements Listener {
 	
 	@EventHandler
 	public void onPotionEffect(EntityPotionEffectEvent e) {
-		if (!glouton || SkillSelection.empty(Skill.GLOUTON)) return;
+		if (!GLOUTON || SkillSelection.empty(Skill.GLOUTON)) return;
 		if (!(e.getEntity() instanceof Player)) return;
 		Player p = (Player) e.getEntity();
 		if (SkillSelection.get(p) != Skill.GLOUTON) return;
@@ -219,13 +217,13 @@ public class SkillListeners implements Listener {
 		if (eff == null || !eff.isAmbient()) return;
 		
 		int duration = eff.getDuration();
-		p.addPotionEffect(new PotionEffect(eff.getType(), duration + (int)((1/5)*duration), eff.getAmplifier(), true, true));
+		p.addPotionEffect(new PotionEffect(eff.getType(), duration + (int) ((1.0/5)*duration), eff.getAmplifier(), true, true));
 		e.setCancelled(true);
 	}
 	
 	@EventHandler
 	public void onRightClickAir(PlayerInteractEvent e) {
-		if (!glouton || SkillSelection.empty(Skill.GLOUTON)) return;
+		if (!GLOUTON || SkillSelection.empty(Skill.GLOUTON)) return;
 		if (e.getAction() != Action.RIGHT_CLICK_AIR) return;
 		ItemStack item = e.getItem();
 		if (item == null || item.getType() != Material.PACKED_MUD) return;
@@ -242,11 +240,11 @@ public class SkillListeners implements Listener {
 	}
 	
 	// DEMOLITION
-	private static final boolean demolition = Func.primeContain(SkillSelection.getSkills(), Skill.DEMOLITION);
+	private static final boolean DEMOLITION = Func.primeContain(SkillSelection.getSkills(), Skill.DEMOLITION);
 	
 	@EventHandler
 	public void onTNTBreak(BlockBreakEvent e) {
-		if (!demolition || SkillSelection.empty(Skill.DEMOLITION)) return;
+		if (!DEMOLITION || SkillSelection.empty(Skill.DEMOLITION)) return;
 		if (SkillSelection.get(e.getPlayer()) != Skill.DEMOLITION) return;
 		if (e.getPlayer().getGameMode() == GameMode.CREATIVE) return;
 		
@@ -260,7 +258,7 @@ public class SkillListeners implements Listener {
 	
 	@EventHandler
 	public void onTNTExplode(EntityExplodeEvent e) {
-		if (!(e.getEntity() instanceof TNTPrimed)) return;
+		if (e.getEntity() instanceof TNTPrimed) return;
 		
 		TNTPrimed tnt = (TNTPrimed) e.getEntity();
 		if (!tnt.isIncendiary()) return;
@@ -271,7 +269,7 @@ public class SkillListeners implements Listener {
 	}
 	
 	// ARTIFICE
-	private static final boolean artifice = Func.primeContain(SkillSelection.getSkills(), Skill.ARTIFICE);
+	private static final boolean ARTIFICE = Func.primeContain(SkillSelection.getSkills(), Skill.ARTIFICE);
 	
 	@EventHandler
 	public void onFireworkExplode(FireworkExplodeEvent e) {
@@ -286,7 +284,7 @@ public class SkillListeners implements Listener {
 	
 	@EventHandler
 	public void onPlayerDamagedFromFirework(EntityDamageByEntityEvent e) {
-		if (!artifice || SkillSelection.empty(Skill.ARTIFICE)) return;
+		if (!ARTIFICE || SkillSelection.empty(Skill.ARTIFICE)) return;
 		if (!(e.getDamager() instanceof Firework)) return;
 		Firework fw = (Firework) e.getDamager();
 		if (!(fw.getShooter() instanceof Player)) return;
@@ -296,11 +294,11 @@ public class SkillListeners implements Listener {
 	}
 	
 	// ROUBLARD
-	private static final boolean roublard = Func.primeContain(SkillSelection.getSkills(), Skill.ROUBLARD);
+	private static final boolean ROUBLARD = Func.primeContain(SkillSelection.getSkills(), Skill.ROUBLARD);
 	
 	@EventHandler
 	public void onFallingDamages(EntityDamageEvent e) {
-		if (!roublard || SkillSelection.empty(Skill.ROUBLARD)) return;
+		if (!ROUBLARD || SkillSelection.empty(Skill.ROUBLARD)) return;
 		if (!(e.getEntity() instanceof Player)) return;
 		if (e.getCause() != DamageCause.FALL) return ;
 		Game game = GameMngr.gameIn((Player) e.getEntity());
@@ -313,13 +311,13 @@ public class SkillListeners implements Listener {
 	}
 	
 	// PISTAGE
-	private static final boolean pistage = Func.primeContain(SkillSelection.getSkills(), Skill.PISTAGE);
+	private static final boolean PISTAGE = Func.primeContain(SkillSelection.getSkills(), Skill.PISTAGE);
 	
 	private static Set<Player> inAir = new HashSet<>();
 	
 	@EventHandler
 	public void onPlayerEnterNewBlock(PlayerMoveEvent e) {
-		if (!pistage || SkillSelection.empty(Skill.PISTAGE)) return;
+		if (!PISTAGE || SkillSelection.empty(Skill.PISTAGE)) return;
 		Player p = e.getPlayer();
 		if (GameMngr.gameIn(p) == null) return;
 		
@@ -338,11 +336,11 @@ public class SkillListeners implements Listener {
 	}
 	
 	// PRECISION
-	private static final boolean precision = Func.primeContain(SkillSelection.getSkills(), Skill.PRECISION);
+	private static final boolean PRECISION = Func.primeContain(SkillSelection.getSkills(), Skill.PRECISION);
 
 	@EventHandler
 	public void onPlayerShootWithBow(ProjectileLaunchEvent e) {
-		if (!precision || SkillSelection.empty(Skill.PRECISION)) return;
+		if (!PRECISION || SkillSelection.empty(Skill.PRECISION)) return;
 		
 		Projectile proj = e.getEntity();
 		
@@ -357,8 +355,7 @@ public class SkillListeners implements Listener {
 		proj.setVelocity(p.getEyeLocation().getDirection().normalize().multiply(1.5 * pow));
 		
 		Arrow arr = (Arrow) proj;
-		AbstractArrow abarr = (AbstractArrow) arr;
-		abarr.setKnockbackStrength((int) (1.5 * abarr.getKnockbackStrength()));
+		arr.setKnockbackStrength((int) (1.5 * arr.getKnockbackStrength()));
 	}
 	
 }

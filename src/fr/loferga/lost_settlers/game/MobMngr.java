@@ -20,7 +20,9 @@ import io.netty.util.internal.ThreadLocalRandom;
 
 public class MobMngr {
 	
-	private static FileConfiguration cfg = Main.getPlugin(Main.class).getConfig();
+	private MobMngr() {/*fonction holder class, it should never be instantiated*/}
+	
+	private static FileConfiguration cfg = Main.plg.getConfig();
 	/*
 	private static final int ARTIFACT_CHANCE = cfg.getInt("mobs.equipment.artifact.chance");
 	private static final double ENCHANT_CHANCE = cfg.getDouble("mobs.equipment.enchantment.chance");
@@ -84,15 +86,13 @@ public class MobMngr {
 		return Arrays.copyOfRange(res, 0, j);
 	}
 	
-	public static void setProperties(Entity ent, double ratio, boolean artifact) {
+	public static void setProperties(Entity ent, double ratio/*, boolean artifact*/) {
 		LivingEntity livEnt = (LivingEntity) ent;
 		
 		double rr = Math.pow(ratio, 2);
 		
-		if (ent instanceof Creeper) {
-			Creeper c = (Creeper) ent;
+		if (ent instanceof Creeper c)
 			c.setExplosionRadius((int) ((1+ratio) * c.getExplosionRadius()));
-		}
 		
 		// Equipment concern only Zombie an Skeleton
 		if (ent instanceof Zombie || ent instanceof Skeleton) {

@@ -15,7 +15,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.Plugin;
 
 import fr.loferga.lost_settlers.Game;
 import fr.loferga.lost_settlers.Main;
@@ -30,9 +29,13 @@ import fr.loferga.lost_settlers.util.Func;
 
 public class GUIMngr {
 	
-	private static Plugin plg = Main.getPlugin(Main.class);
+	private GUIMngr() {/*fonction holder class, it should never be instantiated*/}
 	
-	private static final NamespacedKey selectorKey = new NamespacedKey(plg, "selector");
+	private static final NamespacedKey selectorKey = new NamespacedKey(Main.plg, "selector");
+	
+	private static final String SKILL_KEY = "skill";
+	
+	private static final String SELECTION_PANNEL_NAME = "Selection";
 	
 	private static final ItemStack SELECTOR = buildSelector();
 	private static ItemStack buildSelector() {
@@ -79,7 +82,7 @@ public class GUIMngr {
 	private static ItemStack getItem(Skill s) {
 		for (ItemStack i : S_ITEMS) {
 			PersistentDataContainer pdc = i.getItemMeta().getPersistentDataContainer();
-			if (pdc.get(new NamespacedKey(plg, "Skill"), PersistentDataType.STRING) == s.toString())
+			if (pdc.get(new NamespacedKey(Main.plg, SKILL_KEY), PersistentDataType.STRING).equals(s.toString()))
 				return i;
 		}
 		return null;
@@ -102,10 +105,12 @@ public class GUIMngr {
 	private static final Inventory TEAM_MENU = buildTM();
 	private static Inventory buildTM() {
 		final int len = T_ITEMS.length;
-		final int q = (int) (len/9)+1;
-		Inventory teamMenu = getBlankInventory((q+2)*9, "Selection");
+		final int q = len/9+1;
+		Inventory teamMenu = getBlankInventory((q+2)*9, SELECTION_PANNEL_NAME);
 		fillLine(teamMenu, q);
-		int i = 0, j, t = 0;
+		int i = 0;
+		int j;
+		int t = 0;
 		while (i<q) {
 			j = 0;
 			if (i == q-1) {
@@ -129,9 +134,11 @@ public class GUIMngr {
 	private static final Inventory SKILL_MENU = buildSM();
 	private static Inventory buildSM() {
 		final int len = S_ITEMS.length;
-		final int q = (int) (len/9)+1;
+		final int q = len/9+1;
 		Inventory skillMenu = getBlankInventory(q*9, "Talents");
-		int i = 0, j, t = 0;
+		int i = 0;
+		int j;
+		int t = 0;
 		while (i<q) {
 			j = 0;
 			if (i == q-1) {
@@ -169,10 +176,12 @@ public class GUIMngr {
 	// ### INVENTORY CRAFTING ###
 	
 	public static Inventory getTM(Player p) {
-		Inventory inv = Bukkit.createInventory(null, TEAM_MENU.getSize(), "Selection");
+		Inventory inv = Bukkit.createInventory(null, TEAM_MENU.getSize(), SELECTION_PANNEL_NAME);
 		inv.setContents(TEAM_MENU.getContents());
 		int[] teamSize = TeamMngr.teamsSizes(MapMngr.HUB);
-		int i = 0, j, length = T_ITEMS.length;
+		int i = 0;
+		int j;
+		int length = T_ITEMS.length;
 		while (i < length) {
 			j = 1;
 			while (j < teamSize[i]) {
@@ -196,7 +205,10 @@ public class GUIMngr {
 		Game game = GameMngr.gameIn(p);
 		List<Player> pl = game.getAliveTeamMates(p);
 		List<Wolf> dogsl = DogMngr.get().get(p);
-		int i = 0, j = 0, dllen = dogsl.size(), pllen = pl.size();
+		int i = 0;
+		int j = 0;
+		int dllen = dogsl.size();
+		int pllen = pl.size();
 		Inventory inv = getBlankInventory(18 + (pllen/9), "Confier " + wn);
 		while (j<pllen || i<dllen) {
 			if (j<pllen) {
@@ -217,7 +229,7 @@ public class GUIMngr {
 		if (item.getItemMeta().getDisplayName().equals(" ")) return;
 		
 		if (item.getItemMeta().getPersistentDataContainer().has(
-				new NamespacedKey(Main.getPlugin(Main.class), "Skill"), PersistentDataType.STRING)
+				new NamespacedKey(Main.plg, SKILL_KEY), PersistentDataType.STRING)
 				) {
 			p.openInventory(SKILL_MENU);
 			return;
@@ -225,7 +237,8 @@ public class GUIMngr {
 		
 		LSTeam[] teams = TeamMngr.get();
 		boolean stop = false;
-		int i = 0, length = teams.length;
+		int i = 0;
+		int length = teams.length;
 		while (i<length && !stop) {
 			LSTeam team = teams[i];
 			if (team.getFlag() == item.getType()) {
@@ -241,13 +254,13 @@ public class GUIMngr {
 		if (item.getItemMeta().getDisplayName().equals(" ")) return false;
 		
 		String name = item.getItemMeta().getPersistentDataContainer().get(
-				new NamespacedKey(Main.getPlugin(Main.class), "Skill"), PersistentDataType.STRING);
+				new NamespacedKey(Main.plg, SKILL_KEY), PersistentDataType.STRING);
 		SkillSelection.select(p, name);
 		return true;
 	}
 	
 	public static void clickDTM(Player p, ItemStack item) {
-		if (item.getItemMeta().getDisplayName() != " ") {
+		if (!item.getItemMeta().getDisplayName().equals(" ")) {
 			Material mat = item.getType();
 			if (mat == Material.PLAYER_HEAD) {
 				DogMngr.transferDogTo(
@@ -257,7 +270,7 @@ public class GUIMngr {
 						);
 				if (DogMngr.get().containsKey(p)) {
 					List<Wolf> dogs = DogMngr.get().get(p);
-					p.openInventory(getDTM(p, dogs.get((int) (Math.random() * dogs.size())).getCustomName()));
+					p.openInventory(getDTM(p, dogs.get((int) (Func.random(0, dogs.size()))).getCustomName()));
 					p.updateInventory();
 				} else
 					p.closeInventory();
@@ -272,8 +285,8 @@ public class GUIMngr {
 	
 	public static void refreshTM() {
 		for (Player p : MapMngr.HUB.getPlayers())
-			if (p.getOpenInventory() != null)
-				if (p.getOpenInventory().getTitle().equals("Selection")) {
+			if (p.getOpenInventory() != null
+			&& p.getOpenInventory().getTitle().equals(SELECTION_PANNEL_NAME)) {
 					p.openInventory(getTM(p));
 					p.updateInventory();
 				}
@@ -281,8 +294,8 @@ public class GUIMngr {
 	
 	public static void refreshDTM() {
 		for (Player p : Bukkit.getOnlinePlayers())
-			if (p.getOpenInventory() != null)
-				if (p.getOpenInventory().getTitle().substring(0, 7).equals("Confier")) {
+			if (p.getOpenInventory() != null
+			&& p.getOpenInventory().getTitle().substring(0, 7).equals("Confier")) {
 					p.updateInventory();
 				}
 	}
