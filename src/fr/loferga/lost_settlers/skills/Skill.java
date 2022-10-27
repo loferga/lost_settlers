@@ -110,13 +110,13 @@ public enum Skill {
 	
 	public void mark(ItemMeta im) {
 		im.getPersistentDataContainer().set(
-				new NamespacedKey(Main.PLG, "Skill"), PersistentDataType.STRING, toString()
+				new NamespacedKey(Main.plg(), "Skill"), PersistentDataType.STRING, toString()
 				);
 	}
 	
 	@Override
 	public String toString() {
-		return Func.format("&3" + Func.toReadable(toString(), 1));
+		return Func.format("&3" + Func.toReadable(super.toString(), 1));
 	}
 	
 }

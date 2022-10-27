@@ -28,7 +28,7 @@ public class SkillRules extends BukkitRunnable {
 	public void start() {
 		if (running) return;
 		
-		runTaskTimer(Main.PLG, 0L, 1L);
+		runTaskTimer(Main.plg(), 0L, 1L);
 		running = true;
 	}
 	

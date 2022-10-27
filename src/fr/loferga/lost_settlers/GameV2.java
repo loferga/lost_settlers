@@ -52,7 +52,6 @@ public class GameV2 extends BukkitRunnable {
 		
 		this.world = world;
 		
-		// intitialize ms.teamN first teams within all possible teams
 		Map<LSTeam, Set<Player>> res = new HashMap<>();
 		LSTeam[] allTeams = TeamMngr.get();
 		for (int i = 0; i<ms.teamN; i++)
@@ -93,12 +92,12 @@ public class GameV2 extends BukkitRunnable {
 	
 	public void start() {
 		startTime = System.currentTimeMillis();
-		runTaskTimer(Main.PLG, 0L, 1L);
-		respawn.runTaskTimer(Main.PLG, 0L, 20L);
-		if (chamber != null) chamber.runTaskTimer(Main.PLG, 0L, 20L);
+		runTaskTimer(Main.plg(), 0L, 1L);
+		respawn.runTaskTimer(Main.plg(), 0L, 20L);
+		if (chamber != null) chamber.runTaskTimer(Main.plg(), 0L, 20L);
 	}
 	
-	private static final int PVP_TIME = Main.PLG.getConfig().getInt("pvp_time") * 20;
+	private static final int PVP_TIME = Main.plg().getConfig().getInt("pvp_time") * 20;
 	private static final int HALF = PVP_TIME/2;
 	private static final int FIFTH = PVP_TIME - PVP_TIME/5;
 	private static final int FIFTEENTH = PVP_TIME - PVP_TIME/15;

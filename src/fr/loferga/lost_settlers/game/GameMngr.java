@@ -73,7 +73,7 @@ public class GameMngr {
 	
 	public static void start(String wn) {
 		// MAP
-		Main.PLG.reloadConfig();
+		Main.plg().reloadConfig();
 		for (Player p : MapMngr.HUB.getPlayers()) p.sendMessage(Func.format('&' + Main.MSG_ANNOUNCE + "Chargement de la carte &r" + wn));
 		World world = MapMngr.newWorld(wn);
 		MapSettings ms = MapMngr.getMapSettings(world);
@@ -107,7 +107,7 @@ public class GameMngr {
 		SkillListeners.giveEquipment(game);
 		for (Entity i : world.getEntitiesByClasses(Item.class))
 			i.remove();
-		new GameLaunch(game, MapMngr.setMap(ms), Main.PLG);
+		new GameLaunch(game, MapMngr.setMap(ms), Main.plg());
 	}
 	
 	public static void stop(Game game, LSTeam winner) {

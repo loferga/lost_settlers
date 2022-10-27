@@ -31,7 +31,7 @@ public class GlowMngr {
 	public static void addPacketListener() {
 		
 		ProtocolLibrary.getProtocolManager().addPacketListener(
-				new PacketAdapter(Main.PLG, PacketType.Play.Server.ENTITY_METADATA) {
+				new PacketAdapter(Main.plg(), PacketType.Play.Server.ENTITY_METADATA) {
 					@Override
 				    public void onPacketSending(PacketEvent e) {
 				    	WrappedWatchableObject wwo = e.getPacket().getWatchableCollectionModifier().read(0).get(0);

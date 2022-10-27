@@ -31,7 +31,7 @@ public class GUIMngr {
 	
 	private GUIMngr() {/*fonction holder class, it should never be instantiated*/}
 	
-	private static final NamespacedKey selectorKey = new NamespacedKey(Main.PLG, "selector");
+	private static final NamespacedKey selectorKey = new NamespacedKey(Main.plg(), "selector");
 	
 	private static final String SKILL_KEY = "skill";
 	
@@ -82,7 +82,7 @@ public class GUIMngr {
 	private static ItemStack getItem(Skill s) {
 		for (ItemStack i : S_ITEMS) {
 			PersistentDataContainer pdc = i.getItemMeta().getPersistentDataContainer();
-			if (pdc.get(new NamespacedKey(Main.PLG, SKILL_KEY), PersistentDataType.STRING).equals(s.toString()))
+			if (pdc.get(new NamespacedKey(Main.plg(), SKILL_KEY), PersistentDataType.STRING).equals(s.toString()))
 				return i;
 		}
 		return null;
@@ -229,7 +229,7 @@ public class GUIMngr {
 		if (item.getItemMeta().getDisplayName().equals(" ")) return;
 		
 		if (item.getItemMeta().getPersistentDataContainer().has(
-				new NamespacedKey(Main.PLG, SKILL_KEY), PersistentDataType.STRING)
+				new NamespacedKey(Main.plg(), SKILL_KEY), PersistentDataType.STRING)
 				) {
 			p.openInventory(SKILL_MENU);
 			return;
@@ -254,7 +254,7 @@ public class GUIMngr {
 		if (item.getItemMeta().getDisplayName().equals(" ")) return false;
 		
 		String name = item.getItemMeta().getPersistentDataContainer().get(
-				new NamespacedKey(Main.PLG, SKILL_KEY), PersistentDataType.STRING);
+				new NamespacedKey(Main.plg(), SKILL_KEY), PersistentDataType.STRING);
 		SkillSelection.select(p, name);
 		return true;
 	}

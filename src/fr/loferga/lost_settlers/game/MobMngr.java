@@ -22,7 +22,7 @@ public class MobMngr {
 	
 	private MobMngr() {/*fonction holder class, it should never be instantiated*/}
 	
-	private static FileConfiguration cfg = Main.PLG.getConfig();
+	private static FileConfiguration cfg = Main.plg().getConfig();
 	/*
 	private static final int ARTIFACT_CHANCE = cfg.getInt("mobs.equipment.artifact.chance");
 	private static final double ENCHANT_CHANCE = cfg.getDouble("mobs.equipment.enchantment.chance");

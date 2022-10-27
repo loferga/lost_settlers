@@ -27,7 +27,11 @@ import fr.loferga.lost_settlers.util.GlowMngr;
 
 public class Main extends JavaPlugin{
 	
-	public static final Plugin PLG = getPlugin(Main.class);
+//	private static final Plugin PLUGIN = JavaPlugin.getPlugin(Main.class);
+	
+	public static Plugin plg() {
+		return JavaPlugin.getPlugin(Main.class);
+	}
 	
 	public static final String LOG_PREFIX = "[LostSettlers] ";
 	public static final String MSG_WARNING = "c";

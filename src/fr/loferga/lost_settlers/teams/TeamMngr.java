@@ -25,7 +25,7 @@ public class TeamMngr {
 	
 	private TeamMngr() {/*fonction holder class, it should never be instantiated*/}
 	
-	private static ConfigurationSection section = Main.PLG.getConfig().getConfigurationSection("teams");
+	private static ConfigurationSection section = Main.plg().getConfig().getConfigurationSection("teams");
 	private static Scoreboard sb = Bukkit.getScoreboardManager().getMainScoreboard();
 	
 	private static final LSTeam[] TEAMS = buildTeams(section);

@@ -15,7 +15,7 @@ public class SkillSelection {
 	
 	private SkillSelection() {/*fonction holder class, it should never be instantiated*/}
 	
-	private static FileConfiguration cfg = Main.PLG.getConfig();
+	private static FileConfiguration cfg = Main.plg().getConfig();
 	
 	private static Map<Skill, Set<Player>> selection = buildSelection();
 	private static Map<Skill, Set<Player>> buildSelection() {

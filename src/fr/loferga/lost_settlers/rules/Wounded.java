@@ -54,7 +54,7 @@ public class Wounded extends BukkitRunnable implements Listener {
 //  #
 	
 //  # PUBLIC INTERACTION #
-	private static final int DELAY = Main.PLG.getConfig().getInt("regeneration_delay");
+	private static final int DELAY = Main.plg().getConfig().getInt("regeneration_delay");
 	
 	private static Map<Player, Integer> woundeds = new HashMap<>();
 	
@@ -68,7 +68,7 @@ public class Wounded extends BukkitRunnable implements Listener {
 	public void start() {
 		if (running) return;
 		
-		runTaskTimer(Main.PLG, 0L, 20L);
+		runTaskTimer(Main.plg(), 0L, 20L);
 		running = true;
 	}
 	

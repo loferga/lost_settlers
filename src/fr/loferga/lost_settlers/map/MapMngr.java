@@ -29,14 +29,14 @@ public class MapMngr {
 	
 	private MapMngr() {/*fonction holder class, it should never be instantiated*/}
 	
-	public static final boolean AUTO_LOAD = Main.PLG.getConfig().contains("preload_worlds", true)
-			&& Main.PLG.getConfig().getBoolean("preload_worlds");
+	public static final boolean AUTO_LOAD = Main.plg().getConfig().contains("preload_worlds", true)
+			&& Main.plg().getConfig().getBoolean("preload_worlds");
 	
 	private static BiMap<World, MapSettings> mapsSettings = new BiMap<>();
 	public static final World HUB = newWorld("lobby");
 	
 	private static final int[] SPAWN = mapsSettings.get(HUB).worldSpawn;
-	private static final double RANGE = Main.PLG.getConfig().getDouble("tp_range");
+	private static final double RANGE = Main.plg().getConfig().getDouble("tp_range");
 	
 	private static final String WORLD_NAME_PREFIX = "ls_";
 	

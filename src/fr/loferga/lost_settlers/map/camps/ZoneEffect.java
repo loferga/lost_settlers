@@ -22,7 +22,7 @@ public class ZoneEffect extends BukkitRunnable {
 		this.camp = camp;
 		this.vSize = MapMngr.getMapSettings(camp.getLocation().getWorld()).vitalSize + 0.5;
 		this.vSize -= this.vSize%STEP;
-		runTaskTimer(Main.PLG, 0L, 5L);
+		runTaskTimer(Main.plg(), 0L, 5L);
 	}
 	
 	public void run() {
