@@ -9,6 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
+import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.util.Func;
 
 public class CloseWorld implements TabExecutor {
@@ -40,10 +41,10 @@ public class CloseWorld implements TabExecutor {
 							MapMngr.spawnTeleport(wp);
 						if (args[1].equals("save")) {
 							MapMngr.forget(w, true);
-							p.sendMessage(Func.format("&aLa carte est sauvegardee"));
+							p.sendMessage(Func.format(Main.MSG_DONE + "La carte est sauvegardee"));
 						} else {
 							MapMngr.forget(w, false);
-							p.sendMessage(Func.format("&aLa carte est restauree"));
+							p.sendMessage(Func.format(Main.MSG_DONE + "La carte est restauree"));
 						}
 						return true;
 					}
@@ -52,7 +53,7 @@ public class CloseWorld implements TabExecutor {
 	}
 	
 	private static void sendInvalid(Player p) {
-		p.sendMessage(Func.format("&cInvalid usage, please use:\n/close <mapName> <mode>"));
+		p.sendMessage(Func.format(Main.MSG_WARNING + "Invalid usage, please use:\n/close <mapName> <mode>"));
 	}
 	
 }

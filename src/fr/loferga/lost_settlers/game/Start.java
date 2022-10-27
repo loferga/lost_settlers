@@ -17,7 +17,7 @@ public class Start implements TabExecutor {
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
 		List<String> res = new ArrayList<>();
-		Set<String> mapNames = Main.plg.getConfig().getConfigurationSection("maps").getKeys(false);
+		Set<String> mapNames = Main.PLG.getConfig().getConfigurationSection("maps").getKeys(false);
 		mapNames.remove("lobby");
 		if (args.length == 1)
 			res.addAll(Func.matches(mapNames, args[0]));
@@ -31,7 +31,7 @@ public class Start implements TabExecutor {
 		Player snd = (Player) sender;
 		if (args.length == 1) {
 			List<String> maps = new ArrayList<>();
-			for (String wn : Main.plg.getConfig().getConfigurationSection("maps").getKeys(false))
+			for (String wn : Main.PLG.getConfig().getConfigurationSection("maps").getKeys(false))
 				if (!wn.equals("lobby"))
 					maps.add(wn);
 			if (maps.contains(args[0])) {
@@ -44,7 +44,7 @@ public class Start implements TabExecutor {
 	}
 
 	private static void sendInvalid(Player p) {
-		p.sendMessage(Func.format("&cInvalid usage, please use:\n/start"));
+		p.sendMessage(Func.format(Main.MSG_WARNING + "Invalid usage, please use:\n/start"));
 	}
 	
 }

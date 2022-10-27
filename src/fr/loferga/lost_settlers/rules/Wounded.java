@@ -10,7 +10,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import fr.loferga.lost_settlers.Main;
@@ -43,7 +42,7 @@ public class Wounded extends BukkitRunnable implements Listener {
 //  #
 	
 //  # SINGLETON #
-	private static boolean running = false;
+	private boolean running = false;
 	
 	private static Wounded wounded = null;
 	
@@ -55,7 +54,7 @@ public class Wounded extends BukkitRunnable implements Listener {
 //  #
 	
 //  # PUBLIC INTERACTION #
-	private static final int DELAY = Main.getPlugin(Main.class).getConfig().getInt("regeneration_delay");
+	private static final int DELAY = Main.PLG.getConfig().getInt("regeneration_delay");
 	
 	private static Map<Player, Integer> woundeds = new HashMap<>();
 	
@@ -66,11 +65,11 @@ public class Wounded extends BukkitRunnable implements Listener {
 //  #
 	
 //  # RUNNABLE #
-	public void start(Plugin plugin) {
-		if (!running) {
-			this.runTaskTimer(plugin, 0L, 20L);
-			running = true;
-		}
+	public void start() {
+		if (running) return;
+		
+		runTaskTimer(Main.PLG, 0L, 20L);
+		running = true;
 	}
 	
 	@Override

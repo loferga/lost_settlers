@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -28,14 +29,14 @@ public class MapMngr {
 	
 	private MapMngr() {/*fonction holder class, it should never be instantiated*/}
 	
-	public static final boolean AUTO_LOAD = Main.plg.getConfig().contains("preload_worlds", true)
-			&& Main.plg.getConfig().getBoolean("preload_worlds");
+	public static final boolean AUTO_LOAD = Main.PLG.getConfig().contains("preload_worlds", true)
+			&& Main.PLG.getConfig().getBoolean("preload_worlds");
 	
 	private static BiMap<World, MapSettings> mapsSettings = new BiMap<>();
 	public static final World HUB = newWorld("lobby");
 	
 	private static final int[] SPAWN = mapsSettings.get(HUB).worldSpawn;
-	private static final double RANGE = Main.plg.getConfig().getDouble("tp_range");
+	private static final double RANGE = Main.PLG.getConfig().getDouble("tp_range");
 	
 	private static final String WORLD_NAME_PREFIX = "ls_";
 	
@@ -82,9 +83,7 @@ public class MapMngr {
 			world.save();
 		else {
 			Bukkit.unloadWorld(world, save);
-			if (!AUTO_LOAD)
-				mapsSettings.remove(world);
-			else
+			if (AUTO_LOAD)
 				newWorld(world.getName());
 		}
 	}
@@ -149,9 +148,10 @@ public class MapMngr {
 		double ilen = Func.random(imin, imax);
 		double jlen = Func.random(jmin, jmax);
 		double klen = Func.random(kmin, kmax);
-		Vector i = new Vector(Func.random(-1, 1), Func.random(-1, 1), Func.random(-1, 1)).normalize().multiply(ilen);
+		Vector i = Vector.random().normalize().multiply(ilen);
 		ijk[0] = i;
-		Vector j = new Vector(ijk[0].y, -ijk[0].x, 0).normalize().multiply(jlen);
+		Vector j = Vector.random().cross(i).normalize().multiply(jlen);
+//		Vector j = new Vector(ijk[0].y, -ijk[0].x, 0).normalize().multiply(jlen);
 		ijk[1] = j;
 		ijk[2] = new Vector(i.y*j.z - i.z*j.y, i.z*j.x - i.x*j.z, i.x*j.y - i.y*j.x).normalize().multiply(klen);
 		return ijk;
@@ -236,23 +236,41 @@ public class MapMngr {
 			entry.getKey().getBlock().setType(entry.getValue());
 	}
 
-	public static Location getMapCenter(World world, MapSettings mapSettings) {
-		Location mapCenter = null;
-		MapSettings ms = mapSettings;
-		if (ms == null) ms = getMapSettings(world);
-		if (ms != null) {
-			double[] point = new double[] {0.0, 0.0};
-			Camp[] camps = ms.camps;
-			for (Camp camp : camps) {
-				double[] cpos = camp.getPosition();
-				point[0] += cpos[0];
-				point[1] += cpos[2];
-			}
-			point[0] /= camps.length;
-			point[1] /= camps.length;
-			mapCenter = new Location(world, point[0], (double) world.getHighestBlockYAt((int) point[0], (int) point[1]) + 5, point[1]);
+	public static Location getMapCenter(World world, MapSettings ms) {
+		if (ms == null) return world.getSpawnLocation();
+		
+		double[] point = new double[] {0.0, 0.0};
+		double[] cpos;
+		Camp[] camps = ms.camps;
+		for (Camp camp : camps) {
+			cpos = camp.getPosition();
+			point[0] += cpos[0];
+			point[1] += cpos[2];
 		}
-		return mapCenter;
+		point[0] /= camps.length;
+		point[1] /= camps.length;
+		return new Location(world, point[0], (double) world.getHighestBlockYAt((int) point[0], (int) point[1]) + 5, point[1]);
+	}
+	
+	public static Location getMapCenter(World world) {
+		return getMapCenter(world, getMapSettings(world));
+	}
+	
+	public static void mapBlocks(World w, MapSettings ms, double s, Double e, Consumer<double[]> c) {
+		if (ms == null) {System.out.println(w.getName() + " has not mapSettings loaded"); return;}
+		Location center = MapMngr.getMapCenter(w, ms);
+		int area = ms.playableArea;
+		double xm = center.getX() + area;
+		double zm = center.getZ() + area;
+		for (double x = center.getX() - area; x < xm; x+=1)
+			for (double y = s; y < (e == null ? center.getY() : e); y+=1)
+				for (double z = center.getZ() - area; z < zm; z+=1) {
+					c.accept(new double[] {x, y, z});
+				}
+	}
+	
+	public static void mapBlocks(World w, double s, double e, Consumer<double[]> c) {
+		mapBlocks(w, getMapSettings(w), s, e, c);
 	}
 	
 	public static double getMaxDist(World world, Location loc, MapSettings mapSettings) {

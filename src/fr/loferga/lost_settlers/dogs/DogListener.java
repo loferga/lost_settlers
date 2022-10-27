@@ -40,7 +40,7 @@ public class DogListener implements Listener {
 			));
 	
 	private static String pickRandomName() {
-		int rng = (int) Func.random(0, names.size());
+		int rng = Func.randomInt(0, names.size());
 		String picked = names.get(rng);
 		names.remove(rng);
 		return picked;

@@ -9,13 +9,14 @@ import org.bukkit.Material;
 
 import fr.loferga.lost_settlers.map.geometry.Vector;
 import fr.loferga.lost_settlers.teams.LSTeam;
+import fr.loferga.lost_settlers.teams.TeamMngr;
 
 public class Camp {
 
-	public Camp(String name, LSTeam team, Location location, Direction direction) {
+	public Camp(String name, Location location, Direction direction) {
 		this.name = name;
-		this.owners = new ArrayList<>(Arrays.asList(new Owner(team, System.currentTimeMillis())));
-		this.rivals = new ArrayList<>(Arrays.asList(team));
+		this.owners = new ArrayList<>(Arrays.asList(new Owner(TeamMngr.NULL, System.currentTimeMillis())));
+		this.rivals = new ArrayList<>(Arrays.asList(TeamMngr.NULL));
 		this.location = location;
 		this.direction = direction;
 	}
@@ -81,8 +82,7 @@ public class Camp {
 		Location loc = location.clone().add(0, 11.0, 0);
 		Vector dir = direction.vector;
 		Vector minus2dir = dir.clone().multiply(-2);
-		LSTeam owner = getOwner();
-		Material flagMat = owner != null ? owner.getFlag() : Material.WHITE_CONCRETE;
+		Material flagMat = getOwner().getFlag();
 		int i = 0;
 		while (i < 11) {
 			loc.add(0, -1, 0);

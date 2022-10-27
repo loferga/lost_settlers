@@ -62,7 +62,7 @@ public class Recipes {
 	}
 	
 	private static ShapelessRecipe getFireworkRecipe(String key, String name, int Gp, int P, Material[] recipe, boolean flicker, boolean trail) {
-		NamespacedKey nk = new NamespacedKey(Main.plg, key);
+		NamespacedKey nk = new NamespacedKey(Main.PLG, key);
 		ItemStack i = new ItemStack(Material.FIREWORK_ROCKET, P * 4);
 		FireworkMeta fm = (FireworkMeta) i.getItemMeta();
 		fm.setDisplayName(name);

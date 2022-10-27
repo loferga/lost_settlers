@@ -4,18 +4,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -26,10 +21,6 @@ public class Func {
 	
 	public static String format(String msg) {
 		return ChatColor.translateAlternateColorCodes('&', msg);
-	}
-	
-	public static ChatColor unformat(char c) {
-		return ChatColor.getByChar(c);
 	}
 	
 	// return the a list<String> only with the matching element with the *sample*
@@ -63,6 +54,10 @@ public class Func {
 	
 	public static double random(double min, double max) {
 		return rng.nextDouble(min, max);
+	}
+	
+	public static int randomInt(int min, int max) {
+		return rng.nextInt(min, max);
 	}
 	
 	public static <T> boolean primeContain(T[] array, T e) {
@@ -132,17 +127,13 @@ public class Func {
 		return v;
 	}
 	
-	public static Location getPosLoc(World w, double[] pos) {
-		return new Location(w, pos[0], pos[1], pos[2]);
+	// square shaped distance check
+	public static boolean isNearBy(double pos, double around, double by) {
+		return around - by <= pos && pos < around + by;
 	}
 	
 	public static void sendActionbar(Player p, String msg) {
 		p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(msg));
-	}
-	
-	public static void glowFor(LivingEntity ent, Set<Player> p, int duration) {
-		GlowMngr.addGlow(ent.getEntityId(), p);
-		ent.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, duration, 0, false, false));
 	}
 	
 }

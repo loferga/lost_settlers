@@ -74,6 +74,7 @@ import fr.loferga.lost_settlers.map.camps.Camp;
 import fr.loferga.lost_settlers.teams.LSTeam;
 import fr.loferga.lost_settlers.teams.TeamMngr;
 import fr.loferga.lost_settlers.util.Func;
+import fr.loferga.lost_settlers.util.GlowMngr;
 
 public class Listeners implements Listener {
 	
@@ -126,7 +127,7 @@ public class Listeners implements Listener {
 				
 				SpectralArrow sa = (SpectralArrow) e.getDamager();
 				if (sa.getShooter() instanceof Player shooter)
-					Func.glowFor(dmged, TeamMngr.teamOf(shooter).getPlayers(), 600);
+					GlowMngr.glowFor(dmged, TeamMngr.teamOf(shooter).getPlayers(), 600);
 				
 			}
 				
@@ -212,7 +213,7 @@ public class Listeners implements Listener {
 		Camp camp = game.campIn(b.getLocation());
 		if (camp == null || camp.getRivals().contains(pteam)) return false;
 		
-		Func.sendActionbar(p, Func.format("&cCe camp n'est pas à vous"));
+		Func.sendActionbar(p, Func.format(Main.MSG_WARNING + "Ce camp n'est pas à vous"));
 		return true;
 	}
 	
@@ -324,7 +325,7 @@ public class Listeners implements Listener {
 	
 	private static void spawnMagmaCube(Location loc) {
 		MagmaCube magma = (MagmaCube) loc.getWorld().spawnEntity(loc, EntityType.MAGMA_CUBE);
-		magma.setSize((int) (Func.random(0, 4)));
+		magma.setSize(Func.randomInt(0, 4));
 	}
 	
 	// ##### NO DAMAGE BONUS ARROW #####

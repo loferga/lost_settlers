@@ -39,7 +39,7 @@ public class MapSettings {
 	public LodeGenerator[] generators = null;
 	
 	public MapSettings(String wn) {
-		cfg = Main.plg.getConfig().getConfigurationSection("maps." + wn);
+		cfg = Main.PLG.getConfig().getConfigurationSection("maps." + wn);
 		if (cfg.contains("seed", true)) seed = cfg.getLong("seed");
 		if (cfg.contains("world_type", true)) worldType = Func.valueOf(WorldType.class, cfg.getString("world_type"));
 		if (cfg.contains("world_name", true)) worldName = cfg.getString("world_name");
@@ -72,7 +72,7 @@ public class MapSettings {
 	}
 	
 	private void printSetValues() {
-		ConsoleCommandSender csl = Main.plg.getServer().getConsoleSender();
+		ConsoleCommandSender csl = Main.PLG.getServer().getConsoleSender();
 		if (teamN == -1)
 			csl.sendMessage(Main.LOG_PREFIX + ChatColor.DARK_RED + "team_number is not set in config.yml");
 		else csl.sendMessage(Main.LOG_PREFIX + ChatColor.DARK_GREEN + "team_number is set");
@@ -133,7 +133,6 @@ public class MapSettings {
 			}
 			camps[i] = new Camp(
 					camp,
-					null,
 					new Location(world, (double) data.get(0), (double) data.get(1), (double) data.get(2)),
 					dir
 				);

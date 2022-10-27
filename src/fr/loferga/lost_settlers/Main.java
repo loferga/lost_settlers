@@ -27,9 +27,14 @@ import fr.loferga.lost_settlers.util.GlowMngr;
 
 public class Main extends JavaPlugin{
 	
-	public static final Plugin plg = getPlugin(Main.class);
+	public static final Plugin PLG = getPlugin(Main.class);
 	
 	public static final String LOG_PREFIX = "[LostSettlers] ";
+	public static final String MSG_WARNING = "c";
+	public static final String MSG_ANNOUNCE = "e";
+	public static final String MSG_PERSONNAL = "6";
+	public static final String MSG_ERROR = "4";
+	public static final String MSG_DONE = "a";
 	
 	@Override
 	public void onEnable() {
@@ -66,7 +71,7 @@ public class Main extends JavaPlugin{
 		getServer().getPluginManager().registerEvents(Wounded.getInstance(), this);
 		getServer().getPluginManager().registerEvents(CombatTracker.getInstance(), this);
 		
-		GlowMngr.addPacketListener(this);
+		GlowMngr.addPacketListener();
 		
 		ConsoleCommandSender console = getServer().getConsoleSender();
 		console.sendMessage("[LostSettlers] ===============================");

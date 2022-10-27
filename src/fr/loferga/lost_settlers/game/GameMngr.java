@@ -3,7 +3,6 @@ package fr.loferga.lost_settlers.game;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Difficulty;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -74,15 +73,15 @@ public class GameMngr {
 	
 	public static void start(String wn) {
 		// MAP
-		Main.plg.reloadConfig();
-		for (Player p : MapMngr.HUB.getPlayers()) p.sendMessage(Func.format("Chargement de la carte &e" + wn));
+		Main.PLG.reloadConfig();
+		for (Player p : MapMngr.HUB.getPlayers()) p.sendMessage(Func.format('&' + Main.MSG_ANNOUNCE + "Chargement de la carte &r" + wn));
 		World world = MapMngr.newWorld(wn);
 		MapSettings ms = MapMngr.getMapSettings(world);
 		if (!ms.canHostGame()) return;
 		
 		world.setDifficulty(Difficulty.EASY);
 		world.setTime(0);
-		world.setSpawnFlags(true, true);
+//		world.setSpawnFlags(true, true);
 		world.setSpawnLimit(SpawnCategory.WATER_ANIMAL, 8);
 		world.setSpawnLimit(SpawnCategory.MONSTER, 20);
 		Location center = MapMngr.getMapCenter(world, ms);
@@ -108,25 +107,28 @@ public class GameMngr {
 		SkillListeners.giveEquipment(game);
 		for (Entity i : world.getEntitiesByClasses(Item.class))
 			i.remove();
-		new GameLaunch(game, MapMngr.setMap(ms), Main.plg);
+		new GameLaunch(game, MapMngr.setMap(ms), Main.PLG);
 	}
 	
 	public static void stop(Game game, LSTeam winner) {
 		long gameTime = System.currentTimeMillis() - game.getStartTime();
-		if (winner != null) Bukkit.broadcastMessage(Func.format("&eL'equipe des " + winner.getName() + "&e a remportee la victoire!"));
+		if (winner != null) game.broadcastPlayers(Func.format(Main.MSG_ANNOUNCE + "L'equipe des " + winner.getName()
+				+ Main.MSG_ANNOUNCE + " a remportee la victoire!"));
 		String[] rt = Func.toReadableTime(gameTime);
-		Bukkit.broadcastMessage(Func.format("&eLa partie s\'est terminee en &3" + rt[0] + rt[1] + rt[2] + "&e."));
+		game.broadcastPlayers(Func.format(Main.MSG_ANNOUNCE + "La partie s\'est terminee en &3"
+				+ rt[0] + rt[1] + rt[2] + Main.MSG_ANNOUNCE + "."));
 		game.clearFlags();
 		for (Camp c : game.getMapSettings().camps)
 			c.killZoneEffect();
 		World gw = game.getWorld();
 		gw.getWorldBorder().setSize(Double.MAX_VALUE);
 		gw.setDifficulty(Difficulty.PEACEFUL);
-		gw.setSpawnFlags(false, false);
+//		gw.setSpawnFlags(false, false);
 		for (Player p : game.getPlayers())
 			p.setGameMode(GameMode.ADVENTURE);
 		remove(game);
 		game.stop();
+		
 	}
 
 }

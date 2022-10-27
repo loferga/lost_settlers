@@ -16,7 +16,6 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.projectiles.BlockProjectileSource;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -57,7 +56,7 @@ public class CombatTracker extends BukkitRunnable implements Listener {
 	private static Player getSource(BlockProjectileSource bps) {
 		UUID u = null;
 		for (MetadataValue mv : bps.getBlock().getMetadata(SOURCE_RETRIEVE_FIELD_NAME))
-			if (mv.getOwningPlugin() == Main.plg) {
+			if (mv.getOwningPlugin() == Main.PLG) {
 				u = (UUID) mv.value();
 				break;
 			}
@@ -73,7 +72,7 @@ public class CombatTracker extends BukkitRunnable implements Listener {
 		if (GameMngr.gameIn(e.getPlayer()) == null) return;
 		if (e.getBlock().getType() != Material.DISPENSER) return;
 		
-		e.getBlock().setMetadata("owner", new FixedMetadataValue(Main.plg, e.getPlayer().getUniqueId()));
+		e.getBlock().setMetadata(SOURCE_RETRIEVE_FIELD_NAME, new FixedMetadataValue(Main.PLG, e.getPlayer().getUniqueId()));
 	}
 //  #
 	
@@ -90,12 +89,11 @@ public class CombatTracker extends BukkitRunnable implements Listener {
 //  #
 	
 //  # PUBLIC INTERACTION #
-	private static final int DELAY = Main.plg.getConfig().getInt("regeneration_delay");
+	private static final int DELAY = Main.PLG.getConfig().getInt("regeneration_delay");
 	
 	private static Map<Player, Object[]> inCombat = new HashMap<>();
 	
 	public static void addPlayer(final Player p, final Player k) {
-		System.out.println("Player " + p.getName() + " added to CombatTracker with Player " + k.getName() + " as source");
 		inCombat.put(p, new Object[] {DELAY, k});
 	}
 	
@@ -105,11 +103,11 @@ public class CombatTracker extends BukkitRunnable implements Listener {
 //  #
 	
 //  # RUNNABLE #
-	public void start(final Plugin plugin) {
-		if (!running) {
-			this.runTaskTimer(plugin, 0L, 20L);
-			running = true;
-		}
+	public void start() {
+		if (running) return;
+		
+		runTaskTimer(Main.PLG, 0L, 20L);
+		running = true;
 	}
 	
 	@Override

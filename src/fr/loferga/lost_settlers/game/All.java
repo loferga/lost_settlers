@@ -10,6 +10,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
 import fr.loferga.lost_settlers.Game;
+import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.util.Func;
 
 public class All implements TabExecutor {
@@ -24,7 +25,7 @@ public class All implements TabExecutor {
 		Player p = (Player) sender;
 		Game game = GameMngr.gameIn(p);
 		if (game == null) {
-			p.sendMessage(Func.format("&cNo Game Running"));
+			p.sendMessage(Func.format(Main.MSG_ERROR + "No Game Running"));
 			return false;
 		}
 		StringBuilder msg = new StringBuilder();

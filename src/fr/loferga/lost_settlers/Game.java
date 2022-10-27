@@ -16,7 +16,6 @@ import org.bukkit.SoundCategory;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import fr.loferga.lost_settlers.dogs.Anger;
@@ -53,11 +52,10 @@ public class Game extends BukkitRunnable {
 		
 		this.ms = MapMngr.getMapSettings(world);
 		
-		Plugin plg = Main.getPlugin(Main.class);
-		Anger.getInstance().start(plg);
-		ComeBack.getInstance().start(plg);
-		Wounded.getInstance().start(plg);
-		SkillRules.getInstance().start(plg);
+		Anger.getInstance().start();
+		ComeBack.getInstance().start();
+		Wounded.getInstance().start();
+		SkillRules.getInstance().start();
 	}
 	
 	private boolean pvp;
@@ -76,11 +74,11 @@ public class Game extends BukkitRunnable {
 	private MapSettings ms;
 	
 	public void buildMap() {
-		System.out.println("[LS] flags placing ...");
+		System.out.println(Main.LOG_PREFIX + "flags placing ...");
 		initFlags();
 		MapMngr.setWorldBorder(world, ms);
 		if (ms.isLodesActive()) {
-			System.out.println("[LS] lodes generation ... ");
+			System.out.println(Main.LOG_PREFIX + "lodes generation ... ");
 			MapMngr.generateLodes(world, ms);
 		}
 	}
@@ -186,7 +184,7 @@ public class Game extends BukkitRunnable {
 			int conv = chrono % EIGHT_MINS;
 			if (conv == SEVEN_MINS) {
 				for (Player p : getPlayers())
-					p.sendMessage(Func.format("&6La chambre magmatique commence à se refroidir"));
+					p.sendMessage(Func.format("La chambre magmatique commence à se refroidir"));
 				if (lava.isEmpty())
 					getChamberLava();
 			}
@@ -452,7 +450,7 @@ public class Game extends BukkitRunnable {
 			if (teams[i] != t) {
 				Set<Player> pset = TeamMngr.alivePlayers(this.teams.get(i));
 				pset.remove(killed);
-				if (pset.size() > 0)
+				if (!pset.isEmpty())
 					return false;
 			}
 		return true;
@@ -499,6 +497,7 @@ public class Game extends BukkitRunnable {
 				pset.add(p);
 		return pset;
 	}
+	
 	public void conquest(Camp c, LSTeam t) {
 		addConquest(c, t);
 		c.modifyFlag(Material.GRAY_CONCRETE);
@@ -560,6 +559,12 @@ public class Game extends BukkitRunnable {
 	 *                                  DISPLAY
 	 * ============================================================================
 	 */
+// delete
+	public void broadcastPlayers(String msg) {
+//		for (Set<Player> team : teams.values())
+//			for (Player p : team)
+//				p.sendMessage(msg);
+	}
 	
 	public void conquestMessage(LSTeam from, LSTeam to) {
 		String msgFrom = Func.format("&eLes " + to.getName() + "&e ont conquis votre camp!");
