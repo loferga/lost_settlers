@@ -54,27 +54,10 @@ public class GameMngr {
 		return null;
 	}
 	
-	/* start:
-	 * worldBorders to maxDist + 150
-	 * time set to 0
-	 * 
-	 * for each team:
-	 * 		initiate flags
-	 * 		initiate beacon beam
-	 * 		for each players in team:
-	 * 			teleport around the flag
-	 * 			foodlevel to 30
-	 * 			health to 20.0
-	 * 			exp to 0.0f
-	 * 			clear inv
-	 * difficulty to EASY
-	 * start game tasks
-	 */
-	
 	public static void start(String wn) {
 		// MAP
 		Main.plg().reloadConfig();
-		for (Player p : MapMngr.HUB.getPlayers()) p.sendMessage(Func.format('&' + Main.MSG_ANNOUNCE + "Chargement de la carte &r" + wn));
+		for (Player p : MapMngr.HUB.getPlayers()) p.sendMessage(Func.format(Main.MSG_ANNOUNCE + "Chargement de la carte &r" + wn));
 		World world = MapMngr.newWorld(wn);
 		MapSettings ms = MapMngr.getMapSettings(world);
 		if (!ms.canHostGame()) return;
@@ -92,7 +75,7 @@ public class GameMngr {
 		add(game);
 		// PLAYERS
 		for (LSTeam team : TeamMngr.get()) {
-			Camp tCamp = game.getTeamCamps(team).get(0);
+			Camp tCamp = game.getOlderCamp(team);
 			for (Player p : team.getPlayers()) {
 				MapMngr.campTeleport(p, tCamp);
 				p.setBedSpawnLocation(p.getLocation());
@@ -118,8 +101,6 @@ public class GameMngr {
 		game.broadcastPlayers(Func.format(Main.MSG_ANNOUNCE + "La partie s\'est terminee en &3"
 				+ rt[0] + rt[1] + rt[2] + Main.MSG_ANNOUNCE + "."));
 		game.clearFlags();
-		for (Camp c : game.getMapSettings().camps)
-			c.killZoneEffect();
 		World gw = game.getWorld();
 		gw.getWorldBorder().setSize(Double.MAX_VALUE);
 		gw.setDifficulty(Difficulty.PEACEFUL);

@@ -12,7 +12,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import fr.loferga.lost_settlers.GameV2;
+import fr.loferga.lost_settlers.Game;
 import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.util.Func;
 
@@ -23,7 +23,7 @@ public class MagmaChamber extends BukkitRunnable {
 	private static final int SEVEN_MINS = 7 * 60;
 	private static final int EIGHT_MINS = 8 * 60;
 	
-	private GameV2 game;
+	private Game game;
 	private double height;
 	
 	private Set<Player> in = new HashSet<>();
@@ -33,7 +33,7 @@ public class MagmaChamber extends BukkitRunnable {
 	private List<Location> lava = new ArrayList<>();
 	private List<Location> lavaCache;
 	
-	public MagmaChamber(GameV2 game, double height) {
+	public MagmaChamber(Game game, double height) {
 		this.game = game;
 		this.height = height;
 		MapMngr.mapBlocks(game.getWorld(), -63, height, e -> {

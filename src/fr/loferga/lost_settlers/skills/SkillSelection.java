@@ -37,10 +37,10 @@ public class SkillSelection {
 	
 	public static boolean select(Player p, String name) {
 		try {
-			select(p, Skill.valueOf(name));
+			select(p, Skill.valueOf(name.toUpperCase()));
 			return true;
 		} catch (IllegalArgumentException e) {
-			System.out.println(ChatColor.RED + "[LS] IllegalArgumentException occured at "
+			Main.plg().getServer().getConsoleSender().sendMessage(ChatColor.RED + Main.LOG_PREFIX + "IllegalArgumentException occured at "
 					+ "skill selection, \"" + name +"\" is not a SkillName" );
 		}
 		return false;
@@ -50,7 +50,7 @@ public class SkillSelection {
 		deselect(p);
 		if (selection.containsKey(skill))
 			selection.get(skill).add(p);
-		else System.out.println(ChatColor.RED + "[LS] Exception occured at "
+		else Main.plg().getServer().getConsoleSender().sendMessage(ChatColor.RED + Main.LOG_PREFIX + "Exception occured at "
 				+ "skill selection, \"" + skill.toString() +"\" is not allowed (change it in config.yml)" );
 	}
 	
@@ -74,9 +74,10 @@ public class SkillSelection {
 	private static Skill[] buildSkillArray() {
 		Skill[] arr = new Skill[selection.size()];
 		int i = 0;
-		for (Skill s : Skill.values())
+		for (Skill s : selection.keySet()) {
 			if (selection.containsKey(s))
 				arr[i++] = s;
+		}
 		return arr;
 	}
 	

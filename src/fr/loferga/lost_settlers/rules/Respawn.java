@@ -10,7 +10,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import fr.loferga.lost_settlers.GameV2;
+import fr.loferga.lost_settlers.Game;
 import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.map.MapMngr;
 import fr.loferga.lost_settlers.map.camps.Camp;
@@ -20,11 +20,11 @@ import fr.loferga.lost_settlers.util.Func;
 
 public class Respawn extends BukkitRunnable {
 	
-	private GameV2 game;
+	private Game game;
 	private Set<Player> waitingForRespawn = new HashSet<>();
 	private Map<LSTeam/*killerTeam*/, Set<Player>/*victims*/> killMemory = new HashMap<>();
 	
-	public Respawn(GameV2 game) {
+	public Respawn(Game game) {
 		this.game = game;
 	}
 	

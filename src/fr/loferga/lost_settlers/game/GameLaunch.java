@@ -11,7 +11,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import fr.loferga.lost_settlers.Game;
-import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.map.MapMngr;
 import fr.loferga.lost_settlers.util.Func;
 
@@ -46,7 +45,7 @@ public class GameLaunch extends BukkitRunnable {
 	}
 	
 	private void launchGame() {
-		game.runTaskTimer(Main.plg(), 0L, 1L);
+		game.start();
 		MapMngr.clearMap(map);
 		for (Player p : game.getPlayers()) {
 			p.setGameMode(GameMode.SURVIVAL);

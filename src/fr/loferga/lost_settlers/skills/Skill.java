@@ -101,7 +101,7 @@ public enum Skill {
 	public ItemStack getMarkedItem() {
 		ItemStack i = new ItemStack(item, 1);
 		ItemMeta im = i.getItemMeta();
-		im.setDisplayName(toString());
+		im.setDisplayName(Func.format("&3" + toString()));
 		if (!lore.isEmpty()) im.setLore(lore);
 		mark(im);
 		i.setItemMeta(im);
@@ -116,7 +116,7 @@ public enum Skill {
 	
 	@Override
 	public String toString() {
-		return Func.format("&3" + Func.toReadable(super.toString(), 1));
+		return Func.toReadable(super.toString(), 1);
 	}
 	
 }

@@ -80,7 +80,7 @@ public class DogListener implements Listener {
 		if (game != null && p.isSneaking()
 		&& (e.getRightClicked() instanceof Wolf wolf))
 			if (DogMngr.ownership(wolf, p)
-			&& game.getMembers(TeamMngr.teamOf(p)).size() > 1)
+			&& game.getTeamMembers(TeamMngr.teamOf(p)).size() > 1)
 				p.openInventory(GUIMngr.getDTM(p, e.getRightClicked().getCustomName()));
 	}
 

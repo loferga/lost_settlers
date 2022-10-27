@@ -9,17 +9,17 @@ import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import fr.loferga.lost_settlers.GameV2;
+import fr.loferga.lost_settlers.Game;
 import fr.loferga.lost_settlers.map.camps.Camp;
 import fr.loferga.lost_settlers.teams.LSTeam;
 import fr.loferga.lost_settlers.teams.TeamMngr;
 
 public class Conquest extends BukkitRunnable {
 	
-	private GameV2 game;
+	private Game game;
 	private Set<Camp> disputedCamps = new HashSet<>();
 	
-	public Conquest(GameV2 game) {
+	public Conquest(Game game) {
 		this.game = game;
 	}
 	

@@ -203,7 +203,7 @@ public class GUIMngr {
 	
 	public static Inventory getDTM(Player p, String wn) {
 		Game game = GameMngr.gameIn(p);
-		List<Player> pl = game.getAliveTeamMates(p);
+		List<Player> pl = game.getTeamMates(p);
 		List<Wolf> dogsl = DogMngr.get().get(p);
 		int i = 0;
 		int j = 0;

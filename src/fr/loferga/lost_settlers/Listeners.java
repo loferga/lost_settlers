@@ -67,7 +67,6 @@ import org.bukkit.potion.PotionType;
 import fr.loferga.lost_settlers.dogs.Anger;
 import fr.loferga.lost_settlers.dogs.DogMngr;
 import fr.loferga.lost_settlers.game.GameMngr;
-import fr.loferga.lost_settlers.game.MobMngr;
 import fr.loferga.lost_settlers.gui.GUIMngr;
 import fr.loferga.lost_settlers.map.MapMngr;
 import fr.loferga.lost_settlers.map.camps.Camp;
@@ -101,7 +100,7 @@ public class Listeners implements Listener {
 		if ((int)from.getX() != (int)to.getX() || (int)from.getZ() != (int)to.getZ())
 			campArea(p);
 		else if (MapMngr.getMapSettings(from.getWorld()).isChamberActive() && (int)from.getY() != (int)to.getY() && g.isInChamber(to))
-			g.addPlayerInChamber(p);
+			g.addInChamber(p);
 		
 	}
 	
@@ -182,14 +181,13 @@ public class Listeners implements Listener {
 		Game game = GameMngr.getGame(loc.getWorld());
 		if (game == null || !(e.getEntity() instanceof Monster)) return;
 		
-		if (game.getMapSettings().isChamberActive() && game.isInChamber(loc))
+		if (!game.isChamberFrozen() && game.isInChamber(loc))
 			spawnMagmaCube(loc);
 		
-		if (game.getMapSettings().isLodesActive()) {
-			double ratio = game.undergroundLevel(loc);
-			if (ratio<=1)
-				MobMngr.setProperties(e.getEntity(), Math.abs(1-ratio)/*, game.isInChamber(loc)*/);
-		}
+		// replace with something that don't use ms.highestGround
+//		double ratio = game.undergroundLevel(loc);
+//		if (ratio<=1)
+//			MobMngr.setProperties(e.getEntity(), Math.abs(1-ratio)/*, game.isInChamber(loc)*/);
 		
 	}
 	
@@ -366,20 +364,17 @@ public class Listeners implements Listener {
 		
 		Player dead = e.getEntity();
 		dead.setBedSpawnLocation(dead.getLocation(), true);
-		if (game.pvp()) {
-			Player killer = dead.getKiller();
-			if (killer != null) {
-				if (killer instanceof Player) {
-					game.kill(dead, killer);
-					DogMngr.transferDogsTo(dead, killer);
-				}
-			}
-			else
-				game.winCondition(null, null);
-			e.setDroppedExp(0);
+		
+		Player killer = dead.getKiller();
+		
+		if (!game.pvp() || killer == null)
+			game.suicide(e);
+		else {
+			game.kill(dead, killer);
+			DogMngr.transferDogsTo(dead, killer);
 			Func.dropExp(dead.getLocation(), dead.getTotalExperience());
-		} else
-			game.addRespawn(dead);
+		}
+		e.setDroppedExp(0);
 		GUIMngr.refreshDTM();
 	}
 	

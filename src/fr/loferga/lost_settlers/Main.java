@@ -27,18 +27,16 @@ import fr.loferga.lost_settlers.util.GlowMngr;
 
 public class Main extends JavaPlugin{
 	
-//	private static final Plugin PLUGIN = JavaPlugin.getPlugin(Main.class);
-	
 	public static Plugin plg() {
 		return JavaPlugin.getPlugin(Main.class);
 	}
 	
 	public static final String LOG_PREFIX = "[LostSettlers] ";
-	public static final String MSG_WARNING = "c";
-	public static final String MSG_ANNOUNCE = "e";
-	public static final String MSG_PERSONNAL = "6";
-	public static final String MSG_ERROR = "4";
-	public static final String MSG_DONE = "a";
+	public static final String MSG_WARNING = "&c";
+	public static final String MSG_ANNOUNCE = "&e";
+	public static final String MSG_PERSONNAL = "&6";
+	public static final String MSG_ERROR = "&4";
+	public static final String MSG_DONE = "&a";
 	
 	@Override
 	public void onEnable() {
