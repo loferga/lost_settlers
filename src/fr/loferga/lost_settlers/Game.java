@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -85,6 +86,20 @@ public class Game extends BukkitRunnable {
 	
 	public World getWorld() {
 		return world;
+	}
+	
+	public boolean isTombstones(Block b) {
+		if (b.getType() == Material.SKELETON_SKULL) {
+			for (int i = 0; i<tombstones.size(); i++) {
+				Tombstone tomb = tombstones.get(i);
+				if (tomb.isTombstone(b)) {
+					tomb.drop();
+					tombstones.remove(i);
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	public boolean pvp() {
@@ -311,7 +326,7 @@ public class Game extends BukkitRunnable {
 	
 	public void suicide(PlayerDeathEvent e) {
 		tombstones.add(new Tombstone(e));
-		respawn.addRespawn(e.getEntity());
+		respawn.respawn(e.getEntity(), getTeam(e.getEntity()));
 	}
 	
 	public void kill(Player v, Player k) {
@@ -325,6 +340,7 @@ public class Game extends BukkitRunnable {
 			respawn.teamKilled(vt);
 		}
 		conquest.playerDie(v);
+		v.setGameMode(GameMode.SPECTATOR);
 		winCondition(kt);
 	}
 	

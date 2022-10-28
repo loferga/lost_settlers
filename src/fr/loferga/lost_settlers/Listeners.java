@@ -51,7 +51,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.BrewerInventory;
@@ -70,6 +69,7 @@ import fr.loferga.lost_settlers.game.GameMngr;
 import fr.loferga.lost_settlers.gui.GUIMngr;
 import fr.loferga.lost_settlers.map.MapMngr;
 import fr.loferga.lost_settlers.map.camps.Camp;
+import fr.loferga.lost_settlers.rules.CombatTracker;
 import fr.loferga.lost_settlers.teams.LSTeam;
 import fr.loferga.lost_settlers.teams.TeamMngr;
 import fr.loferga.lost_settlers.util.Func;
@@ -148,13 +148,17 @@ public class Listeners implements Listener {
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent e) {
 		// linked to CAMPS & ORE EXP
-		if (e.getBlock().getType() == Material.TNT) return;
-			
-		if (GameMngr.gameIn(e.getPlayer()) == null) return;
+		Block b = e.getBlock();
+		if (b.getType() == Material.TNT) return;
+		Game g = GameMngr.gameIn(e.getPlayer());
+		if (g == null) return;
 		
-		if (campBlockBreak(e.getBlock(), e.getPlayer()))
+		if (g.isTombstones(b)) return;
+			
+		
+		if (campBlockBreak(b, e.getPlayer()))
 			e.setCancelled(true);
-		else oreExp(e.getBlock());
+		else oreExp(b);
 	}
 	
 	@EventHandler
@@ -350,32 +354,24 @@ public class Listeners implements Listener {
 	// ##### DEATH #####
 	
 	@EventHandler
-	public void onPlayerRespawn(PlayerRespawnEvent e) {
-		if (GameMngr.gameIn(e.getPlayer()) == null) return;
-		
-		Player p = e.getPlayer();
-		p.setGameMode(GameMode.SPECTATOR);
-	}
-	
-	@EventHandler
 	public void onPlayerDeath(PlayerDeathEvent e) {
 		Game game = GameMngr.gameIn(e.getEntity());
 		if (game == null) return;
 		
 		Player dead = e.getEntity();
-		dead.setBedSpawnLocation(dead.getLocation(), true);
 		
 		Player killer = dead.getKiller();
 		
-		if (!game.pvp() || killer == null)
+		if (!game.pvp() || killer == null || !CombatTracker.isInCombat(dead))
 			game.suicide(e);
 		else {
 			game.kill(dead, killer);
-			DogMngr.transferDogsTo(dead, killer);
+			dead.setBedSpawnLocation(dead.getLocation(), true);
 			Func.dropExp(dead.getLocation(), dead.getTotalExperience());
+			DogMngr.transferDogsTo(dead, killer);
+			GUIMngr.refreshDTM();
 		}
 		e.setDroppedExp(0);
-		GUIMngr.refreshDTM();
 	}
 	
 	// ##### CRAFTS COLOR ASSIGNMENT #####
@@ -468,7 +464,7 @@ public class Listeners implements Listener {
 			if (game.isFlag(b)) {
 				e.setCancelled(true);
 				Entity src = e.getEntity();
-				if (e.getEntity() instanceof TNTPrimed tnt)
+				if (src instanceof TNTPrimed tnt)
 					src = tnt.getSource();
 				e.getLocation().getWorld().createExplosion(e.getLocation(), 4f, false, false, src);
 				return;

@@ -106,7 +106,8 @@ public class GameMngr {
 		gw.setDifficulty(Difficulty.PEACEFUL);
 //		gw.setSpawnFlags(false, false);
 		for (Player p : game.getPlayers())
-			p.setGameMode(GameMode.ADVENTURE);
+			if (p.getGameMode() == GameMode.SURVIVAL)
+				p.setGameMode(GameMode.ADVENTURE);
 		remove(game);
 		game.stop();
 		

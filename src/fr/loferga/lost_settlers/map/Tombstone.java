@@ -28,7 +28,7 @@ public class Tombstone {
 	}
 	
 	public boolean isTombstone(Block broke) {
-		return block == broke;
+		return block.equals(broke);
 	}
 	
 	public void drop() {

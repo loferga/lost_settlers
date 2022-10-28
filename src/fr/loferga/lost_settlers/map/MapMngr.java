@@ -45,6 +45,7 @@ public class MapMngr {
 		if (ms == null) ms = new MapSettings(wn);
 		World w = createWorld(wn, ms);
 		w.setGameRule(GameRule.DISABLE_RAIDS, true);
+		w.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
 		mapsSettings.put(w, ms);
 		return w;
 	}
@@ -290,11 +291,12 @@ public class MapMngr {
 	}
 	
 	public static void campTeleport(Player p, Camp c) {
-		p.teleport(c.getLocation().add(
+		Location tpdest = c.getLocation().add(
 				Func.random(-RANGE, RANGE),
 				0,
-				Func.random(-RANGE, RANGE)
-				));
+				Func.random(-RANGE, RANGE));
+		p.teleport(tpdest);
+		p.setBedSpawnLocation(tpdest, true);
 	}
 	
 	public static void spawnTeleport(Player p) {
