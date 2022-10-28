@@ -258,7 +258,7 @@ public class SkillListeners implements Listener {
 	
 	@EventHandler
 	public void onTNTExplode(EntityExplodeEvent e) {
-		if (e.getEntity() instanceof TNTPrimed) return;
+		if (!(e.getEntity() instanceof TNTPrimed)) return;
 		
 		TNTPrimed tnt = (TNTPrimed) e.getEntity();
 		if (!tnt.isIncendiary()) return;
