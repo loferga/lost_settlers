@@ -18,6 +18,7 @@ import fr.loferga.lost_settlers.map.MapMngr;
 import fr.loferga.lost_settlers.map.MapSettings;
 import fr.loferga.lost_settlers.map.camps.Camp;
 import fr.loferga.lost_settlers.skills.SkillListeners;
+import fr.loferga.lost_settlers.skills.SkillSelection;
 import fr.loferga.lost_settlers.teams.LSTeam;
 import fr.loferga.lost_settlers.teams.TeamMngr;
 import fr.loferga.lost_settlers.util.Func;
@@ -85,6 +86,7 @@ public class GameMngr {
 				p.setExp(0.0f);
 				p.setLevel(0);
 				p.getInventory().clear();
+				p.sendMessage(Func.format(Main.MSG_PERSONNAL + "Vous êtes doué du talent &3" + SkillSelection.get(p).toString()));
 			}
 		}
 		SkillListeners.giveEquipment(game);

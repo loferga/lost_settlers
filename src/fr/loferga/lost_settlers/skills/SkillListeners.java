@@ -39,6 +39,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
@@ -280,8 +281,15 @@ public class SkillListeners implements Listener {
 		if (!(e.getEntity() instanceof Firework)) return;
 		
 		Firework fw = (Firework) e.getEntity();
-		if (fw.getShooter() instanceof Player p && SkillSelection.get(p) == Skill.ARTIFICE)
-				p.setVelocity(p.getEyeLocation().getDirection().multiply(-0.2).add(new Vector(0, 0.1, 0)));
+		if (fw.getShooter() instanceof Player p && SkillSelection.get(p) == Skill.ARTIFICE) {
+			Vector back = p.getEyeLocation().getDirection().multiply(-0.2).add(new Vector(0, 0.1, 0));
+			p.setVelocity(p.getVelocity().add(back));
+		}
+		FireworkMeta fwm = fw.getFireworkMeta();
+		if (fwm.getPower() == 1) {
+			fw.detonate(); return;
+		} else fwm.setPower(fwm.getPower()-1);
+		fw.setFireworkMeta(fwm);
 	}
 	
 	@EventHandler
@@ -303,7 +311,7 @@ public class SkillListeners implements Listener {
 		if (!(fw.getShooter() instanceof Player)) return;
 		if (SkillSelection.get((Player) fw.getShooter()) != Skill.ARTIFICE) return;
 		
-		e.setDamage(0);
+		e.setDamage(0.7 * e.getDamage());
 	}
 	
 	@EventHandler
@@ -315,10 +323,12 @@ public class SkillListeners implements Listener {
 		if (SkillSelection.get(p) != Skill.ARTIFICE) return;
 		
 		List<Block> blocks = e.blockList();
-		for (int i = 0; i<blocks.size(); i++) {
+		int i = 0;
+		while (i<blocks.size()) {
 			Block b = blocks.get(i);
-			if (b.getLocation().distanceSquared(e.getLocation()) >= 1)
+			if (b.getLocation().distance(e.getLocation()) >= 1.8)
 				blocks.remove(i);
+			else i++;
 		}
 	}
 	
@@ -334,7 +344,7 @@ public class SkillListeners implements Listener {
 		if (game == null) return;
 		
 		Camp c = game.campIn(e.getEntity().getLocation());
-		if (c == null || c.getOwner() != TeamMngr.teamOf((Player) e.getEntity())) return;
+		if (c == null || c.getOwner() != game.getTeam((Player) e.getEntity())) return;
 		
 		e.setCancelled(true);
 	}

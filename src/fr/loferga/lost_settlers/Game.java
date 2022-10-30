@@ -62,12 +62,14 @@ public class Game extends BukkitRunnable {
 		LSTeam[] allTeams = TeamMngr.get();
 		for (int i = 0; i<ms.teamNumber; i++)
 			res.put(allTeams[i], new HashSet<>());
-		for (Player p : players)
-			res.get(TeamMngr.teamOf(p)).add(p);
+		for (Player p : players) {
+			Set<Player> team = res.get(TeamMngr.teamOf(p));
+			if (team != null) team.add(p);
+		}
 		this.teams = res;
 		
-		camps = ms.camps.clone();
-		
+		camps = ms.camps;
+				
 		if (ms.isChamberActive())
 			chamber = new MagmaChamber(this, ms.chamberHeight);
 		
@@ -302,7 +304,7 @@ public class Game extends BukkitRunnable {
 	private boolean inPerimeter(Location loc, Camp c, double p) {
 		double[] pos = c.getPosition();
 		return loc.getWorld() == world
-				&& Func.isNearBy(loc.getX(), pos[0], p) && Func.isNearBy(loc.getZ(), pos[1], p);
+				&& Func.isNearBy(loc.getX(), pos[0], p) && Func.isNearBy(loc.getZ(), pos[2], p);
 	}
 	
 	public void campLeavingCheck(Player p, Location from, Location to) {
@@ -404,7 +406,8 @@ public class Game extends BukkitRunnable {
 	private void assignRandomTeams() {
 		List<LSTeam> teamList = new ArrayList<>(teams.keySet());
 		int rng;
-		for (int i = 0; i<teamList.size(); i++) {
+		int len = teamList.size();
+		for (int i = 0; i<len; i++) {
 			rng = Func.randomInt(0, teamList.size());
 			camps[i].setOwner(teamList.get(rng));
 			teamList.remove(rng);

@@ -119,11 +119,11 @@ public class MapMngr {
 	 */
 	
 	public static void generateLodes(World world, MapSettings ms) {
-		double d = world.getWorldBorder().getSize();
+		double d = world.getWorldBorder().getSize() / 2;
 		double cx = world.getWorldBorder().getCenter().getX();
 		double cz = world.getWorldBorder().getCenter().getZ();
 		for (LodeGenerator generator : ms.generators) {
-			createLodes(world, generator, new double[] {cx-d, -63, cz-d}, new double[] {cx+d, ms.highestGround,  cz+d});
+			createLodes(world, generator, new double[] {cx-d, -65, cz-d}, new double[] {cx+d, ms.highestGround,  cz+d});
 			System.out.println("[LodeGenerator] " + generator.ore.toString() + " generated");
 		}
 	}
@@ -132,15 +132,17 @@ public class MapMngr {
 		int count = (int) (g.count * (((maxs[0]-mins[0])*(maxs[1]-mins[1])*(maxs[2]-mins[2]))/1000000));
 		double[] rv = g.sizeBounds;
 		for (int n = 0; n<count; n++) {
-			double x = Func.random(mins[0], maxs[0]);
-			double y = Func.onBounds(0, 1, Func.gauss(g.gaussFactor)*g.gaussOffset) * (maxs[1]-mins[1]) *g.yratio + mins[1];
-			double z = Func.random(mins[2], maxs[2]);
 			Vector[] ijk = randomVectors(rv[0], rv[1], rv[2], rv[3], rv[4], rv[5]);
-			new Lode(world, g.ore, new Point(
-					x,
-					y,
-					z
-			), ijk[0], ijk[1], ijk[2]).setMaterial();
+			double[] maxAbs = Func.getMaxAbs(ijk);
+			double x = Func.random(mins[0] + maxAbs[0], maxs[0] - maxAbs[0]);
+			double y = Func.onBounds(0, 1, Func.gauss(g.gaussFactor)*g.gaussOffset) * (maxs[1]-mins[1]) *g.yratio + mins[1];
+			double z = Func.random(mins[2] + maxAbs[2], maxs[2] - maxAbs[2]);
+			new Lode(
+					world,
+					g.ore,
+					new Point((int) x + 0.5, (int) y + 0.5, (int) z + 0.5),
+					ijk[0], ijk[1], ijk[2]
+			).setMaterial();
 		}
 	}
 	

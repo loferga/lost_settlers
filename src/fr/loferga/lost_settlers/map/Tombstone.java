@@ -24,7 +24,7 @@ public class Tombstone {
 		items = new ItemStack[drops.size()];
 		for (int i = 0; i<items.length; i++)
 			items[i] = Func.pop(drops);
-		xp = e.getDroppedExp();
+		xp = e.getEntity().getTotalExperience();
 	}
 	
 	public boolean isTombstone(Block broke) {

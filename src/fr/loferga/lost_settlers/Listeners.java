@@ -94,12 +94,12 @@ public class Listeners implements Listener {
 		Game g = GameMngr.gameIn(p);
 		if (g == null) return;
 		if (!g.pvp() || p.getGameMode() != GameMode.SURVIVAL) return;
-
+		
 		Location from = e.getFrom();
 		Location to = e.getTo();
 		if ((int)from.getX() != (int)to.getX() || (int)from.getZ() != (int)to.getZ())
-			campArea(p);
-		else if (MapMngr.getMapSettings(from.getWorld()).isChamberActive() && (int)from.getY() != (int)to.getY() && g.isInChamber(to))
+			campArea(g, p);
+		else if (g.isChamberActive() && (int)from.getY() != (int)to.getY() && g.isInChamber(to))
 			g.addInChamber(p);
 		
 	}
@@ -219,19 +219,18 @@ public class Listeners implements Listener {
 		return true;
 	}
 	
-	private static void campArea(Player p) {
+	private static void campArea(Game g, Player p) {
 		// triggered whenever a player move to a new block in x.z plane
 		if (p.isInvisible()) return;
-		Game game = GameMngr.gameIn(p);
 		LSTeam pteam = TeamMngr.teamOf(p);
-		if (game == null || pteam == null) return;
-		Camp camp = game.vitalIn(p.getLocation());
+		if (pteam == null) return;
+		Camp camp = g.vitalIn(p.getLocation());
 		if (camp == null || camp.getRivals().contains(pteam)) return;
 		
-		if (game.teamProtect(camp.getOwner(), camp))
-			game.conquest(camp, pteam);
+		if (g.teamProtect(camp.getOwner(), camp))
+			g.conquest(camp, pteam);
 		else
-			game.capture(camp, pteam);
+			g.capture(camp, pteam);
 	}
 	
 	/*

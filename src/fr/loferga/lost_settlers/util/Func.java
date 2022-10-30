@@ -12,6 +12,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 
+import fr.loferga.lost_settlers.map.geometry.Vector;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 
@@ -53,10 +54,12 @@ public class Func {
 	private static Random rng = new Random();
 	
 	public static double random(double min, double max) {
+		if (max<=min || Double.isNaN(min) || Double.isNaN(max)) return min;
 		return rng.nextDouble(min, max);
 	}
 	
 	public static int randomInt(int min, int max) {
+		if (max<=min) return min;
 		return rng.nextInt(min, max);
 	}
 	
@@ -129,11 +132,25 @@ public class Func {
 	
 	// square shaped distance check
 	public static boolean isNearBy(double pos, double around, double by) {
-		return around - by <= pos && pos < around + by;
+		return around - by <= pos && pos <= around + by;
 	}
 	
 	public static void sendActionbar(Player p, String msg) {
 		p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(msg));
+	}
+	
+	public static double[] getMaxAbs(Vector... vectors) {
+		if (vectors.length == 0) return new double[] {0, 0, 0};
+		double[] maxs = new double[] {vectors[0].x, vectors[0].y, vectors[0].z};
+		for (Vector v : vectors) {
+			if (v.x > maxs[0])
+				maxs[0] = v.x;
+			if (v.y > maxs[1])
+				maxs[1] = v.y;
+			if (v.z > maxs[2])
+				maxs[2] = v.z;
+		}
+		return maxs;
 	}
 	
 }
