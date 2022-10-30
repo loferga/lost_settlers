@@ -18,7 +18,7 @@ public class Warp implements TabExecutor {
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
 		List<String> res = new ArrayList<>();
-		Set<String> mapNames = Main.getPlugin(Main.class).getConfig().getConfigurationSection("maps").getKeys(false);
+		Set<String> mapNames = Main.plg().getConfig().getConfigurationSection("maps").getKeys(false);
 		if (args.length == 1)
 			res.addAll(Func.matches(mapNames, args[0]));
 		return res;
@@ -30,7 +30,7 @@ public class Warp implements TabExecutor {
 		
 		Player p = (Player) sender;
 		if (args.length == 1
-		&& Main.plg.getConfig().getConfigurationSection("maps").getKeys(false).contains(args[0])) {
+		&& Main.plg().getConfig().getConfigurationSection("maps").getKeys(false).contains(args[0])) {
 			if (args[0].equals("spawn"))
 				MapMngr.spawnTeleport(p);
 			else {
@@ -44,7 +44,7 @@ public class Warp implements TabExecutor {
 	}
 	
 	private static void sendInvalid(Player p) {
-		p.sendMessage(Func.format("&cInvalid usage, please use:\n/warp <mapName>"));
+		p.sendMessage(Func.format(Main.MSG_WARNING + "Invalid usage, please use:\n/warp <mapName>"));
 	}
 
 }

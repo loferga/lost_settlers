@@ -8,7 +8,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.Plugin;
 
 import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.util.Func;
@@ -102,19 +101,22 @@ public enum Skill {
 	public ItemStack getMarkedItem() {
 		ItemStack i = new ItemStack(item, 1);
 		ItemMeta im = i.getItemMeta();
-		im.setDisplayName(Func.format("&3" + Func.toReadable(toString(), 1)));
+		im.setDisplayName(Func.format("&3" + toString()));
 		if (!lore.isEmpty()) im.setLore(lore);
 		mark(im);
 		i.setItemMeta(im);
 		return i;
 	}
 	
-	private static Plugin plg = Main.getPlugin(Main.class);
-	
 	public void mark(ItemMeta im) {
 		im.getPersistentDataContainer().set(
-				new NamespacedKey(plg, "Skill"), PersistentDataType.STRING, toString()
+				new NamespacedKey(Main.plg(), "Skill"), PersistentDataType.STRING, toString()
 				);
+	}
+	
+	@Override
+	public String toString() {
+		return Func.toReadable(super.toString(), 1);
 	}
 	
 }

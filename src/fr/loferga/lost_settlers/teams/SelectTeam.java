@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
+import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.game.GameMngr;
 import fr.loferga.lost_settlers.util.Func;
 
@@ -42,7 +43,7 @@ public class SelectTeam implements TabExecutor {
 				if (p.isOp())
 					p = Bukkit.getPlayer(args[1]);
 				else {
-					p.sendMessage(Func.format("\"" + args[1] + "\"&c is not a valid player"));
+					p.sendMessage(Func.format("\"" + args[1] + "\"" + Main.MSG_ERROR + " is not a valid player"));
 					return false;
 				}
 			}
@@ -50,7 +51,7 @@ public class SelectTeam implements TabExecutor {
 				if (GameMngr.gameIn(p) != null) return false;
 				if (args[0].equals("#null")) {
 					TeamMngr.remove(p);
-					p.sendMessage(Func.format("&eVous ne faites plus parti d'une équipe"));
+					p.sendMessage(Func.format(Main.MSG_PERSONNAL + "Vous ne faites plus parti d'une équipe"));
 					return true;
 				}
 				LSTeam team = null;
@@ -62,10 +63,10 @@ public class SelectTeam implements TabExecutor {
 				}
 				if (team != null) {
 					TeamMngr.join(p, team);
-					p.sendMessage(Func.format("&eVous faites désormais parti de l'équipe " + team.getName()));
+					p.sendMessage(Func.format(Main.MSG_PERSONNAL + "Vous faites désormais parti de l'équipe " + team.getName()));
 					return true;
 				} else {
-					p.sendMessage(Func.format("\"" + args[0] + "\"&c is not a valid team"));
+					p.sendMessage(Func.format("\"" + args[0] + "\"" + Main.MSG_ERROR + " is not a valid team"));
 					return false;
 				}
 			}
@@ -75,9 +76,9 @@ public class SelectTeam implements TabExecutor {
 	}
 	
 	private void sendInvalid(Player p) {
-		p.sendMessage(Func.format("&cInvalid usage, please use:\n/lsteam <team>"));
+		p.sendMessage(Func.format(Main.MSG_WARNING + "Invalid usage, please use:\n/lsteam <team>"));
 		if (p.isOp())
-			p.sendMessage(Func.format("&cor /lsteam <team> <player>"));
+			p.sendMessage(Func.format(Main.MSG_WARNING + "or /lsteam <team> <player>"));
 	}
 
 }

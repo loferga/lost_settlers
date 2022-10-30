@@ -2,15 +2,16 @@ package fr.loferga.lost_settlers.dogs;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
@@ -23,9 +24,11 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.util.Vector;
 
+import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.game.GameMngr;
 import fr.loferga.lost_settlers.teams.TeamMngr;
 import fr.loferga.lost_settlers.util.Func;
+import fr.loferga.lost_settlers.util.GlowMngr;
 
 public class DogMngr {
 	
@@ -67,50 +70,56 @@ public class DogMngr {
 	
 	public static void onOrder(PlayerInteractEvent e) {
 		Player p = e.getPlayer();
-		if (DogMngr.get().containsKey(p) && !e.hasItem()) {
-			LivingEntity target = getTarget(p);
-			if (target != null) {
-				List<Wolf> dogs = DogMngr.get().get(p);
-				if (target instanceof Wolf && dogs.contains(target)) {
-					if (!ComeBack.containPlayer(p)) {
-						comeBack(dogs, p);
-						p.getWorld().playSound(p.getLocation(), "custom.whistle_back", SoundCategory.PLAYERS, 2.0f, 1.0f);
-						for (Wolf dog : dogs)
-							Func.glowFor(dog, new HashSet<>(Set.of(p)), 10);
-					}
-					prevTarget.remove(p);
-				} else if (!(target instanceof Player) || GameMngr.gameIn(p).pvp()) {
-					setAnger(dogs, target);
-					p.getWorld().playSound(p.getLocation(), "custom.whistle", SoundCategory.PLAYERS, 2.0f, 1.0f);
-					Func.glowFor(target, new HashSet<>(Set.of(p)), 10);
-					prevTarget.put(p, target);
-				}
+		if (!DogMngr.get().containsKey(p) || e.hasItem()) return;
+		
+		LivingEntity target = getTarget(p, GameMngr.gameIn(p).pvp());
+		if (target == null) return;
+		
+		List<Wolf> dogs = DogMngr.get().get(p);
+		if (target instanceof Wolf && dogs.contains(target)) {
+			if (!ComeBack.containPlayer(p)) {
+				comeBack(dogs, p);
+				p.getWorld().playSound(p.getLocation(), "custom.whistle_back", SoundCategory.PLAYERS, 2.0f, 1.0f);
+				for (Wolf dog : dogs)
+					GlowMngr.glowFor(dog, new HashSet<>(Set.of(p)), 10);
 			}
+			prevTarget.remove(p);
+		} else {
+			setAnger(dogs, target);
+			p.getWorld().playSound(p.getLocation(), "custom.whistle", SoundCategory.PLAYERS, 2.0f, 1.0f);
+			GlowMngr.glowFor(target, new HashSet<>(Set.of(p)), 10);
+			prevTarget.put(p, target);
 		}
 	}
 	
-	private static LivingEntity getTarget(Player p) {
-		LivingEntity target = null;
+	private static LivingEntity getTarget(Player p, boolean pvp) {
 		Location rayloc = p.getEyeLocation();
 		Vector eyedir = rayloc.getDirection().normalize();
-		boolean stop = false;
-		int i = 0;
-		Collection<Entity> ents = p.getWorld().getEntitiesByClasses(LivingEntity.class);
-    	ents.remove(prevTarget.get(p));
-    	ents.removeAll(TeamMngr.teamOf(p).getPlayers());
-    	while (i < 60 && !stop) {
-    		rayloc = rayloc.add(eyedir);
-    		if (!rayloc.getBlock().getType().isOccluding()) {
-    			for (Entity ent : ents)
-    				if (ent != prevTarget.get(p) && rayloc.distance(ent.getLocation().add(0, ent.getHeight()/2, 0)) < 1.0) {
-    					target = (LivingEntity) ent;
-    					stop = true;
-    				}
-    		} else
-    			stop = true;
-    		i++;
-    	}
-    	return target;
+		Predicate<Entity> predicate = pvp ? e -> true : e -> !(e instanceof Player); // don't target player if pvp is not set
+		Entity ent = p.getWorld().rayTrace(rayloc, eyedir, 60, FluidCollisionMode.ALWAYS, false, 1.0, predicate).getHitEntity();
+		if (ent instanceof LivingEntity target) return target;
+		else return null;
+//		LivingEntity target = null;
+//		Location rayloc = p.getEyeLocation();
+//		Vector eyedir = rayloc.getDirection().normalize();
+//		boolean stop = false;
+//		int i = 0;
+//		Collection<Entity> ents = p.getWorld().getEntitiesByClasses(LivingEntity.class);
+//    	ents.remove(prevTarget.get(p));
+//    	ents.removeAll(TeamMngr.teamOf(p).getPlayers());
+//    	while (i < 60 && !stop) {
+//    		rayloc = rayloc.add(eyedir);
+//    		if (!rayloc.getBlock().getType().isOccluding()) {
+//    			for (Entity ent : ents)
+//    				if (ent != prevTarget.get(p) && rayloc.distance(ent.getLocation().add(0, ent.getHeight()/2, 0)) < 1.0) {
+//    					target = (LivingEntity) ent;
+//    					stop = true;
+//    				}
+//    		} else
+//    			stop = true;
+//    		i++;
+//    	}
+//		return target;
     }
 	
 	private static void setAnger(List<Wolf> wolfs, LivingEntity target) {
@@ -161,7 +170,7 @@ public class DogMngr {
 				wolf.getWorld().playSound(wolf.getLocation(), Sound.ENTITY_WOLF_WHINE, 1.0f, 1.0f);
 			}
 			tamers.remove(from);
-			to.sendMessage(Func.format("&eVous êtes désormais le maître des chiens de " +
+			to.sendMessage(Func.format(Main.MSG_PERSONNAL + "Vous êtes désormais le maître des chiens de " +
 			TeamMngr.teamOf(from).getColor() + from.getDisplayName()));
 		}
 	}
@@ -173,9 +182,9 @@ public class DogMngr {
 		else
 			tamers.remove(from);
 		ChatColor color = TeamMngr.teamOf(from).getChatColor();
-		from.sendMessage(Func.format("&eVous venez de confier " + color + wolf.getCustomName() +
-				"&e à " + color + to.getName()));
-		to.sendMessage(Func.format(color + from.getName() + "&e viens de vous confier " + color + wolf.getCustomName()));
+		from.sendMessage(Func.format(Main.MSG_PERSONNAL + "Vous venez de confier " + color + wolf.getCustomName()
+				+ Main.MSG_PERSONNAL + " à " + color + to.getName()));
+		to.sendMessage(Func.format(color + from.getName() + Main.MSG_PERSONNAL +" viens de vous confier " + color + wolf.getCustomName()));
 	}
 	
 	private static void dogGive(Player p, Wolf w) {

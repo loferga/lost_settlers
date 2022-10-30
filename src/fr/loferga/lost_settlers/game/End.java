@@ -9,6 +9,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
 import fr.loferga.lost_settlers.Game;
+import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.util.Func;
 
 public class End implements TabExecutor {
@@ -29,7 +30,7 @@ public class End implements TabExecutor {
 				GameMngr.stop(game, null);
 				return true;
 			} else {
-				p.sendMessage(Func.format("&cNo game is running"));
+				p.sendMessage(Func.format(Main.MSG_ERROR + "No game is running"));
 				return false;
 			}
 		}
@@ -38,7 +39,7 @@ public class End implements TabExecutor {
 	}
 
 	private static void sendInvalid(Player p) {
-		p.sendMessage(Func.format("&cInvalid usage, please use:\n/stop"));
+		p.sendMessage(Func.format(Main.MSG_WARNING + "Invalid usage, please use:\n/stop"));
 	}
 
 }

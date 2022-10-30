@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
+import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.game.GameMngr;
 import fr.loferga.lost_settlers.util.Func;
 
@@ -44,7 +45,7 @@ public class SkillCommand implements TabExecutor {
 			if (p.isOp())
 				p = Bukkit.getPlayer(args[1]);
 			else {
-				p.sendMessage(Func.format("\"" + args[1] + "\"&c is not a valid player"));
+				p.sendMessage(Func.format("\"" + args[1] + "\"" + Main.MSG_ERROR + " is not a valid player"));
 				return false;
 			}
 		}
@@ -52,12 +53,12 @@ public class SkillCommand implements TabExecutor {
 			if (GameMngr.gameIn(p) != null) return false;
 			if (args[0].equals("#null")) {
 				SkillSelection.deselect(p);
-				p.sendMessage(Func.format("&eVous ne possédez plus de talent"));
+				p.sendMessage(Func.format(Main.MSG_PERSONNAL + "Vous ne possédez plus de talent"));
 				return true;
 			}
 			boolean selection = SkillSelection.select(p, args[0].toUpperCase());
 			if (selection)
-				p.sendMessage(Func.format("&eVous possédez désormais le talent &3" + args[0]));
+				p.sendMessage(Func.format(Main.MSG_PERSONNAL + "Vous possédez désormais le talent &3" + args[0]));
 			return selection;
 		}
 		
@@ -66,9 +67,9 @@ public class SkillCommand implements TabExecutor {
 	}
 	
 	private void sendInvalid(Player p) {
-		p.sendMessage(Func.format("&cInvalid usage, please use:\n/skill <skill>"));
+		p.sendMessage(Func.format(Main.MSG_WARNING + "Invalid usage, please use:\n/skill <skill>"));
 		if (p.isOp())
-			p.sendMessage(Func.format("&cor /skill <skill> <player>"));
+			p.sendMessage(Func.format(Main.MSG_WARNING + "or /skill <skill> <player>"));
 	}
 
 }

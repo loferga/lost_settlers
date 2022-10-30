@@ -25,13 +25,13 @@ public class TeamMngr {
 	
 	private TeamMngr() {/*fonction holder class, it should never be instantiated*/}
 	
-	private static ConfigurationSection section = Main.plg.getConfig().getConfigurationSection("teams");
+	private static ConfigurationSection section = Main.plg().getConfig().getConfigurationSection("teams");
 	private static Scoreboard sb = Bukkit.getScoreboardManager().getMainScoreboard();
 	
 	private static final LSTeam[] TEAMS = buildTeams(section);
 	public static final LSTeam NULL = new LSTeam(
 			createTeam(ChatColor.RESET, "NULL", true),
-					null, DyeColor.WHITE, Color.WHITE
+					Material.WHITE_CONCRETE, DyeColor.WHITE, Color.WHITE
 				);
 	
 	public static LSTeam[] get() {

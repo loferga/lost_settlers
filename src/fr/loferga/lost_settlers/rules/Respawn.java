@@ -10,7 +10,8 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import fr.loferga.lost_settlers.GameV2;
+import fr.loferga.lost_settlers.Game;
+import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.map.MapMngr;
 import fr.loferga.lost_settlers.map.camps.Camp;
 import fr.loferga.lost_settlers.teams.LSTeam;
@@ -19,11 +20,11 @@ import fr.loferga.lost_settlers.util.Func;
 
 public class Respawn extends BukkitRunnable {
 	
-	private GameV2 game;
+	private Game game;
 	private Set<Player> waitingForRespawn = new HashSet<>();
 	private Map<LSTeam/*killerTeam*/, Set<Player>/*victims*/> killMemory = new HashMap<>();
 	
-	public Respawn(GameV2 game) {
+	public Respawn(Game game) {
 		this.game = game;
 	}
 	
@@ -36,12 +37,19 @@ public class Respawn extends BukkitRunnable {
 				respawn(respawn, t);
 				waitingForRespawn.remove(respawn);
 			} else
-				Func.sendActionbar(respawn, Func.format("&eVous n'avez pas de camp"));
+				Func.sendActionbar(respawn, Func.format(Main.MSG_PERSONNAL + "Vous n'avez pas de camp"));
 		}
 	}
 
 	public void addRespawn(Player p) {
 		waitingForRespawn.add(p);
+		Func.sendActionbar(p, Func.format(Main.MSG_PERSONNAL + "Vous n'avez pas de camp"));
+	}
+	
+	public void campCapturedBy(LSTeam t) {
+		for (Player p : new HashSet<>(waitingForRespawn))
+			if (TeamMngr.teamOf(p) == t)
+				respawn(p);
 	}
 	
 	public void addKill(LSTeam kt, Player v) {
@@ -67,7 +75,7 @@ public class Respawn extends BukkitRunnable {
 		for (Player p : waitingForRespawn)
 			if (TeamMngr.teamOf(p) == t) {
 				waitingForRespawn.remove(p);
-				Func.sendActionbar(p, Func.format("&cVotre équipe à été vaincue"));
+				Func.sendActionbar(p, Func.format(Main.MSG_PERSONNAL + "Votre équipe à été vaincue"));
 			}
 	}
 

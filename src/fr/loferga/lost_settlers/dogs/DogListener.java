@@ -40,7 +40,7 @@ public class DogListener implements Listener {
 			));
 	
 	private static String pickRandomName() {
-		int rng = (int) Func.random(0, names.size());
+		int rng = Func.randomInt(0, names.size());
 		String picked = names.get(rng);
 		names.remove(rng);
 		return picked;
@@ -80,7 +80,7 @@ public class DogListener implements Listener {
 		if (game != null && p.isSneaking()
 		&& (e.getRightClicked() instanceof Wolf wolf))
 			if (DogMngr.ownership(wolf, p)
-			&& game.getMembers(TeamMngr.teamOf(p)).size() > 1)
+			&& game.getTeamMembers(TeamMngr.teamOf(p)).size() > 1)
 				p.openInventory(GUIMngr.getDTM(p, e.getRightClicked().getCustomName()));
 	}
 

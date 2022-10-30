@@ -13,6 +13,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -38,8 +39,10 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.projectiles.ProjectileSource;
+import org.bukkit.util.Vector;
 
 import fr.loferga.lost_settlers.Game;
 import fr.loferga.lost_settlers.dogs.DogMngr;
@@ -258,7 +261,7 @@ public class SkillListeners implements Listener {
 	
 	@EventHandler
 	public void onTNTExplode(EntityExplodeEvent e) {
-		if (e.getEntity() instanceof TNTPrimed) return;
+		if (!(e.getEntity() instanceof TNTPrimed)) return;
 		
 		TNTPrimed tnt = (TNTPrimed) e.getEntity();
 		if (!tnt.isIncendiary()) return;
@@ -272,6 +275,24 @@ public class SkillListeners implements Listener {
 	private static final boolean ARTIFICE = Func.primeContain(SkillSelection.getSkills(), Skill.ARTIFICE);
 	
 	@EventHandler
+	public void onFireworkShoot(ProjectileLaunchEvent e) {
+		if (!ARTIFICE || SkillSelection.empty(Skill.ARTIFICE)) return;
+		
+		if (!(e.getEntity() instanceof Firework)) return;
+		
+		Firework fw = (Firework) e.getEntity();
+		if (fw.getShooter() instanceof Player p && SkillSelection.get(p) == Skill.ARTIFICE) {
+			Vector back = p.getEyeLocation().getDirection().multiply(-0.2).add(new Vector(0, 0.1, 0));
+			p.setVelocity(p.getVelocity().add(back));
+		}
+		FireworkMeta fwm = fw.getFireworkMeta();
+		if (fwm.getPower() == 1) {
+			fw.detonate(); return;
+		} else fwm.setPower(fwm.getPower()-1);
+		fw.setFireworkMeta(fwm);
+	}
+	
+	@EventHandler
 	public void onFireworkExplode(FireworkExplodeEvent e) {
 		Firework fw = e.getEntity();
 		ProjectileSource shooter = fw.getShooter();
@@ -279,7 +300,7 @@ public class SkillListeners implements Listener {
 		
 		if (SkillSelection.get((Player) shooter) != Skill.ARTIFICE) return;
 		
-		fw.getWorld().createExplosion(fw.getLocation(), 1.0f, false, true, (Entity) shooter);
+		fw.getWorld().createExplosion(fw.getLocation(), 2.2f, false, true, (Entity) shooter);
 	}
 	
 	@EventHandler
@@ -290,7 +311,25 @@ public class SkillListeners implements Listener {
 		if (!(fw.getShooter() instanceof Player)) return;
 		if (SkillSelection.get((Player) fw.getShooter()) != Skill.ARTIFICE) return;
 		
-		e.setDamage(2 * e.getFinalDamage());
+		e.setDamage(0.7 * e.getDamage());
+	}
+	
+	@EventHandler
+	public void onFireworkExplode(EntityExplodeEvent e) {
+		if (!ARTIFICE || SkillSelection.empty(Skill.ARTIFICE)) return;
+		if (!(e.getEntity() instanceof Player)) return;
+		
+		Player p = (Player) e.getEntity();
+		if (SkillSelection.get(p) != Skill.ARTIFICE) return;
+		
+		List<Block> blocks = e.blockList();
+		int i = 0;
+		while (i<blocks.size()) {
+			Block b = blocks.get(i);
+			if (b.getLocation().distance(e.getLocation()) >= 1.8)
+				blocks.remove(i);
+			else i++;
+		}
 	}
 	
 	// ROUBLARD
@@ -305,7 +344,7 @@ public class SkillListeners implements Listener {
 		if (game == null) return;
 		
 		Camp c = game.campIn(e.getEntity().getLocation());
-		if (c == null || c.getOwner() != TeamMngr.teamOf((Player) e.getEntity())) return;
+		if (c == null || c.getOwner() != game.getTeam((Player) e.getEntity())) return;
 		
 		e.setCancelled(true);
 	}

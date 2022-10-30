@@ -9,8 +9,9 @@ import java.util.Set;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import fr.loferga.lost_settlers.Main;
 
 public class ComeBack extends BukkitRunnable {
 	
@@ -26,11 +27,11 @@ public class ComeBack extends BukkitRunnable {
 	}
 	
 	//start the runnable if it's not already running
-	public void start(Plugin plugin) {
-		if (!running) {
-			runTaskTimer(plugin, 0L, 1L);
-			running = true;
-		}
+	public void start() {
+		if (running) return;
+		
+		runTaskTimer(Main.plg(), 0L, 1L);
+		running = true;
 	}
 	
 	private static Map<LivingEntity, Set<Wolf>> targets = new HashMap<>();

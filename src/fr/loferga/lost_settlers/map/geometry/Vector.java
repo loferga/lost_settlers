@@ -2,6 +2,8 @@ package fr.loferga.lost_settlers.map.geometry;
 
 import org.bukkit.Location;
 
+import fr.loferga.lost_settlers.util.Func;
+
 public class Vector {
 	
 	public Vector(double x, double y, double z) {
@@ -13,6 +15,10 @@ public class Vector {
 	public double x;
 	public double y;
 	public double z;
+	
+	public static Vector random() {
+		return new Vector(Func.random(-1, 1), Func.random(-1, 1), Func.random(-1, 1));
+	}
 	
 	public Location addTo(Location location) {
 		return location.add(x, y, z);
@@ -28,6 +34,14 @@ public class Vector {
 	
 	public Vector multiply(double f) {
 		x*=f; y*=f; z*=f;
+		return this;
+	}
+	
+	public Vector cross(Vector a) {
+		Vector c = clone();
+		x = c.y*a.z - c.z*a.y;
+		y = c.z*a.x - c.x*a.z;
+		z = c.x*a.y - c.y*a.x;
 		return this;
 	}
 	

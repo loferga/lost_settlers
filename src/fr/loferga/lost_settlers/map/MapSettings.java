@@ -27,7 +27,7 @@ public class MapSettings {
 	public int[] worldSpawn = null;
 	
 	// game launch required parameters
-	public int teamN = -1;
+	public int teamNumber = -1;
 	public int playableArea = -1;
 	public int campSize = -1;
 	public int vitalSize = -1;
@@ -39,12 +39,12 @@ public class MapSettings {
 	public LodeGenerator[] generators = null;
 	
 	public MapSettings(String wn) {
-		cfg = Main.plg.getConfig().getConfigurationSection("maps." + wn);
+		cfg = Main.plg().getConfig().getConfigurationSection("maps." + wn);
 		if (cfg.contains("seed", true)) seed = cfg.getLong("seed");
 		if (cfg.contains("world_type", true)) worldType = Func.valueOf(WorldType.class, cfg.getString("world_type"));
 		if (cfg.contains("world_name", true)) worldName = cfg.getString("world_name");
 		if (cfg.contains("world_spawn", true)) worldSpawn = toIntArray(cfg.getIntegerList("world_spawn"));
-		if (cfg.contains("team_number", true)) teamN = cfg.getInt("team_number");
+		if (cfg.contains("team_number", true)) teamNumber = cfg.getInt("team_number");
 		if (cfg.contains("playable_area", true)) playableArea = cfg.getInt("playable_area");
 		if (cfg.contains("camps", true)) {
 			if (cfg.contains("camps.camp_size", true)) campSize = cfg.getInt("camps.camp_size");
@@ -66,14 +66,14 @@ public class MapSettings {
 	}
 	
 	public boolean canHostGame() {
-		boolean canHost = teamN != -1 && playableArea != -1 && campSize != -1 && vitalSize != -1 && camps != null;
+		boolean canHost = teamNumber != -1 && playableArea != -1 && campSize != -1 && vitalSize != -1 && camps != null;
 		if (!canHost) printSetValues();
 		return canHost;
 	}
 	
 	private void printSetValues() {
-		ConsoleCommandSender csl = Main.plg.getServer().getConsoleSender();
-		if (teamN == -1)
+		ConsoleCommandSender csl = Main.plg().getServer().getConsoleSender();
+		if (teamNumber == -1)
 			csl.sendMessage(Main.LOG_PREFIX + ChatColor.DARK_RED + "team_number is not set in config.yml");
 		else csl.sendMessage(Main.LOG_PREFIX + ChatColor.DARK_GREEN + "team_number is set");
 		if (playableArea == -1)
@@ -133,7 +133,6 @@ public class MapSettings {
 			}
 			camps[i] = new Camp(
 					camp,
-					null,
 					new Location(world, (double) data.get(0), (double) data.get(1), (double) data.get(2)),
 					dir
 				);

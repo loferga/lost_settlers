@@ -2,29 +2,34 @@ package fr.loferga.lost_settlers.map.camps;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 
 import fr.loferga.lost_settlers.map.geometry.Vector;
 import fr.loferga.lost_settlers.teams.LSTeam;
+import fr.loferga.lost_settlers.teams.TeamMngr;
 
 public class Camp {
 
-	public Camp(String name, LSTeam team, Location location, Direction direction) {
+	public Camp(String name, Location location, Direction direction) {
 		this.name = name;
-		this.owners = new ArrayList<>(Arrays.asList(new Owner(team, System.currentTimeMillis())));
-		this.rivals = new ArrayList<>(Arrays.asList(team));
+		this.owners = new ArrayList<>(Arrays.asList(new Owner(TeamMngr.NULL, System.currentTimeMillis())));
+		this.rivals = new ArrayList<>(Arrays.asList(TeamMngr.NULL));
 		this.location = location;
 		this.direction = direction;
 	}
 
-	private String name;
+	public String name;
 	private List<Owner> owners;
 	private List<LSTeam> rivals;
 	private Location location;
 	private Direction direction;
+	private Set<Block> flag = new HashSet<>();
 
 	private ZoneEffect zoneEffect;
 	
@@ -81,23 +86,25 @@ public class Camp {
 		Location loc = location.clone().add(0, 11.0, 0);
 		Vector dir = direction.vector;
 		Vector minus2dir = dir.clone().multiply(-2);
-		LSTeam owner = getOwner();
-		Material flagMat = owner != null ? owner.getFlag() : Material.WHITE_CONCRETE;
+		Material flagMat = getOwner().getFlag();
+		Block b;
 		int i = 0;
 		while (i < 11) {
 			loc.add(0, -1, 0);
-			if (loc.getBlock().getType() != Material.OAK_FENCE)
-				loc.getBlock().setType(Material.OAK_FENCE);
+			b = loc.getBlock();
+			flag.add(b);
+			if (b.getType() != Material.OAK_FENCE)
+				b.setType(Material.OAK_FENCE);
 			if (i < 3) {
-				dir.addTo(loc).getBlock().setType(flagMat);
-				minus2dir.addTo(loc).getBlock().setType(flagMat);
+				b = dir.addTo(loc).getBlock(); flag.add(b); b.setType(flagMat);
+				b = minus2dir.addTo(loc).getBlock(); flag.add(b); b.setType(flagMat);
 				dir.addTo(loc);
 			}
 			i++;
 		}
-		dir.addTo(loc).getBlock().setType(Material.ENCHANTING_TABLE);
-		minus2dir.addTo(loc).getBlock().setType(Material.CHISELED_STONE_BRICKS);
-		loc.add(0, 1, 0).getBlock().setType(Material.BREWING_STAND);
+		b = dir.addTo(loc).getBlock(); flag.add(b); b.setType(Material.ENCHANTING_TABLE);
+		b = minus2dir.addTo(loc).getBlock(); flag.add(b); b.setType(Material.CHISELED_STONE_BRICKS);
+		b = loc.add(0, 1, 0).getBlock(); flag.add(b);b.setType(Material.BREWING_STAND);
 	}
 	
 	public void modifyFlag(Material mat) {
@@ -110,6 +117,10 @@ public class Camp {
 			minus2dir.addTo(loc).getBlock().setType(mat);
 			downdir.addTo(loc);
 		}
+	}
+	
+	public boolean isFlag(Block b) {
+		return flag.contains(b);
 	}
 	
 	@Override

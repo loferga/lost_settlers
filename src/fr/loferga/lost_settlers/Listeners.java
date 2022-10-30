@@ -51,7 +51,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.BrewerInventory;
@@ -67,13 +66,14 @@ import org.bukkit.potion.PotionType;
 import fr.loferga.lost_settlers.dogs.Anger;
 import fr.loferga.lost_settlers.dogs.DogMngr;
 import fr.loferga.lost_settlers.game.GameMngr;
-import fr.loferga.lost_settlers.game.MobMngr;
 import fr.loferga.lost_settlers.gui.GUIMngr;
 import fr.loferga.lost_settlers.map.MapMngr;
 import fr.loferga.lost_settlers.map.camps.Camp;
+import fr.loferga.lost_settlers.rules.CombatTracker;
 import fr.loferga.lost_settlers.teams.LSTeam;
 import fr.loferga.lost_settlers.teams.TeamMngr;
 import fr.loferga.lost_settlers.util.Func;
+import fr.loferga.lost_settlers.util.GlowMngr;
 
 public class Listeners implements Listener {
 	
@@ -94,13 +94,13 @@ public class Listeners implements Listener {
 		Game g = GameMngr.gameIn(p);
 		if (g == null) return;
 		if (!g.pvp() || p.getGameMode() != GameMode.SURVIVAL) return;
-
+		
 		Location from = e.getFrom();
 		Location to = e.getTo();
 		if ((int)from.getX() != (int)to.getX() || (int)from.getZ() != (int)to.getZ())
-			campArea(p);
-		else if (MapMngr.getMapSettings(from.getWorld()).isChamberActive() && (int)from.getY() != (int)to.getY() && g.isInChamber(to))
-			g.addPlayerInChamber(p);
+			campArea(g, p);
+		else if (g.isChamberActive() && (int)from.getY() != (int)to.getY() && g.isInChamber(to))
+			g.addInChamber(p);
 		
 	}
 	
@@ -126,7 +126,7 @@ public class Listeners implements Listener {
 				
 				SpectralArrow sa = (SpectralArrow) e.getDamager();
 				if (sa.getShooter() instanceof Player shooter)
-					Func.glowFor(dmged, TeamMngr.teamOf(shooter).getPlayers(), 600);
+					GlowMngr.glowFor(dmged, TeamMngr.teamOf(shooter).getPlayers(), 600);
 				
 			}
 				
@@ -148,13 +148,17 @@ public class Listeners implements Listener {
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent e) {
 		// linked to CAMPS & ORE EXP
-		if (e.getBlock().getType() == Material.TNT) return;
-			
-		if (GameMngr.gameIn(e.getPlayer()) == null) return;
+		Block b = e.getBlock();
+		if (b.getType() == Material.TNT) return;
+		Game g = GameMngr.gameIn(e.getPlayer());
+		if (g == null) return;
 		
-		if (campBlockBreak(e.getBlock(), e.getPlayer()))
+		if (g.isTombstones(b)) return;
+			
+		
+		if (campBlockBreak(b, e.getPlayer()))
 			e.setCancelled(true);
-		else oreExp(e.getBlock());
+		else oreExp(b);
 	}
 	
 	@EventHandler
@@ -181,14 +185,13 @@ public class Listeners implements Listener {
 		Game game = GameMngr.getGame(loc.getWorld());
 		if (game == null || !(e.getEntity() instanceof Monster)) return;
 		
-		if (game.getMapSettings().isChamberActive() && game.isInChamber(loc))
+		if (!game.isChamberFrozen() && game.isInChamber(loc))
 			spawnMagmaCube(loc);
 		
-		if (game.getMapSettings().isLodesActive()) {
-			double ratio = game.undergroundLevel(loc);
-			if (ratio<=1)
-				MobMngr.setProperties(e.getEntity(), Math.abs(1-ratio)/*, game.isInChamber(loc)*/);
-		}
+		// replace with something that don't use ms.highestGround
+//		double ratio = game.undergroundLevel(loc);
+//		if (ratio<=1)
+//			MobMngr.setProperties(e.getEntity(), Math.abs(1-ratio)/*, game.isInChamber(loc)*/);
 		
 	}
 	
@@ -212,23 +215,22 @@ public class Listeners implements Listener {
 		Camp camp = game.campIn(b.getLocation());
 		if (camp == null || camp.getRivals().contains(pteam)) return false;
 		
-		Func.sendActionbar(p, Func.format("&cCe camp n'est pas à vous"));
+		Func.sendActionbar(p, Func.format(Main.MSG_WARNING + "Ce camp n'est pas à vous"));
 		return true;
 	}
 	
-	private static void campArea(Player p) {
+	private static void campArea(Game g, Player p) {
 		// triggered whenever a player move to a new block in x.z plane
 		if (p.isInvisible()) return;
-		Game game = GameMngr.gameIn(p);
 		LSTeam pteam = TeamMngr.teamOf(p);
-		if (game == null || pteam == null) return;
-		Camp camp = game.vitalIn(p.getLocation());
+		if (pteam == null) return;
+		Camp camp = g.vitalIn(p.getLocation());
 		if (camp == null || camp.getRivals().contains(pteam)) return;
 		
-		if (game.teamProtect(camp.getOwner(), camp))
-			game.conquest(camp, pteam);
+		if (g.teamProtect(camp.getOwner(), camp))
+			g.conquest(camp, pteam);
 		else
-			game.capture(camp, pteam);
+			g.capture(camp, pteam);
 	}
 	
 	/*
@@ -324,7 +326,7 @@ public class Listeners implements Listener {
 	
 	private static void spawnMagmaCube(Location loc) {
 		MagmaCube magma = (MagmaCube) loc.getWorld().spawnEntity(loc, EntityType.MAGMA_CUBE);
-		magma.setSize((int) (Func.random(0, 4)));
+		magma.setSize(Func.randomInt(0, 4));
 	}
 	
 	// ##### NO DAMAGE BONUS ARROW #####
@@ -351,35 +353,24 @@ public class Listeners implements Listener {
 	// ##### DEATH #####
 	
 	@EventHandler
-	public void onPlayerRespawn(PlayerRespawnEvent e) {
-		if (GameMngr.gameIn(e.getPlayer()) == null) return;
-		
-		Player p = e.getPlayer();
-		p.setGameMode(GameMode.SPECTATOR);
-	}
-	
-	@EventHandler
 	public void onPlayerDeath(PlayerDeathEvent e) {
 		Game game = GameMngr.gameIn(e.getEntity());
 		if (game == null) return;
 		
 		Player dead = e.getEntity();
-		dead.setBedSpawnLocation(dead.getLocation(), true);
-		if (game.pvp()) {
-			Player killer = dead.getKiller();
-			if (killer != null) {
-				if (killer instanceof Player) {
-					game.kill(dead, killer);
-					DogMngr.transferDogsTo(dead, killer);
-				}
-			}
-			else
-				game.winCondition(null, null);
-			e.setDroppedExp(0);
+		
+		Player killer = dead.getKiller();
+		
+		if (!game.pvp() || killer == null || !CombatTracker.isInCombat(dead))
+			game.suicide(e);
+		else {
+			game.kill(dead, killer);
+			dead.setBedSpawnLocation(dead.getLocation(), true);
 			Func.dropExp(dead.getLocation(), dead.getTotalExperience());
-		} else
-			game.addRespawn(dead);
-		GUIMngr.refreshDTM();
+			DogMngr.transferDogsTo(dead, killer);
+			GUIMngr.refreshDTM();
+		}
+		e.setDroppedExp(0);
 	}
 	
 	// ##### CRAFTS COLOR ASSIGNMENT #####
@@ -472,7 +463,7 @@ public class Listeners implements Listener {
 			if (game.isFlag(b)) {
 				e.setCancelled(true);
 				Entity src = e.getEntity();
-				if (e.getEntity() instanceof TNTPrimed tnt)
+				if (src instanceof TNTPrimed tnt)
 					src = tnt.getSource();
 				e.getLocation().getWorld().createExplosion(e.getLocation(), 4f, false, false, src);
 				return;

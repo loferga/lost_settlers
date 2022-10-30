@@ -79,4 +79,9 @@ public class LSTeam {
 		team.unregister();
 	}
 	
+	@Override
+	public String toString() {
+		return team.getName();
+	}
+	
 }

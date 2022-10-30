@@ -9,6 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
+import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.util.Func;
 
 public class Lobby implements TabExecutor {
@@ -35,7 +36,7 @@ public class Lobby implements TabExecutor {
 	}
 	
 	private void sendInvalid(Player p) {
-		p.sendMessage(Func.format("&cInvalid Usage, please use: /lobby"));
+		p.sendMessage(Func.format(Main.MSG_WARNING + "Invalid Usage, please use: /lobby"));
 	}
 	
 }

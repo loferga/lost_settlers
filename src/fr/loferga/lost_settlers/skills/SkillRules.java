@@ -4,11 +4,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import fr.loferga.lost_settlers.Main;
 import fr.loferga.lost_settlers.game.GameMngr;
 import fr.loferga.lost_settlers.util.Func;
+import fr.loferga.lost_settlers.util.GlowMngr;
 
 public class SkillRules extends BukkitRunnable {
 	
@@ -24,11 +25,11 @@ public class SkillRules extends BukkitRunnable {
 	}
 	
 	//start the runnable if it's not already running
-	public void start(Plugin plugin) {
-		if (!running) {
-			runTaskTimer(plugin, 0L, 1L);
-			running = true;
-		}
+	public void start() {
+		if (running) return;
+		
+		runTaskTimer(Main.plg(), 0L, 1L);
+		running = true;
 	}
 	
 	public void stop() {
@@ -47,7 +48,7 @@ public class SkillRules extends BukkitRunnable {
 					for (Player other : GameMngr.gameIn(c).getAliveEnnemies(c))
 						if (!other.isInvisible()
 						&& other.getLocation().distance(c.getLocation()) < 10)
-							Func.glowFor(other, new HashSet<>(Set.of(c)), 2);
+							GlowMngr.glowFor(other, new HashSet<>(Set.of(c)), 2);
 	}
 	
 }
